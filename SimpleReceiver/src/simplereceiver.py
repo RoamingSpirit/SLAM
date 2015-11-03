@@ -7,17 +7,28 @@ __date__ = "$03.11.2015 15:41:03$"
 
 import socket
 
-SERVER_ADDRESS = ('localhost', 3490)
-BUFFER_SIZE = 1024
-MESSAGE = "Success!"
+class SimpleReceiver:
+    
+    """
+    Class representing a socket that is listening on 'localhost' and receiving data.
+    """
+    def __init__(self):
+        """Initialize the class variables"""
+        self.BUFFER_SIZE = 1024
+        self.SERVER_ADDRESS = ('localhost', 3490)
 
-s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-s.connect(SERVER_ADDRESS)
+    def connect(self):
+         """Connect to host"""
+         self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+         self.s.connect(self.SERVER_ADDRESS)
+         print "Connected to: ", self.SERVER_ADDRESS
 
-#Receive data
-data = s.recv(BUFFER_SIZE)
+    def listen(self):
+        """Listen and receive data"""
+        data = self.s.recv(1024)
+        print "received data:", data
+        self.s.close()
+        print "Closed socket"
 
-s.send(MESSAGE)
-s.close()
-
-print "received data:", data
+    #msg = "Success!"
+    #s.send(msg)
