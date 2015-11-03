@@ -13,7 +13,10 @@ MESSAGE = "Success!"
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.connect(SERVER_ADDRESS)
+
+#Receive data
 data = s.recv(BUFFER_SIZE)
+
 s.send(MESSAGE)
 s.close()
 
