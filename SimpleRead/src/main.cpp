@@ -27,6 +27,17 @@
 
 using namespace openni;
 
+int getAverage(int x, int y, int dist, DepthPixel* pDepth, int width){
+    int value=0;
+    for(int i=y-dist;i<=y+dist;i++)
+        value+=pDepth[i*width+x];
+    return value/(dist*2+1);
+}
+
+void test(){
+    
+}
+
 int main()
 {
 	Status rc = OpenNI::initialize();
@@ -64,7 +75,6 @@ int main()
 	}
 
 	VideoFrameRef frame;
-
 	while (!wasKeyboardHit())
 	{
 		int changedStreamDummy;
@@ -91,9 +101,15 @@ int main()
 
 		DepthPixel* pDepth = (DepthPixel*)frame.getData();
 
-		int middleIndex = (frame.getHeight()+1)*frame.getWidth()/2;
-
-		printf("[%08llu] %8d\n", (long long)frame.getTimestamp(), pDepth[middleIndex]);
+		//int middleIndex = (frame.getHeight()+1)*frame.getWidth()/2;
+                
+                int y = frame.getHeight()/2;
+                int dist = 2;
+                
+                int value=0;
+                for(int x=0;x<frame.getWidth();x++)
+                    value+=getAverage(x, y, dist, pDepth, frame.getWidth());
+                printf("Frame line average %d\n", value/frame.getWidth());
 	}
 
 	depth.stop();
@@ -103,3 +119,7 @@ int main()
 
 	return 0;
 }
+
+
+
+
