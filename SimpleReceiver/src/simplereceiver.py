@@ -7,7 +7,7 @@ __date__ = "$03.11.2015 15:41:03$"
 
 import socket
 
-SERVER_ADDRESS = ('localhost', 10000)
+SERVER_ADDRESS = ('localhost', 3490)
 BUFFER_SIZE = 1024
 MESSAGE = "Success!"
 
