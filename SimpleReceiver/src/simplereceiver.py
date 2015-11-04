@@ -26,8 +26,10 @@ class SimpleReceiver:
     def listen(self):
         while 1:
             """Listen and receive data"""
+            print "Wait for incoming data"
             data = self.s.recv(self.BUFFER_SIZE)
             print "Received: ",data
+            
         self.s.close()
         print "Closed socket"
 
