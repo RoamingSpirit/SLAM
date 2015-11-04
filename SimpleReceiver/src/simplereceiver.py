@@ -24,9 +24,10 @@ class SimpleReceiver:
          print "Connected to: ", self.SERVER_ADDRESS
 
     def listen(self):
-        """Listen and receive data"""
-        data = self.s.recv(1024)
-        print "received data:", data
+        while 1:
+            """Listen and receive data"""
+            data = self.s.recv(1024)
+            print data
         self.s.close()
         print "Closed socket"
 
