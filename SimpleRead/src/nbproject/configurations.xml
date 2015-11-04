@@ -2,7 +2,6 @@
 <configurationDescriptor version="95">
   <logicalFolder name="root" displayName="root" projectFiles="true" kind="ROOT">
     <df root="." name="0">
-      <in>main.cpp</in>
     </df>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
@@ -30,7 +29,7 @@
           <buildCommandWorkingDir></buildCommandWorkingDir>
           <buildCommand>${MAKE} -f Makefile</buildCommand>
           <cleanCommand>${MAKE} -f Makefile clean</cleanCommand>
-          <executablePath></executablePath>
+          <executablePath>/home/pi/workspaces/nils/SLAM/SimpleRead/Bin/Arm-Release/SimpleRead</executablePath>
           <ccTool>
             <incDir>
               <pElem>/home/pi/devel/OpenNI2/Include</pElem>
@@ -39,8 +38,6 @@
           </ccTool>
         </makeTool>
       </makefileType>
-      <item path="main.cpp" ex="false" tool="1" flavor2="0">
-      </item>
     </conf>
   </confs>
 </configurationDescriptor>

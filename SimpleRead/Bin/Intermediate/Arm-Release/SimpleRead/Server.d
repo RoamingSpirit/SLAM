@@ -1,5 +1,5 @@
-..//Bin/Intermediate/Arm-Release/SimpleRead/main.d ..//Bin/Intermediate/Arm-Release/SimpleRead/main.o: \
- main.cpp Server.h /usr/include/stdio.h /usr/include/features.h \
+..//Bin/Intermediate/Arm-Release/SimpleRead/Server.d ..//Bin/Intermediate/Arm-Release/SimpleRead/Server.o: \
+ Server.cpp Server.h /usr/include/stdio.h /usr/include/features.h \
  /usr/include/arm-linux-gnueabihf/bits/predefs.h \
  /usr/include/arm-linux-gnueabihf/sys/cdefs.h \
  /usr/include/arm-linux-gnueabihf/bits/wordsize.h \
@@ -111,22 +111,7 @@
  /home/pi/devel/OpenNI2/Include/OniCTypes.h \
  /home/pi/devel/OpenNI2/Include/OniCEnums.h \
  /home/pi/devel/OpenNI2/Include/OniCProperties.h \
- /home/pi/devel/OpenNI2/Include/OniVersion.h \
- /usr/include/c++/4.6/iostream /usr/include/c++/4.6/ostream \
- /usr/include/c++/4.6/ios /usr/include/c++/4.6/bits/ios_base.h \
- /usr/include/c++/4.6/bits/locale_classes.h \
- /usr/include/c++/4.6/bits/locale_classes.tcc \
- /usr/include/c++/4.6/streambuf /usr/include/c++/4.6/bits/streambuf.tcc \
- /usr/include/c++/4.6/bits/basic_ios.h \
- /usr/include/c++/4.6/bits/locale_facets.h /usr/include/c++/4.6/cwctype \
- /usr/include/wctype.h \
- /usr/include/c++/4.6/arm-linux-gnueabihf/./bits/ctype_base.h \
- /usr/include/c++/4.6/bits/streambuf_iterator.h \
- /usr/include/c++/4.6/arm-linux-gnueabihf/./bits/ctype_inline.h \
- /usr/include/c++/4.6/bits/locale_facets.tcc \
- /usr/include/c++/4.6/bits/basic_ios.tcc \
- /usr/include/c++/4.6/bits/ostream.tcc /usr/include/c++/4.6/istream \
- /usr/include/c++/4.6/bits/istream.tcc
+ /home/pi/devel/OpenNI2/Include/OniVersion.h
 
 Server.h:
 
@@ -415,43 +400,3 @@ Reader.h:
 /home/pi/devel/OpenNI2/Include/OniCProperties.h:
 
 /home/pi/devel/OpenNI2/Include/OniVersion.h:
-
-/usr/include/c++/4.6/iostream:
-
-/usr/include/c++/4.6/ostream:
-
-/usr/include/c++/4.6/ios:
-
-/usr/include/c++/4.6/bits/ios_base.h:
-
-/usr/include/c++/4.6/bits/locale_classes.h:
-
-/usr/include/c++/4.6/bits/locale_classes.tcc:
-
-/usr/include/c++/4.6/streambuf:
-
-/usr/include/c++/4.6/bits/streambuf.tcc:
-
-/usr/include/c++/4.6/bits/basic_ios.h:
-
-/usr/include/c++/4.6/bits/locale_facets.h:
-
-/usr/include/c++/4.6/cwctype:
-
-/usr/include/wctype.h:
-
-/usr/include/c++/4.6/arm-linux-gnueabihf/./bits/ctype_base.h:
-
-/usr/include/c++/4.6/bits/streambuf_iterator.h:
-
-/usr/include/c++/4.6/arm-linux-gnueabihf/./bits/ctype_inline.h:
-
-/usr/include/c++/4.6/bits/locale_facets.tcc:
-
-/usr/include/c++/4.6/bits/basic_ios.tcc:
-
-/usr/include/c++/4.6/bits/ostream.tcc:
-
-/usr/include/c++/4.6/istream:
-
-/usr/include/c++/4.6/bits/istream.tcc:
