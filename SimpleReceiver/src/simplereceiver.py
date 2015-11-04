@@ -28,6 +28,7 @@ class SimpleReceiver:
             """Listen and receive data"""
             print "Wait for incoming data"
             data = self.s.recv(self.BUFFER_SIZE)
+            if not data: break
             print "Received: ",data
             
         self.s.close()
