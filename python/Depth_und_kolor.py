@@ -42,6 +42,30 @@ import cv2 #opencv, which uses numpy arrays for images anyway: can handle uint16
 
 path = '/home/pi/devel/OpenNI2/Packaging/OpenNI-Linux-Arm-2.2/Redist'
 
+#author Nils
+#Prints the depth value for every pixel in one line
+#frame_data - depth frame
+#width -  width of the frame
+#height - heigth of the frame
+#line - line to print
+def print_line (frame_data, width, height, line):
+    print "new frame"
+    for x in range(0,width):
+        print getAverageDepth(frame_data, width, height, x, line, 4)
+
+#author Nils
+#get the average value of a specifiv pixel with a certain amount of pixel above and under.
+#frame_data - depth frame
+#widht -  width of the frame
+#height - height of the frame
+#x - coordinate of the pixel
+#y - coordinate of the pixel
+#distance - amount of pixel under and above the desired position
+def getAverageDepth (frame_data, width, height, x, y, distance):
+    value = 0;
+    for xTemp in range (-distance+x, distance+1+x):
+        value += frame_data[y*width+xTemp]
+    return value/(distance+1);
 
 
 #takes frame data, and the type it is and displays the image
@@ -110,8 +134,10 @@ while(flagy == 1):
    
     Color_frame = color_stream.read_frame()
     frame_data1 = Color_frame.get_buffer_as_uint8()
+
+    print_line(frame_data1, 320, 240, 160)
     
-    print_frame(frame_data1, np.uint8)
+    #print_frame(frame_data1, np.uint8)
     #print_frame(frame_data, np.uint16)
     if(cv2.waitKey(10) & 0xFF == ord('q')):
         cv2.destroyAllWindows()
