@@ -30,26 +30,19 @@ Starter test program
 from primesense import openni2
 from primesense import _openni2 as c_api
 import numpy as np
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 #alternate to matplotlib:
 import cv2 #opencv, which uses numpy arrays for images anyway: can handle uint16 depth
 
 
-face_cascade = cv2.CascadeClassifier('C:\\Users\\Guillermo the Great\\Documents\\MQP\Code\\Python\\From Work\\PythonCode (1)\\haarcascade_frontalface_default.xml')
-eye_cascade = cv2.CascadeClassifier('C:\\Users\\Guillermo the Great\\Documents\\MQP\Code\\Python\\From Work\\PythonCode (1)\\haarcascade_eye.xml')
 
 
-def draw_flow(img, flow, step=16):
-    h, w = img.shape[:2]
-    y, x = np.mgrid[step/2:h:step, step/2:w:step].reshape(2,-1)
-    fx, fy = flow[y,x].T
-    lines = np.vstack([x, y, x+fx, y+fy]).T.reshape(-1, 2, 2)
-    lines = np.int32(lines + 0.5)
-    vis = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
-    cv2.polylines(vis, lines, 0, (0, 255, 0))
-    for (x1, y1), (x2, y2) in lines:
-        cv2.circle(vis, (x1, y1), 1, (0, 255, 0), -1)
-    return vis
+
+
+
+path = '/home/pi/devel/OpenNI2/Packaging/OpenNI-Linux-Arm-2.2/Redist'
+
+
 
 #takes frame data, and the type it is and displays the image
 #frame_data = frame.get_buffer_as_blah(); thisType = numpy.someType
@@ -97,7 +90,7 @@ def print_frame(frame_data, thisType):
         
         
         
-openni2.initialize()     # can also accept the path of the OpenNI redistribution
+openni2.initialize(path)     # can also accept the path of the OpenNI redistribution
 
 dev = openni2.Device.open_any()
 print dev.get_sensor_info(openni2.SENSOR_DEPTH)
@@ -120,7 +113,7 @@ while(flagy == 1):
     
     print_frame(frame_data1, np.uint8)
     #print_frame(frame_data, np.uint16)
-    if(cv2.waitKey(100) & 0xFF == ord('q')):
+    if(cv2.waitKey(10) & 0xFF == ord('q')):
         cv2.destroyAllWindows()
         break
     
