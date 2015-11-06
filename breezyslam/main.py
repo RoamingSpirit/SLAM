@@ -52,9 +52,9 @@ from time import time
 # Map size, scale
 MAP_SIZE_PIXELS          =  1000
 MAP_SIZE_METERS          =  30
-seed = 9999 #waht is this used for?
+seed = 9999 #whit is this used for?
 use_odometry = False #not yet implemented
-iterations = 10 #how many scans to make
+iterations = 50 #how many scans to make
 
 
 def main():

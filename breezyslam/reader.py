@@ -16,7 +16,7 @@ class Reader:
         self.depth_stream = dev.create_depth_stream()
         self.depth_stream.set_video_mode(c_api.OniVideoMode(pixelFormat = c_api.OniPixelFormat.ONI_PIXEL_FORMAT_DEPTH_1_MM, resolutionX = 320, resolutionY = 240, fps = 30))
         self.depth_stream.start()
-
+        
     '''
     reurns the stream height
     '''

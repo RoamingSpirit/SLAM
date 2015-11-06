@@ -23,7 +23,10 @@ class XTION(Laser):
     '''
     A class for the Asus XTION
     '''
-    def __init__(self, detectionMargin = 0, offsetMillimeters = 0):
+    def __init__(self, log = True, detectionMargin = 0, offsetMillimeters = 0):
+        self.log = log
+        if(log):
+            self.out = open('log', 'w')
         self.reader = Reader()
         self.width = self.reader.getHeight()
         self.height = self.reader.getWidth()
@@ -54,7 +57,12 @@ class XTION(Laser):
         data = []
         for x in range(width-1, -1, -1):
             value = self.getAverageDepth(frame_data, width, height, x, line, self.linecount)
-            data.append(self.toLidarValue(value, x, width))
+            converted = self.toLidarValue(value, x, width)
+            if(self.log):
+                self.out.write(str(converted) + ' ')
+            data.append(converted)
+        if(self.log):
+            self.out.write('\n')
         return data
 
     '''
