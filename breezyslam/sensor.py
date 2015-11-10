@@ -17,13 +17,15 @@ class XTION(Laser):
 
     viewangle = 58 #asus xtion view in degrees
     linecount = 2 #lines above and below to generate average (0=online desired line)
-    distance_no_detection_mm = 10000 # todo find value
+    distance_no_detection_mm = 3500 # value used if sensor detects 0
     scan_rate_hz = 10 #todo find value
+    detectionMargin = 5 #pixels on the sites of the scans which should be ignored
+    offsetMillimeters = 0 #offset of the sensor to the center of the robot
     
     '''
     A class for the Asus XTION
     '''
-    def __init__(self, log = True, detectionMargin = 0, offsetMillimeters = 0):
+    def __init__(self, log = True):
         self.log = log
         if(log):
             self.out = open('log', 'w')
@@ -31,7 +33,7 @@ class XTION(Laser):
         self.width = self.reader.getHeight()
         self.height = self.reader.getWidth()
         self.row = self.height/2 #row to read
-        Laser.__init__(self, self.width, self.scan_rate_hz, self.viewangle, self.distance_no_detection_mm, detectionMargin, offsetMillimeters)
+        Laser.__init__(self, self.width, self.scan_rate_hz, self.viewangle, self.distance_no_detection_mm, self.detectionMargin, self.offsetMillimeters)
         
     
 
@@ -90,4 +92,4 @@ class XTION(Laser):
         value = 0;
         for xTemp in range (-distance+x, distance+1+x):
             value += frame_data[y*width+xTemp]
-        return value/(distance+1);  
+        return value/(distance*2+1);  

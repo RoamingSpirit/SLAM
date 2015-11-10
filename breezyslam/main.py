@@ -38,6 +38,7 @@ Change log:
 
 
 from sensor import XTION
+from server import Server
 
 from breezyslam.algorithms import Deterministic_SLAM, RMHC_SLAM
 
@@ -46,32 +47,44 @@ from pgm_utils import pgm_save
 
 from sys import exit, stdout
 from time import time
+import cv2
+import sys, termios, atexit
+from select import select
 
 
+#wait for client for image stream
+stream = True
 
 # Map size, scale
 MAP_SIZE_PIXELS          =  1000
 MAP_SIZE_METERS          =  30
 seed = 9999 #whit is this used for?
 use_odometry = False #not yet implemented
-iterations = 50 #how many scans to make
+iterations = 600 #how many scans to make
+
+
+#for keyboard interrupt
+fd = sys.stdin.fileno()
+new_term = termios.tcgetattr(fd)
+old_term = termios.tcgetattr(fd)
+
+# new terminal setting unbuffered
+new_term[3] = (new_term[3] & ~termios.ICANON & ~termios.ECHO)
 
 
 def main():
+   
     #initialize the asus xtion as sensor
     sensor = XTION()
             
     # Create a CoreSLAM object with laser params and optional robot object
-    slam = RMHC_SLAM(sensor, MAP_SIZE_PIXELS, MAP_SIZE_METERS, random_seed=seed) \
+    slam = RMHC_SLAM(sensor, MAP_SIZE_PIXELS, MAP_SIZE_METERS, 100, 300, random_seed=seed) \
         if seed \
         else Deterministic_SLAM(sensor, MAP_SIZE_PIXELS, MAP_SIZE_METERS) 
-    
-    
-    # Report what we're doing
-    print('Processing %d scans with%s odometry / with%s particle filter...' % \
-        (iterations, \
-         '' if use_odometry else 'out', '' if seed else 'out'))
-    progbar = ProgressBar(0, iterations, 80)
+
+    if(stream):
+        server = Server(slam, MAP_SIZE_PIXELS)
+        server.start()
     
     # Start with an empty trajectory of positions
     trajectory = []
@@ -79,9 +92,14 @@ def main():
     # Start timing
     start_sec = time()
     
-    # Loop over scans    
-    for scanno in range(0, iterations):
+    # Loop
+    atexit.register(set_normal_term)
+    set_curses_term()
     
+    scanno = 0
+    
+    while(True):
+        scanno+=1
         if use_odometry:
                   
             # Convert odometry to velocities
@@ -100,17 +118,31 @@ def main():
         
         # Add new position to trajectory
         trajectory.append((x_mm, y_mm))
-        
-        # Tame impatience
-        progbar.updateAmount(scanno)
-        stdout.write('\r%s' % str(progbar))
-        stdout.flush()
+
+        if kbhit():
+            break
 
     # Report elapsed time
     elapsed_sec = time() - start_sec
-    print('\n%d scans in %f sec = %f scans / sec' % (iterations, elapsed_sec, iterations/elapsed_sec))
+    print('\n%d scans in %f sec = %f scans / sec' % (scanno, elapsed_sec, scanno/elapsed_sec))
                     
                                 
+    mapbytes = createMap(slam, trajectory)
+
+           
+    # Save map and trajectory as PGM file    
+    pgm_save('test.pgm', mapbytes, (MAP_SIZE_PIXELS, MAP_SIZE_PIXELS))
+    image = cv2.imread("test.pgm", 0)
+    print"Accessing the image.. again. So dirty."
+    print"Saving as .png: ..."
+    cv2.imwrite("test.png", image)
+    print "done"
+    if(stream):
+        server.close()
+
+# Helpers ---------------------------------------------------------        
+
+def createMap(slam, trajectory):
     # Create a byte array to receive the computed maps
     mapbytes = bytearray(MAP_SIZE_PIXELS * MAP_SIZE_PIXELS)
     
@@ -126,13 +158,31 @@ def main():
         y_pix = mm2pix(y_mm)
                                                                                               
         mapbytes[y_pix * MAP_SIZE_PIXELS + x_pix] = 0;
-                    
-    # Save map and trajectory as PGM file    
-    pgm_save('test.pgm', mapbytes, (MAP_SIZE_PIXELS, MAP_SIZE_PIXELS))
-    
-    print "done"
+        
+    return mapbytes
 
-# Helpers ---------------------------------------------------------        
+# switch to normal terminal
+def set_normal_term():
+    termios.tcsetattr(fd, termios.TCSAFLUSH, old_term)
+
+# switch to unbuffered terminal
+def set_curses_term():
+    termios.tcsetattr(fd, termios.TCSAFLUSH, new_term)
+
+def putch(ch):
+    sys.stdout.write(ch)
+
+def getch():
+    return sys.stdin.read(1)
+
+def getche():
+    ch = getch()
+    putch(ch)
+    return ch
+
+def kbhit():
+    dr,dw,de = select([sys.stdin], [], [], 0)
+    return dr <> []
 
 def mm2pix(mm):
         
