@@ -1,5 +1,7 @@
 '''
-    Simple socket server using threads
+server.py: Runs in it own threads and sends the map to a connected clients in a loop
+
+author: Nils Bernhardt
 '''
  
 import socket
@@ -12,7 +14,7 @@ HOST = ''   # Symbolic name, meaning all available interfaces
 PORT = 8888 # Arbitrary non-privileged port
 
 class Server(threading.Thread):
-
+    #flag for running
     running = True
     
     def __init__(self, slam, MAP_SIZE_PIXELS):
@@ -20,9 +22,36 @@ class Server(threading.Thread):
         self.slam = slam
         self.MAP_SIZE_PIXELS = MAP_SIZE_PIXELS
 
-
+    '''
+    opens a second and waits till a client connects.
+    Then sends the map updates till the client disconnects.
+    Start over.
+    '''
     def run(self):
 
+        self.setup()
+        self.connection.sendall(str(self.MAP_SIZE_PIXELS)+"\n")
+        
+        while(self.running):
+            if(self.valid):
+                # Create a byte array to receive the computed maps
+                mapb = bytearray(self.MAP_SIZE_PIXELS * self.MAP_SIZE_PIXELS)
+
+                # Get final map    
+                self.slam.getmap(mapb)
+                try:
+                    self.connection.send(mapb)
+                except socket.error, e:
+                    print "Client disconnected"
+                    self.setup()
+                    self.connection.sendall(str(self.MAP_SIZE_PIXELS)+"\n")
+            else:
+                self.running = False
+
+    '''
+    Setups a connection to a client on port 8888.
+    '''
+    def setup(self):
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         print 'Socket created'
          
@@ -45,23 +74,11 @@ class Server(threading.Thread):
             
             self.connection, addr = self.socket.accept()
             print 'Connected with ' + addr[0] + ':' + str(addr[1])
-        
-        while(self.running):
-            # Create a byte array to receive the computed maps
-            mapb = bytearray(self.MAP_SIZE_PIXELS * self.MAP_SIZE_PIXELS)
-        
-            # Get final map    
-            self.slam.getmap(mapb)
             
-            if(self.valid):
-                msg = str(mapb[0])
-                for x in range(0, len(mapb)):
-                    msg += (";" + str(mapb[x]))
-                self.connection.sendall(msg + "\n")
-            else:
-                self.running = False
 
-    def close(self):
-        self.runnig = False
+    '''
+    closes the connection and stops the running thread.
+    '''    def close(self):
+        self.running = False
         if(self.valid):
             self.socket.close()

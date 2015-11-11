@@ -42,7 +42,6 @@ from server import Server
 
 from breezyslam.algorithms import Deterministic_SLAM, RMHC_SLAM
 
-from progressbar import ProgressBar
 from pgm_utils import pgm_save
 
 from sys import exit, stdout
@@ -76,6 +75,10 @@ def main():
    
     #initialize the asus xtion as sensor
     sensor = XTION()
+
+    #initialiye robot
+    if(use_odometry):
+        robot = 0#todo initialize a vehicle
             
     # Create a CoreSLAM object with laser params and optional robot object
     slam = RMHC_SLAM(sensor, MAP_SIZE_PIXELS, MAP_SIZE_METERS, 100, 300, random_seed=seed) \
@@ -98,12 +101,12 @@ def main():
     
     scanno = 0
     
+    
     while(True):
         scanno+=1
         if use_odometry:
-                  
-            # Convert odometry to velocities
-            velocities = robot.computeVelocities(odometries[scanno])
+            velocities = robot.getOdometry()
+            scan = sensor.scan()
                                  
             # Update SLAM with lidar and velocities
             slam.update(sensor.scan(), velocities)
@@ -136,9 +139,9 @@ def main():
     print"Accessing the image.. again. So dirty."
     print"Saving as .png: ..."
     cv2.imwrite("test.png", image)
-    print "done"
     if(stream):
         server.close()
+    print "done"
 
 # Helpers ---------------------------------------------------------        
 
