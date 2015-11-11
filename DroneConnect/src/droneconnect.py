@@ -27,37 +27,30 @@ class DroneConnect:
         self.frame_count=1
         self.running = True
         # 'Traveled' distance in mm
-        self.distance = 0.0
+        self.distance_frame = 0.0
+        self.distance_update = 0.0
+        self.psi_frame = self.drone.navdata.get(0, dict()).get('psi', 0)
+        self.psi_update = self.drone.navdata.get(0, dict()).get('psi', 0)
         self.old_timestamp = 0.0
         self.new_timestamp = 0.0
 
     def get_information(self): 
         """
         Receive navdata information and set them on the frame
-        """
-        # get dt
-        if self.old_timestamp == 0.0:
-            self.old_timestamp = time.time()
-            return
-        self.new_timestamp = time.time()
-        dt = self.new_timestamp-self.old_timestamp
-        self.old_timetamp = self.new_timestamp
+        """        
+        self.calc_distance(self.drone.navdata.get(0, dict()).get('vx', 0), self.get_dt())
         
-        # calculate distance and create distance string
-        vx = self.drone.navdata.get(0, dict()).get('vx', 0)
-        if vx < 0.0:
-            vx = 0.0
-        
-        self.distance += (vx*dt)/1000
-        if self.distance < 0.0:
-            self.distance = 0.0
-        else:
-            self.distance=round(self.distance, 0)
-        
+        # create distance string
         distance_str = "distance: "
-        distance_str += str(self.distance)
-        cv2.putText(self.frame, distance_str, (10,260), cv2.FONT_HERSHEY_SIMPLEX, 0.5, 255)
+        distance_str += str(self.distance_update)
+        cv2.putText(self.frame, distance_str, (10,320), cv2.FONT_HERSHEY_SIMPLEX, 0.5, 255)
         
+        # create psi string
+        psi_str = "psi: "
+        psi_str += str(self.psi_update)
+        cv2.putText(self.frame, psi_str, (10,335), cv2.FONT_HERSHEY_SIMPLEX, 0.5, 255)
+        
+        """
          # creating altitude information string
         altitude_str = "altitude: "
         altitude_str += str(self.drone.navdata.get(0, dict()).get('altitude', 0))
@@ -82,13 +75,13 @@ class DroneConnect:
         vy_str = "vy: "
         vy_str += str(round(self.drone.navdata.get(0, dict()).get('vy', 0)))
         cv2.putText(self.frame, vy_str, (10,335), cv2.FONT_HERSHEY_SIMPLEX, 0.5, 255)
+        """
 
         # creating battery information string
         battery_str = "Battery: "
         battery_str += str(self.drone.navdata.get(0, dict()).get('battery', 0))
         battery_str += "%"
         cv2.putText(self.frame, battery_str, (10,350), cv2.FONT_HERSHEY_SIMPLEX, 0.5, 255)
-        
     def save_frame(self):
         """
         Save current frame
@@ -100,8 +93,40 @@ class DroneConnect:
         self.frame_count += 1
         print "Frame saved"
         
-    def update(self):
-        self.distance = 0.0
+    def update(self, psi):
+        # distance
+        self.distance_update = self.distance_frame
+        self.distance_frame = 0.0
+        # psi
+        self.psi_update = psi - self.psi_frame
+        self.psi_frame = psi
+        
+    def get_dt(self):
+        if self.old_timestamp == 0.0:
+            self.old_timestamp = time.time()
+            return 0.0
+        self.new_timestamp = time.time()
+        dt = self.new_timestamp-self.old_timestamp
+        self.old_timetamp = self.new_timestamp
+        return dt
+        
+    def calc_distance(self, vx, dt):
+        """
+        Calculate distance since last frame
+        """
+        if vx < 0.0:
+            vx = 0.0
+        self.distance_frame += (vx*dt)/1000
+        if self.distance_frame < 0.0:
+            self.distance_frame = 0.0
+        else:
+            self.distance_frame=round(self.distance_frame, 0)
+            
+    def calc_psi(self, psi):
+        """
+        Calculate psi since last frame
+        """
+        self.psi_frame += psi - self.psi_frame
         
     def run(self):
         """
@@ -151,7 +176,7 @@ class DroneConnect:
                 elif k==112:  # p
                     self.save_frame()
                 elif k==117:  # u
-                    self.update()
+                    self.update(self.drone.navdata.get(0, dict()).get('psi', 0))
                 elif k==-1:  # other
                     continue
                 else:
