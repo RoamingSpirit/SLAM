@@ -7,58 +7,92 @@ __date__ = "$10.11.2015 10:12:49$"
 
 import libardrone
 import cv2
+import time
 
 class DroneConnect:
+    """
+    Class representing a connection to the ARDrone, controls it and receive navdata information
+    """
 
     def __init__(self):
+        """
+        Initialize the connection and variables
+        """
         print "Connecting..."
         self.cam = cv2.VideoCapture('tcp://192.168.1.1:5555')
         self.drone = libardrone.ARDrone()
         print "Ok."
+        cv2.namedWindow('Front camera')
+        # Counter for file names
         self.frame_count=1
         self.running = True
-        cv2.namedWindow('Front camera')
+        # 'Traveled' distance in mm
+        self.distance = 0.0
+        self.old_timestamp = 0.0
+        self.new_timestamp = 0.0
 
-    def get_information(self):
-         # creating altitude information string
-        altitude = "altitude: "
-        altitude += str(self.drone.navdata.get(0, dict()).get('altitude', 0))
-        cv2.putText(self.frame,altitude, (10,260), cv2.FONT_HERSHEY_SIMPLEX, 0.5, 255)
+    def get_information(self): 
+        """
+        Receive navdata information and set them on the frame
+        """
+        # get dt
+        if self.old_timestamp == 0.0:
+            self.old_timestamp = time.time()
+            return
+        self.new_timestamp = time.time()
+        dt = self.new_timestamp-self.old_timestamp
+        self.old_timetamp = self.new_timestamp
         
-        #print self.drone.navdata
+        # calculate distance and create distance string
+        vx = self.drone.navdata.get(0, dict()).get('vx', 0)
+        if vx < 0.0:
+            vx = 0.0
+        
+        self.distance += (vx*dt)/1000
+        if self.distance < 0.0:
+            self.distance = 0.0
+        else:
+            self.distance=round(self.distance, 0)
+        
+        distance_str = "distance: "
+        distance_str += str(self.distance)
+        cv2.putText(self.frame, distance_str, (10,260), cv2.FONT_HERSHEY_SIMPLEX, 0.5, 255)
+        
+         # creating altitude information string
+        altitude_str = "altitude: "
+        altitude_str += str(self.drone.navdata.get(0, dict()).get('altitude', 0))
+        cv2.putText(self.frame, altitude_str, (10,275), cv2.FONT_HERSHEY_SIMPLEX, 0.5, 255)
 
         # creating theta information string
-        theta = "theta: "
-        theta += str(self.drone.navdata.get(0, dict()).get('theta', 0))
-        cv2.putText(self.frame,theta, (10,275), cv2.FONT_HERSHEY_SIMPLEX, 0.5, 255)
+        theta_str = "theta: "
+        theta_str += str(self.drone.navdata.get(0, dict()).get('theta', 0))
+        cv2.putText(self.frame, theta_str, (10,290), cv2.FONT_HERSHEY_SIMPLEX, 0.5, 255)
 
         # creating phi information string
-        phi = "phi: "
-        phi += str(self.drone.navdata.get(0, dict()).get('phi', 0))
-        cv2.putText(self.frame,phi, (10,290), cv2.FONT_HERSHEY_SIMPLEX, 0.5, 255)
+        phi_str = "phi: "
+        phi_str += str(self.drone.navdata.get(0, dict()).get('phi', 0))
+        cv2.putText(self.frame, phi_str, (10,305), cv2.FONT_HERSHEY_SIMPLEX, 0.5, 255)
 
         # creating vx information string
-        vx = "vx: "
-        vx += str(round(self.drone.navdata.get(0, dict()).get('vx', 0)))
-        cv2.putText(self.frame,vx, (10,305), cv2.FONT_HERSHEY_SIMPLEX, 0.5, 255)
+        vx_str = "vx: "
+        vx_str += str(round(self.drone.navdata.get(0, dict()).get('vx', 0)))
+        cv2.putText(self.frame, vx_str, (10,320), cv2.FONT_HERSHEY_SIMPLEX, 0.5, 255)
 
         # creating vy information string
-        vy = "vy: "
-        vy += str(round(self.drone.navdata.get(0, dict()).get('vy', 0)))
-        cv2.putText(self.frame,vy, (10,320), cv2.FONT_HERSHEY_SIMPLEX, 0.5, 255)
-
-        # creating vz information string
-        vz = "vz: "
-        vz += str(round(self.drone.navdata.get(0, dict()).get('vz', 0)))
-        cv2.putText(self.frame,vz, (10,335), cv2.FONT_HERSHEY_SIMPLEX, 0.5, 255)
+        vy_str = "vy: "
+        vy_str += str(round(self.drone.navdata.get(0, dict()).get('vy', 0)))
+        cv2.putText(self.frame, vy_str, (10,335), cv2.FONT_HERSHEY_SIMPLEX, 0.5, 255)
 
         # creating battery information string
-        battery = "Battery: "
-        battery += str(self.drone.navdata.get(0, dict()).get('battery', 0))
-        battery += "%"
-        cv2.putText(self.frame,battery, (10,350), cv2.FONT_HERSHEY_SIMPLEX, 0.5, 255)
+        battery_str = "Battery: "
+        battery_str += str(self.drone.navdata.get(0, dict()).get('battery', 0))
+        battery_str += "%"
+        cv2.putText(self.frame, battery_str, (10,350), cv2.FONT_HERSHEY_SIMPLEX, 0.5, 255)
         
     def save_frame(self):
+        """
+        Save current frame
+        """
         file = "Frames/#"
         file += str(self.frame_count)
         file += ".jpg"
@@ -66,7 +100,13 @@ class DroneConnect:
         self.frame_count += 1
         print "Frame saved"
         
+    def update(self):
+        self.distance = 0.0
+        
     def run(self):
+        """
+        Main loop
+        """
         while self.running:
             # get current frame of video
             self.running, self.frame = self.cam.read()
@@ -75,13 +115,13 @@ class DroneConnect:
                 # show current frame
                 cv2.imshow('Front camera', self.frame)
                 k = cv2.waitKey(1)
-                if k==27:   # esc key to stop
+                if k==27:   # Esc
                     self.running = False
                     self.shutdown()
-                elif k==10:  # return
+                elif k==10:  # Return
                     self.drone.takeoff()
                     print "Return pressed"
-                elif k==32:  # space
+                elif k==32:  # Space
                     self.drone.land()
                     print "Space pressed"
                 elif k==119:  # w
@@ -96,30 +136,34 @@ class DroneConnect:
                 elif k==100:  # d
                     self.drone.move_right()
                     print "D pressed"
-                elif k==65362:  # up
+                elif k==65362:  # Up
                     self.drone.move_up()
                     print "Up pressed"
-                elif k==65364:  # down
+                elif k==65364:  # Down
                     self.drone.move_down()
                     print "Down pressed"
-                elif k==65361:  # left
+                elif k==65361:  # Left
                     self.drone.turn_left()
                     print "Left pressed"
-                elif k==65363:  # right
+                elif k==65363:  # Right
                     self.drone.turn_right()
                     print "Right pressed"
                 elif k==112:  # p
                     self.save_frame()
-                    print "P pressed"
+                elif k==117:  # u
+                    self.update()
                 elif k==-1:  # other
                     continue
                 else:
                     print k
             else:
                 # error reading frame
-                print 'error reading video feed'
+                print "Error reading video feed"
                 
     def shutdown(self):
+        """
+        Close application
+        """
         print "Shutting down..."
         self.cam.release()
         cv2.destroyAllWindows()
