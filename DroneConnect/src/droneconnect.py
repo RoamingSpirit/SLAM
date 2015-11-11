@@ -75,6 +75,30 @@ class DroneConnect:
                 elif k==32:  # space
                     self.drone.land()
                     print "Space pressed"
+                elif k==119:  # w
+                    self.drone.move_forward()
+                    print "W pressed"
+                elif k==97:  # a
+                    self.drone.move_left()
+                    print "A pressed"
+                elif k==115:  # s
+                    self.drone.move_backward()
+                    print "S pressed"
+                elif k==100:  # d
+                    self.drone.move_right()
+                    print "D pressed"
+                elif k==65362:  # up
+                    self.drone.move_up()
+                    print "Up pressed"
+                elif k==65364:  # down
+                    self.drone.move_down()
+                    print "Down pressed"
+                elif k==65361:  # left
+                    self.drone.turn_left()
+                    print "Left pressed"
+                elif k==65363:  # right
+                    self.drone.turn_right()
+                    print "Right pressed"
                 elif k==-1:  # other
                     continue
                 else:
