@@ -23,6 +23,26 @@ class Server(threading.Thread):
 
     def run(self):
 
+        self.setup()
+        self.connection.sendall(str(self.MAP_SIZE_PIXELS)+"\n")
+        
+        while(self.running):
+            if(self.valid):
+                # Create a byte array to receive the computed maps
+                mapb = bytearray(self.MAP_SIZE_PIXELS * self.MAP_SIZE_PIXELS)
+
+                # Get final map    
+                self.slam.getmap(mapb)
+                try:
+                    self.connection.send(mapb)
+                except socket.error, e:
+                    print "Client disconnected"
+                    self.setup()
+                    self.connection.sendall(str(self.MAP_SIZE_PIXELS)+"\n")
+            else:
+                self.running = False
+
+    def setup(self):
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         print 'Socket created'
          
@@ -45,23 +65,9 @@ class Server(threading.Thread):
             
             self.connection, addr = self.socket.accept()
             print 'Connected with ' + addr[0] + ':' + str(addr[1])
-        
-        while(self.running):
-            # Create a byte array to receive the computed maps
-            mapb = bytearray(self.MAP_SIZE_PIXELS * self.MAP_SIZE_PIXELS)
-        
-            # Get final map    
-            self.slam.getmap(mapb)
             
-            if(self.valid):
-                msg = str(mapb[0])
-                for x in range(0, len(mapb)):
-                    msg += (";" + str(mapb[x]))
-                self.connection.sendall(msg + "\n")
-            else:
-                self.running = False
 
     def close(self):
-        self.runnig = False
+        self.running = False
         if(self.valid):
             self.socket.close()

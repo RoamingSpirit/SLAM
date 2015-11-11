@@ -42,7 +42,6 @@ from server import Server
 
 from breezyslam.algorithms import Deterministic_SLAM, RMHC_SLAM
 
-from progressbar import ProgressBar
 from pgm_utils import pgm_save
 
 from sys import exit, stdout
@@ -97,13 +96,22 @@ def main():
     set_curses_term()
     
     scanno = 0
+    last_time = 0
     
     while(True):
         scanno+=1
         if use_odometry:
+            
+            
+            new_time = time()
+            if(last_time==0):
+                new_time = last_time
+            dt = new_time-last_time
+            last_time = new_time
                   
-            # Convert odometry to velocities
+            scan = sensor.scan()
             velocities = robot.computeVelocities(odometries[scanno])
+            
                                  
             # Update SLAM with lidar and velocities
             slam.update(sensor.scan(), velocities)
@@ -136,9 +144,9 @@ def main():
     print"Accessing the image.. again. So dirty."
     print"Saving as .png: ..."
     cv2.imwrite("test.png", image)
-    print "done"
     if(stream):
         server.close()
+    print "done"
 
 # Helpers ---------------------------------------------------------        
 
