@@ -75,6 +75,10 @@ def main():
    
     #initialize the asus xtion as sensor
     sensor = XTION()
+
+    #initialiye robot
+    if(use_odometry):
+        robot = 0#todo initialize a vehicle
             
     # Create a CoreSLAM object with laser params and optional robot object
     slam = RMHC_SLAM(sensor, MAP_SIZE_PIXELS, MAP_SIZE_METERS, 100, 300, random_seed=seed) \
@@ -96,22 +100,13 @@ def main():
     set_curses_term()
     
     scanno = 0
-    last_time = 0
+    
     
     while(True):
         scanno+=1
         if use_odometry:
-            
-            
-            new_time = time()
-            if(last_time==0):
-                new_time = last_time
-            dt = new_time-last_time
-            last_time = new_time
-                  
+            velocities = robot.getOdometry()
             scan = sensor.scan()
-            velocities = robot.computeVelocities(odometries[scanno])
-            
                                  
             # Update SLAM with lidar and velocities
             slam.update(sensor.scan(), velocities)
