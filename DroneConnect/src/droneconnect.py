@@ -15,10 +15,11 @@ class DroneConnect:
         self.cam = cv2.VideoCapture('tcp://192.168.1.1:5555')
         self.drone = libardrone.ARDrone()
         print "Ok."
+        self.frame_count=1
         self.running = True
         cv2.namedWindow('Front camera')
 
-    def getInformation(self):
+    def get_information(self):
          # creating altitude information string
         altitude = "altitude: "
         altitude += str(self.drone.navdata.get(0, dict()).get('altitude', 0))
@@ -57,11 +58,19 @@ class DroneConnect:
         battery += "%"
         cv2.putText(self.frame,battery, (10,350), cv2.FONT_HERSHEY_SIMPLEX, 0.5, 255)
         
+    def save_frame(self):
+        file = "Frames/#"
+        file += str(self.frame_count)
+        file += ".jpg"
+        cv2.imwrite(file,self.frame)
+        self.frame_count += 1
+        print "Frame saved"
+        
     def run(self):
         while self.running:
             # get current frame of video
             self.running, self.frame = self.cam.read()
-            self.getInformation()
+            self.get_information()
             if self.running:     
                 # show current frame
                 cv2.imshow('Front camera', self.frame)
@@ -99,6 +108,9 @@ class DroneConnect:
                 elif k==65363:  # right
                     self.drone.turn_right()
                     print "Right pressed"
+                elif k==112:  # p
+                    self.save_frame()
+                    print "P pressed"
                 elif k==-1:  # other
                     continue
                 else:
