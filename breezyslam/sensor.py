@@ -16,9 +16,9 @@ import math
 class XTION(Laser):
 
     viewangle = 58 #asus xtion view in degrees
-    linecount = 2 #lines above and below to generate average (0=online desired line)
-    distance_no_detection_mm = 3500 # value used if sensor detects 0
-    scan_rate_hz = 10 #todo find value
+    linecount = 10 #lines above and below to generate average (0=online desired line)
+    distance_no_detection_mm = 10000 # value used if sensor detects 0
+    scan_rate_hz = 1 #todo find value
     detectionMargin = 5 #pixels on the sites of the scans which should be ignored
     offsetMillimeters = 0 #offset of the sensor to the center of the robot
     
@@ -89,7 +89,65 @@ class XTION(Laser):
     '''
     #distance - amount of pixel under and above the desired position
     def getAverageDepth (self, frame_data, width, height, x, y, distance):
-        value = 0;
-        for xTemp in range (-distance+x, distance+1+x):
-            value += frame_data[y*width+xTemp]
-        return value/(distance*2+1);  
+        sum = 0;
+        count = 0
+        for xTemp in range (-distance+x, distance+1+x):            
+            value = frame_data[y*width+xTemp]
+            if(value>0):
+                sum += value
+                count += 1
+        if(count>0):
+            return sum/count
+        else:
+            return 0
+
+class FileXTION(XTION):
+
+    index = 0
+
+    '''
+    A class for reading the log file of an Asus XTION
+    '''
+    def __init__(self, dataset, datadir = '.'):
+        self.scans, width = self.load_data(datadir, dataset)
+        Laser.__init__(self, width, self.scan_rate_hz, self.viewangle, self.distance_no_detection_mm, self.detectionMargin, self.offsetMillimeters)
+
+    '''
+    Scans one line
+    return: array with the values
+    '''
+    def scan(self):
+        if(self.index < len(self.scans)):
+           self.index += 1
+           return self.scans[self.index-1]
+        else:
+           return []
+
+
+    def load_data(self, datadir, dataset):
+        
+        filename = '%s/%s' % (datadir, dataset)
+        print('Loading data from %s...' % filename)
+        
+        fd = open(filename, 'rt')
+        
+        scans = []
+        
+        while True:  
+            
+            s = fd.readline()
+            
+            if len(s) == 0:
+                break       
+                
+            toks = s.split()[0:-1] # ignore ''
+                            
+            lidar = [int(tok) for tok in toks[:]]
+            
+
+            scans.append(lidar)
+            
+        fd.close()
+            
+        return scans, len(scans[0])
+        

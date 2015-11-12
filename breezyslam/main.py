@@ -38,6 +38,7 @@ Change log:
 
 
 from sensor import XTION
+from sensor import FileXTION
 from server import Server
 
 from breezyslam.algorithms import Deterministic_SLAM, RMHC_SLAM
@@ -53,6 +54,8 @@ from select import select
 
 #wait for client for image stream
 stream = True
+#read form log file or use sensor
+readlog = True
 
 # Map size, scale
 MAP_SIZE_PIXELS          =  1000
@@ -74,7 +77,10 @@ new_term[3] = (new_term[3] & ~termios.ICANON & ~termios.ECHO)
 def main():
    
     #initialize the asus xtion as sensor
-    sensor = XTION()
+    if(readlog):
+        sensor = FileXTION("log")
+    else:
+        sensor = XTION()
 
     #initialiye robot
     if(use_odometry):
@@ -107,14 +113,21 @@ def main():
         if use_odometry:
             velocities = robot.getOdometry()
             scan = sensor.scan()
-                                 
+            if(len(scan)<=0):
+                print 'Reader error or end of file.'
+                break
+            
             # Update SLAM with lidar and velocities
             slam.update(sensor.scan(), velocities)
             
         else:
+            scan = sensor.scan()
+            if(len(scan)<=0):
+                print 'Reader error or end of file.'
+                break
         
             # Update SLAM with lidar alone
-            slam.update(sensor.scan())
+            slam.update(scan)
                     
         # Get new position
         x_mm, y_mm, theta_degrees = slam.getpos()    
