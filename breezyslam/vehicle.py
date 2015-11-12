@@ -14,6 +14,16 @@ class Vehicle(object):
         return
 
     @abc.abstractmethod
+    def initialize(self):
+        """prepare"""
+        return
+
+    @abc.abstractmethod
+    def shutdown(self):
+        """stop every running thread"""
+        return
+
+    @abc.abstractmethod
     def move(self, dxy):
         """move by dxy milimeters"""
         return

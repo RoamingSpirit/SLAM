@@ -86,7 +86,8 @@ def main():
 
     #initialiye robot
     if(use_odometry):
-        robot = Drone()#todo initialize a vehicle
+        robot = Drone()#todo initialize a vehicler
+        robot.initialize()
             
     # Create a CoreSLAM object with laser params and optional robot object
     slam = RMHC_SLAM(sensor, MAP_SIZE_PIXELS, MAP_SIZE_METERS, 100, 300, random_seed=seed) \
@@ -141,6 +142,7 @@ def main():
             break
 
     # Report elapsed time
+    robot.shutdown()
     elapsed_sec = time() - start_sec
     print('\n%d scans in %f sec = %f scans / sec' % (scanno, elapsed_sec, scanno/elapsed_sec))
                     
