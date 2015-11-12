@@ -8,8 +8,9 @@ __date__ = "$10.11.2015 10:12:49$"
 import libardrone
 import cv2
 import time
+from vehicle import Vehicle
 
-class DroneConnect:
+class Drone(Vehicle):
     """
     Class representing a connection to the ARDrone, controls it and receive navdata information
     """
@@ -26,62 +27,25 @@ class DroneConnect:
         # Counter for file names
         self.frame_count=1
         self.running = True
+        self.first = True
         # 'Traveled' distance in mm
         self.distance_frame = 0.0
-        self.distance_update = 0.0
-        self.psi_frame = self.drone.navdata.get(0, dict()).get('psi', 0)
         self.psi_update = self.drone.navdata.get(0, dict()).get('psi', 0)
-        self.old_timestamp = 0.0
-        self.new_timestamp = 0.0
+        self.timestamp_frame = 0.0
+        self.timestamp_update = 0.0
 
     def get_information(self): 
         """
         Receive navdata information and set them on the frame
         """        
-        self.calc_distance(self.drone.navdata.get(0, dict()).get('vx', 0), self.get_dt())
-        
-        # create distance string
-        distance_str = "distance: "
-        distance_str += str(self.distance_update)
-        cv2.putText(self.frame, distance_str, (10,320), cv2.FONT_HERSHEY_SIMPLEX, 0.5, 255)
-        
-        # create psi string
-        psi_str = "psi: "
-        psi_str += str(self.psi_update)
-        cv2.putText(self.frame, psi_str, (10,335), cv2.FONT_HERSHEY_SIMPLEX, 0.5, 255)
-        
-        """
-         # creating altitude information string
-        altitude_str = "altitude: "
-        altitude_str += str(self.drone.navdata.get(0, dict()).get('altitude', 0))
-        cv2.putText(self.frame, altitude_str, (10,275), cv2.FONT_HERSHEY_SIMPLEX, 0.5, 255)
-
-        # creating theta information string
-        theta_str = "theta: "
-        theta_str += str(self.drone.navdata.get(0, dict()).get('theta', 0))
-        cv2.putText(self.frame, theta_str, (10,290), cv2.FONT_HERSHEY_SIMPLEX, 0.5, 255)
-
-        # creating phi information string
-        phi_str = "phi: "
-        phi_str += str(self.drone.navdata.get(0, dict()).get('phi', 0))
-        cv2.putText(self.frame, phi_str, (10,305), cv2.FONT_HERSHEY_SIMPLEX, 0.5, 255)
-
-        # creating vx information string
-        vx_str = "vx: "
-        vx_str += str(round(self.drone.navdata.get(0, dict()).get('vx', 0)))
-        cv2.putText(self.frame, vx_str, (10,320), cv2.FONT_HERSHEY_SIMPLEX, 0.5, 255)
-
-        # creating vy information string
-        vy_str = "vy: "
-        vy_str += str(round(self.drone.navdata.get(0, dict()).get('vy', 0)))
-        cv2.putText(self.frame, vy_str, (10,335), cv2.FONT_HERSHEY_SIMPLEX, 0.5, 255)
-        """
+        self.calc_distance(self.drone.navdata.get(0, dict()).get('vx', 0))
 
         # creating battery information string
         battery_str = "Battery: "
         battery_str += str(self.drone.navdata.get(0, dict()).get('battery', 0))
         battery_str += "%"
         cv2.putText(self.frame, battery_str, (10,350), cv2.FONT_HERSHEY_SIMPLEX, 0.5, 255)
+        
     def save_frame(self):
         """
         Save current frame
@@ -95,28 +59,41 @@ class DroneConnect:
         
     def update(self, psi):
         # distance
-        self.distance_update = self.distance_frame
+        dx = self.distance_frame
         self.distance_frame = 0.0
-        # psi
-        self.psi_update = psi - self.psi_frame
-        self.psi_frame = psi
+        return dx,self.calc_psi(psi),self.get_dt_update()
         
-    def get_dt(self):
-        if self.old_timestamp == 0.0:
-            self.old_timestamp = time.time()
-            return 0.0
-        self.new_timestamp = time.time()
-        dt = self.new_timestamp-self.old_timestamp
-        self.old_timetamp = self.new_timestamp
+    def calc_dt(self,old):
+        """
+        Return the time difference between old time and now
+        """
+        now = time.time()
+        if old == 0.0:
+            return 0.0,now
+        dt = now-old
+        return dt, now
+    
+    def get_dt_frame(self):
+        """
+        Return the time difference between since the last frame
+        """
+        dt,self.timestamp_frame=self.calc_dt(self.timestamp_frame)
+        return dt
+    
+    def get_dt_update(self):
+        """
+        Return the time difference between since the last update
+        """
+        dt,self.timestamp_update=self.calc_dt(self.timestamp_update)
         return dt
         
-    def calc_distance(self, vx, dt):
+    def calc_distance(self, vx):
         """
         Calculate distance since last frame
         """
         if vx < 0.0:
             vx = 0.0
-        self.distance_frame += (vx*dt)/1000
+        self.distance_frame += (vx*self.get_dt_frame())
         if self.distance_frame < 0.0:
             self.distance_frame = 0.0
         else:
@@ -124,9 +101,20 @@ class DroneConnect:
             
     def calc_psi(self, psi):
         """
-        Calculate psi since last frame
+        Calculate psi since last call
         """
-        self.psi_frame += psi - self.psi_frame
+        dd = psi - self.psi_update
+        self.psi_update = psi
+        return dd
+        
+    def getOdometry(self):
+        """
+        return a tuple of odometry (dxy in mm,dthata in degree, dt in s)
+        """
+        if self.first:
+            self.first = False
+            return 0.0,0,0.0
+        return self.update(self.drone.navdata.get(0, dict()).get('psi', 0))    
         
     def run(self):
         """
@@ -176,7 +164,7 @@ class DroneConnect:
                 elif k==112:  # p
                     self.save_frame()
                 elif k==117:  # u
-                    self.update(self.drone.navdata.get(0, dict()).get('psi', 0))
+                    print self.getOdometry()
                 elif k==-1:  # other
                     continue
                 else:
