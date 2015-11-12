@@ -15,15 +15,12 @@ class Drone(Vehicle,threading.Thread):
     """
     Class representing a connection to the ARDrone, controls it and receive navdata information
     """
-
-    self.frame_count=1
-    self.running = True
-    self.first = True
+    running = True
+    first = True
     # 'Traveled' distance in mm
-    self.distance_frame = 0.0
-    self.psi_update = self.drone.navdata.get(0, dict()).get('psi', 0)
-    self.timestamp_frame = 0.0
-    self.timestamp_update = 0.0
+    distance_frame = 0.0
+    timestamp_frame = 0.0
+    timestamp_update = 0.0
 
     def __init__(self):
         """
@@ -34,20 +31,10 @@ class Drone(Vehicle,threading.Thread):
         #self.cam = cv2.VideoCapture('tcp://192.168.1.1:5555')
         self.drone = libardrone.ARDrone()
         print "Ok."
-        #cv2.namedWindow('Front camera')
+        self.psi_update = self.drone.navdata.get(0, dict()).get('psi', 0)
+        cv2.namedWindow('Front camera')
         # Counter for file names
         self.start()
-        
-    def save_frame(self):
-        """
-        Save current frame
-        """
-        file = "Frames/#"
-        file += str(self.frame_count)
-        file += ".jpg"
-        cv2.imwrite(file,self.frame)
-        self.frame_count += 1
-        print "Frame saved"
         
     def update(self, psi):
         # distance
@@ -83,13 +70,9 @@ class Drone(Vehicle,threading.Thread):
         """
         Calculate distance since last frame
         """
-        if vx < 0.0:
-            vx = 0.0
         self.distance_frame += (vx*self.get_dt_frame())
-        if self.distance_frame < 0.0:
-            self.distance_frame = 0.0
-        else:
-            self.distance_frame=round(self.distance_frame, 0)
+        self.distance_frame=round(self.distance_frame, 2)
+        #print vx,self.distance_frame
             
     def calc_psi(self, psi):
         """
@@ -119,13 +102,12 @@ class Drone(Vehicle,threading.Thread):
         self.drone.halt()
         print "Drone shutted down."
         
-    def initialize(self):
+    def takeoff(self):
         """
         Lets the drone fly
         """
-        print "Take off!"
+        print "Take off"
         #drone.takeoff()
-	print "Drone in air!"
     
     def run(self):
         """
@@ -135,51 +117,47 @@ class Drone(Vehicle,threading.Thread):
             # get current frame of video
             #self.running, self.frame = self.cam.read()
             self.calc_distance(self.drone.navdata.get(0, dict()).get('vx', 0))
-            if self.running:     
-                # show current frame
-                #cv2.imshow('Front camera', self.frame)
-                k = cv2.waitKey(1)
-                if k==27:   # Esc
-                    self.shutdown()
-                elif k==10:  # Return
-                    self.drone.takeoff()
-                    print "Return pressed"
-                elif k==32:  # Space
-                    self.drone.land()
-                    print "Space pressed"
-                elif k==119:  # w
-                    self.drone.move_forward()
-                    print "W pressed"
-                elif k==97:  # a
-                    self.drone.move_left()
-                    print "A pressed"
-                elif k==115:  # s
-                    self.drone.move_backward()
-                    print "S pressed"
-                elif k==100:  # d
-                    self.drone.move_right()
-                    print "D pressed"
-                elif k==65362:  # Up
-                    self.drone.move_up()
-                    print "Up pressed"
-                elif k==65364:  # Down
-                    self.drone.move_down()
-                    print "Down pressed"
-                elif k==65361:  # Left
-                    self.drone.turn_left()
-                    print "Left pressed"
-                elif k==65363:  # Right
-                    self.drone.turn_right()
-                    print "Right pressed"
-                elif k==112:  # p
-                    self.save_frame()
-                elif k==117:  # u
-                    print self.getOdometry()
-                elif k==-1:  # other
-                    continue
-                else:
-                    print k
+            print self.getOdometry()
+            # show current frame
+            #cv2.imshow('Front camera', self.frame)
+            """
+            k = cv2.waitKey(1)
+            if k==27:   # Esc
+                self.running = False
+                self.shutdown()
+            elif k==10:  # Return
+                self.drone.takeoff()
+                print "Return pressed"
+            elif k==32:  # Space
+                self.drone.land()
+                print "Space pressed"
+            elif k==119:  # w
+                self.drone.move_forward()
+                print "W pressed"
+            elif k==97:  # a
+                self.drone.move_left()
+                print "A pressed"
+            elif k==115:  # s
+                self.drone.move_backward()
+                print "S pressed"
+            elif k==100:  # d
+                self.drone.move_right()
+                print "D pressed"
+            elif k==65362:  # Up
+                self.drone.move_up()
+                print "Up pressed"
+            elif k==65364:  # Down
+                self.drone.move_down()
+                print "Down pressed"
+            elif k==65361:  # Left
+                self.drone.turn_left()
+                print "Left pressed"
+            elif k==65363:  # Right
+                self.drone.turn_right()
+                print "Right pressed"
+            elif k==117:  # u
+                print self.getOdometry()
+            elif k==-1:  # other
+                continue
             else:
-                # error reading frame
-                print "Error reading video feed"
-
+                print k"""
