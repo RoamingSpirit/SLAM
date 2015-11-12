@@ -16,7 +16,7 @@ import math
 class XTION(Laser):
 
     viewangle = 58 #asus xtion view in degrees
-    linecount = 10 #lines above and below to generate average (0=online desired line)
+    linecount = 7 #lines above and below to generate average (0=online desired line)
     distance_no_detection_mm = 10000 # value used if sensor detects 0
     scan_rate_hz = 1 #todo find value
     detectionMargin = 5 #pixels on the sites of the scans which should be ignored
@@ -85,9 +85,9 @@ class XTION(Laser):
     #height - height of the frame
     #x - coordinate of the pixel
     #y - coordinate of the pixel
+    #distance - pixels under and above the desired row
     return: average value
     '''
-    #distance - amount of pixel under and above the desired position
     def getAverageDepth (self, frame_data, width, height, x, y, distance):
         sum = 0;
         count = 0
@@ -102,18 +102,21 @@ class XTION(Laser):
             return 0
 
 class FileXTION(XTION):
-
+    #current frame read
     index = 0
 
     '''
     A class for reading the log file of an Asus XTION
+    
+    dataset: filename
+    datadir: directionary of the file default '.'
     '''
     def __init__(self, dataset, datadir = '.'):
         self.scans, width = self.load_data(datadir, dataset)
         Laser.__init__(self, width, self.scan_rate_hz, self.viewangle, self.distance_no_detection_mm, self.detectionMargin, self.offsetMillimeters)
 
     '''
-    Scans one line
+    reads a scan 
     return: array with the values
     '''
     def scan(self):
@@ -123,7 +126,12 @@ class FileXTION(XTION):
         else:
            return []
 
-
+    '''
+    loads a stroed log file and saves the scans.
+    datadir: directionary of the file
+    dataset: filename
+    return: scans, width of the scans
+    '''
     def load_data(self, datadir, dataset):
         
         filename = '%s/%s' % (datadir, dataset)

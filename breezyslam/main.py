@@ -55,7 +55,7 @@ from select import select
 #wait for client for image stream
 stream = True
 #read form log file or use sensor
-readlog = True
+readlog = False
 
 # Map size, scale
 MAP_SIZE_PIXELS          =  1000
