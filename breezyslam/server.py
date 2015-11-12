@@ -30,23 +30,18 @@ class Server(threading.Thread):
     def run(self):
 
         self.setup()
-        self.connection.sendall(str(self.MAP_SIZE_PIXELS)+"\n")
         
         while(self.running):
-            if(self.valid):
-                # Create a byte array to receive the computed maps
-                mapb = bytearray(self.MAP_SIZE_PIXELS * self.MAP_SIZE_PIXELS)
+            # Create a byte array to receive the computed maps
+            mapb = bytearray(self.MAP_SIZE_PIXELS * self.MAP_SIZE_PIXELS)
 
-                # Get final map    
-                self.slam.getmap(mapb)
-                try:
-                    self.connection.send(mapb)
-                except socket.error, e:
-                    print "Client disconnected"
-                    self.setup()
-                    self.connection.sendall(str(self.MAP_SIZE_PIXELS)+"\n")
-            else:
-                self.running = False
+            # Get final map    
+            self.slam.getmap(mapb)
+            try:
+                self.connection.send(mapb)
+            except socket.error, e:
+                print "Client disconnected"
+                self.setup()
 
     '''
     Setups a connection to a client on port 8888.
@@ -56,13 +51,13 @@ class Server(threading.Thread):
         print 'Socket created'
          
         #Bind socket to local host and port
-        self.valid = True
         try:
             self.socket.bind((HOST, PORT))
         except socket.error as msg:
             print 'Bind failed. Error Code : ' + str(msg[0]) + ' Message ' + msg[1]
-            self.valid = False
-        if(self.valid):     
+            self.running = False
+            
+        if(self.running):     
             print 'Socket bind complete'
              
             #Start listening on socket
@@ -71,14 +66,20 @@ class Server(threading.Thread):
              
             #now keep talking with the client
             #wait to accept a connection - blocking call
+            try:
+                self.connection, addr = self.socket.accept()
+                print 'Connected with ' + addr[0] + ':' + str(addr[1])
+                self.connection.sendall(str(self.MAP_SIZE_PIXELS)+"\n")
+            except socket.error, e:
+                self.running = False
+                print 'socket closed'
             
-            self.connection, addr = self.socket.accept()
-            print 'Connected with ' + addr[0] + ':' + str(addr[1])
             
 
     '''
     closes the connection and stops the running thread.
-    '''    def close(self):
+    '''
+    def close(self):
         self.running = False
-        if(self.valid):
-            self.socket.close()
+        self.socket.shutdown(socket.SHUT_RDWR)
+        self.socket.close()
