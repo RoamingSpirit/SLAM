@@ -15,11 +15,19 @@ class Drone(Vehicle,threading.Thread):
     """
     Class representing a connection to the ARDrone, controls it and receive navdata information
     """
+<<<<<<< HEAD
+
+    frame_count=1
+=======
+>>>>>>> 8ce1a9ffd891b12b333e57a87a9a4ba46dd97b7f
     running = True
     first = True
     # 'Traveled' distance in mm
     distance_frame = 0.0
-
+<<<<<<< HEAD
+    
+=======
+>>>>>>> 8ce1a9ffd891b12b333e57a87a9a4ba46dd97b7f
     timestamp_frame = 0.0
     timestamp_update = 0.0
 
@@ -32,11 +40,15 @@ class Drone(Vehicle,threading.Thread):
         #self.cam = cv2.VideoCapture('tcp://192.168.1.1:5555')
         self.drone = libardrone.ARDrone()
         print "Ok."
+<<<<<<< HEAD
 
         self.psi_update = self.drone.navdata.get(0, dict()).get('psi', 0)
         
         #cv2.namedWindow('Front camera')
-
+=======
+        self.psi_update = self.drone.navdata.get(0, dict()).get('psi', 0)
+        cv2.namedWindow('Front camera')
+>>>>>>> 8ce1a9ffd891b12b333e57a87a9a4ba46dd97b7f
         # Counter for file names
         self.start()
         
