@@ -9,8 +9,9 @@ import libardrone
 import cv2
 import time
 from vehicle import Vehicle
+import threading
 
-class Drone(Vehicle):
+class Drone(Vehicle,threading.Thread):
     """
     Class representing a connection to the ARDrone, controls it and receive navdata information
     """
@@ -19,6 +20,7 @@ class Drone(Vehicle):
         """
         Initialize the connection and variables
         """
+        threading.Thread.__init__(self)
         print "Connecting..."
         self.cam = cv2.VideoCapture('tcp://192.168.1.1:5555')
         self.drone = libardrone.ARDrone()
@@ -33,6 +35,7 @@ class Drone(Vehicle):
         self.psi_update = self.drone.navdata.get(0, dict()).get('psi', 0)
         self.timestamp_frame = 0.0
         self.timestamp_update = 0.0
+        self.start()
 
     def get_information(self): 
         """
