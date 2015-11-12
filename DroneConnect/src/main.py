@@ -5,8 +5,17 @@
 __author__ = "lukas"
 __date__ = "$11.11.2015 11:10:27$"
 
-from droneconnect import DroneConnect
+from drone import Drone
+import time
 
 if __name__ == "__main__":
-    ardrone = DroneConnect()
+    ardrone = Drone()
     ardrone.run()
+    
+    """
+    now = time.time()
+    old = time.time()
+    dt = now-old
+    time_tup=(dt,now)
+    print time_tup"""
+    
