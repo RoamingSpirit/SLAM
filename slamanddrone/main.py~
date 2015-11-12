@@ -55,7 +55,7 @@ from select import select
 
 
 #wait for client for image stream
-stream = True
+stream = true
 #read form log file or use sensor
 readlog = False
 
