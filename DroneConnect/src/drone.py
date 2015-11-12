@@ -27,6 +27,7 @@ class Drone(Vehicle):
         # Counter for file names
         self.frame_count=1
         self.running = True
+        self.first = True
         # 'Traveled' distance in mm
         self.distance_frame = 0.0
         self.psi_update = self.drone.navdata.get(0, dict()).get('psi', 0)
@@ -110,6 +111,9 @@ class Drone(Vehicle):
         """
         return a tuple of odometry (dxy in mm,dthata in degree, dt in s)
         """
+        if self.first:
+            self.first = False
+            return 0.0,0,0.0
         return self.update(self.drone.navdata.get(0, dict()).get('psi', 0))    
         
     def run(self):
