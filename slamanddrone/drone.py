@@ -16,38 +16,27 @@ class Drone(Vehicle,threading.Thread):
     Class representing a connection to the ARDrone, controls it and receive navdata information
     """
 
+    self.frame_count=1
+    self.running = True
+    self.first = True
+    # 'Traveled' distance in mm
+    self.distance_frame = 0.0
+    self.psi_update = self.drone.navdata.get(0, dict()).get('psi', 0)
+    self.timestamp_frame = 0.0
+    self.timestamp_update = 0.0
+
     def __init__(self):
         """
         Initialize the connection and variables
         """
         threading.Thread.__init__(self)
         print "Connecting..."
-        self.cam = cv2.VideoCapture('tcp://192.168.1.1:5555')
+        #self.cam = cv2.VideoCapture('tcp://192.168.1.1:5555')
         self.drone = libardrone.ARDrone()
         print "Ok."
-        cv2.namedWindow('Front camera')
+        #cv2.namedWindow('Front camera')
         # Counter for file names
-        self.frame_count=1
-        self.running = True
-        self.first = True
-        # 'Traveled' distance in mm
-        self.distance_frame = 0.0
-        self.psi_update = self.drone.navdata.get(0, dict()).get('psi', 0)
-        self.timestamp_frame = 0.0
-        self.timestamp_update = 0.0
         self.start()
-
-    def get_information(self): 
-        """
-        Receive navdata information and set them on the frame
-        """        
-        self.calc_distance(self.drone.navdata.get(0, dict()).get('vx', 0))
-
-        # creating battery information string
-        battery_str = "Battery: "
-        battery_str += str(self.drone.navdata.get(0, dict()).get('battery', 0))
-        battery_str += "%"
-        cv2.putText(self.frame, battery_str, (10,350), cv2.FONT_HERSHEY_SIMPLEX, 0.5, 255)
         
     def save_frame(self):
         """
@@ -117,22 +106,40 @@ class Drone(Vehicle,threading.Thread):
         if self.first:
             self.first = False
             return 0.0,0,0.0
-        return self.update(self.drone.navdata.get(0, dict()).get('psi', 0))    
+        return self.update(self.drone.navdata.get(0, dict()).get('psi', 0))
         
+    def shutdown(self):
+        """
+        Close application
+        """
+        print "Shutting down..."
+        #self.cam.release()
+        #cv2.destroyAllWindows()
+        self.running = False
+        self.drone.halt()
+        print "Drone shutted down."
+        
+    def initialize(self):
+        """
+        Lets the drone fly
+        """
+        print "Take off!"
+        #drone.takeoff()
+	print "Drone in air!"
+    
     def run(self):
         """
         Main loop
         """
         while self.running:
             # get current frame of video
-            self.running, self.frame = self.cam.read()
-            self.get_information()
+            #self.running, self.frame = self.cam.read()
+            self.calc_distance(self.drone.navdata.get(0, dict()).get('vx', 0))
             if self.running:     
                 # show current frame
-                cv2.imshow('Front camera', self.frame)
+                #cv2.imshow('Front camera', self.frame)
                 k = cv2.waitKey(1)
                 if k==27:   # Esc
-                    self.running = False
                     self.shutdown()
                 elif k==10:  # Return
                     self.drone.takeoff()
@@ -175,13 +182,4 @@ class Drone(Vehicle,threading.Thread):
             else:
                 # error reading frame
                 print "Error reading video feed"
-                
-    def shutdown(self):
-        """
-        Close application
-        """
-        print "Shutting down..."
-        self.cam.release()
-        cv2.destroyAllWindows()
-        self.drone.halt()
-        print "Ok."
+
