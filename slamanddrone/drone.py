@@ -16,8 +16,7 @@ class Drone(Vehicle,threading.Thread):
     Class representing a connection to the ARDrone, controls it and receive navdata information
     """
     running = True
-    UNHANDED_UPDATES = 10
-    update_count = 0
+    correct_psi = True
     timestamp_frame = 0.0
     timestamp_update = 0.0
 
@@ -75,13 +74,11 @@ class Drone(Vehicle,threading.Thread):
         """
         return a tuple of odometry (dxy in mm,dthata in degree, dt in s)
         """
-        if self.update_count == 0:
-            self.update_count += 1
-            return 0.0,0,self.get_dt_update()
-	elif self.update_count < self.UNHANDED_UPDATES:
-	    self.update_count += 1
-            return 0.0,0,self.get_dt_update()	
-        return self.calc_distance(self.drone.navdata.get(0, dict()).get('vx', 0)),self.calc_dthata(self.drone.navdata.get(0, dict()).get('psi', 0)),self.get_dt_update()
+	dthata = self.calc_dthata(self.drone.navdata.get(0, dict()).get('psi', 0))
+        if self.correct_psi && dthata:
+		dthata = 0
+		self.correct_psi = False	
+        return self.calc_distance(self.drone.navdata.get(0, dict()).get('vx', 0)), dthata, self.get_dt_update()
         
     def initialize(self):
         """
