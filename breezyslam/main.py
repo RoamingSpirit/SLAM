@@ -41,8 +41,7 @@ from sensor import XTION
 from sensor import FileXTION
 from server import Server
 
-import sys
-sys.path.insert(0, 'home/pi/workspaces/nils/SLAM/DroneConnect
+
 from drone import Drone
                 
 from breezyslam.algorithms import Deterministic_SLAM, RMHC_SLAM
