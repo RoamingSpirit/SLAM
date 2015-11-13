@@ -40,6 +40,7 @@ class Drone(Vehicle,threading.Thread):
         """
 	now = time.time()
         if self.old_timestamp == 0.0:
+	    self.old_timestamp = now
             return 0.0
         dt = now-self.old_timestamp
         self.old_timestamp = now
