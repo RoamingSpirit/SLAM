@@ -41,8 +41,10 @@ from sensor import XTION
 from sensor import FileXTION
 from server import Server
 
+import sys
+sys.path.insert(0, 'home/pi/workspaces/nils/SLAM/DroneConnect
 from drone import Drone
-
+                
 from breezyslam.algorithms import Deterministic_SLAM, RMHC_SLAM
 
 from pgm_utils import pgm_save
@@ -59,11 +61,13 @@ stream = True
 #read form log file or use sensor
 readlog = False
 
+use_odometry = True #not yet implemented
+
 # Map size, scale
 MAP_SIZE_PIXELS          =  1000
 MAP_SIZE_METERS          =  30
 seed = 9999 #whit is this used for?
-use_odometry = True #not yet implemented
+
 iterations = 600 #how many scans to make
 
 
@@ -109,19 +113,21 @@ def main():
     set_curses_term()
     
     scanno = 0
-    
+
+    out = open('odometry', 'w')
     
     while(True):
         scanno+=1
         if use_odometry:
             velocities = robot.getOdometry()
+            out.write(str(velocities[0]) + " | " + str(velocities[1]) + " | "+ str(velocities[2]) +"\n" )
             scan = sensor.scan()
             if(len(scan)<=0):
                 print 'Reader error or end of file.'
                 break
             
             # Update SLAM with lidar and velocities
-            slam.update(sensor.scan(), velocities)
+            slam.update(scan, velocities)
             
         else:
             scan = sensor.scan()
@@ -142,7 +148,8 @@ def main():
             break
 
     # Report elapsed time
-    robot.shutdown()
+    if(use_odometry):
+        robot.shutdown()
     elapsed_sec = time() - start_sec
     print('\n%d scans in %f sec = %f scans / sec' % (scanno, elapsed_sec, scanno/elapsed_sec))
                     
