@@ -39,10 +39,10 @@ class Drone(Vehicle,threading.Thread):
         Return the time difference between since the last update
         """
 	now = time.time()
-        if old_timestamp == 0.0:
+        if self.old_timestamp == 0.0:
             return 0.0
-        dt = now-old_timestamp
-        old_timestamp = now
+        dt = now-self.old_timestamp
+        self.old_timestamp = now
         return dt
         
     def calc_distance(self, vx, dt):
@@ -63,9 +63,9 @@ class Drone(Vehicle,threading.Thread):
         """
         return a tuple of odometry (dxy in mm,dthata in degree, dt in s)
         """
-	dt = get_dt()
+	dt = self.get_dt()
 	dthata = self.calc_dthata(self.drone.navdata.get(0, dict()).get('psi', 0))
-        if self.correct_psi & math.fabs(dthata) > 20:
+        if self.correct_psi & (math.fabs(dthata) > 20):
 		dthata = 0
 		self.correct_psi = False	
         return self.calc_distance(self.drone.navdata.get(0, dict()).get('vx', 0), dt), dthata, dt
