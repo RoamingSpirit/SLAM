@@ -28,16 +28,17 @@ class Drone(Vehicle,threading.Thread):
         """
         threading.Thread.__init__(self)
         print "Connecting..."
-        #self.cam = cv2.VideoCapture('tcp://192.168.1.1:5555')
+        self.cam = cv2.VideoCapture('tcp://192.168.1.1:5555')
         self.drone = libardrone.ARDrone()
         print "Ok."
         self.psi_update = self.drone.navdata.get(0, dict()).get('psi', 0)
         #cv2.namedWindow('Front camera')
         # Counter for file names
-        self.start()
+        #self.start()
         
     def update(self, psi):
         # distance
+        self.calc_distance(self.drone.navdata.get(0, dict()).get('vx', 0))
         dx = self.distance_frame
         self.distance_frame = 0.0
         return dx,self.calc_psi(psi),self.get_dt_update()
@@ -70,7 +71,7 @@ class Drone(Vehicle,threading.Thread):
         """
         Calculate distance since last frame
         """
-        self.distance_frame += (vx*self.get_dt_frame())
+        self.distance_frame = (vx*self.get_dt_frame())
         self.distance_frame=round(self.distance_frame, 2)
         #print vx,self.distance_frame
             
@@ -116,12 +117,15 @@ class Drone(Vehicle,threading.Thread):
         while self.running:
             # get current frame of video
             #self.running, self.frame = self.cam.read()
-            self.calc_distance(self.drone.navdata.get(0, dict()).get('vx', 0))
-            print self.getOdometry()
-            time.sleep(0.05)
+            #self.calc_distance(self.drone.navdata.get(0, dict()).get('vx', 0))
+            
             # show current frame
-            #cv2.imshow('Front camera', self.frame)
             """
+            if self.running:
+                cv2.imshow('Front camera', self.frame)
+            else:
+                self.running = True
+            
             k = cv2.waitKey(1)
             if k==27:   # Esc
                 self.running = False

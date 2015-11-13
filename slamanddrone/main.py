@@ -59,7 +59,7 @@ stream = True
 #read form log file or use sensor
 readlog = False
 
-use_odometry = False #not yet implemented
+use_odometry = True #not yet implemented
 
 # Map size, scale
 MAP_SIZE_PIXELS          =  1000
@@ -118,7 +118,6 @@ def main():
         scanno+=1
         if use_odometry:
             velocities = robot.getOdometry()
-	    print velocities
             out.write(str(velocities[0]) + " | " + str(velocities[1]) + " | "+ str(velocities[2]) +"\n" )
             scan = sensor.scan()
             if(len(scan)<=0):
@@ -126,7 +125,7 @@ def main():
                 break
             
             # Update SLAM with lidar and velocities
-            slam.update(sensor.scan(), velocities)
+            slam.update(scan, velocities)
             
         else:
             scan = sensor.scan()
