@@ -75,7 +75,7 @@ class Drone(Vehicle,threading.Thread):
         return a tuple of odometry (dxy in mm,dthata in degree, dt in s)
         """
 	dthata = self.calc_dthata(self.drone.navdata.get(0, dict()).get('psi', 0))
-        if self.correct_psi && dthata:
+        if self.correct_psi && dthata > 20:
 		dthata = 0
 		self.correct_psi = False	
         return self.calc_distance(self.drone.navdata.get(0, dict()).get('vx', 0)), dthata, self.get_dt_update()
