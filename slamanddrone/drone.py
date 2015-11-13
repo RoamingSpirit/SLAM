@@ -19,7 +19,6 @@ class Drone(Vehicle,threading.Thread):
     first = True
     # 'Traveled' distance in mm
     distance_frame = 0.0
-
     timestamp_frame = 0.0
     timestamp_update = 0.0
 
@@ -32,11 +31,8 @@ class Drone(Vehicle,threading.Thread):
         #self.cam = cv2.VideoCapture('tcp://192.168.1.1:5555')
         self.drone = libardrone.ARDrone()
         print "Ok."
-
         self.psi_update = self.drone.navdata.get(0, dict()).get('psi', 0)
-        
         #cv2.namedWindow('Front camera')
-
         # Counter for file names
         self.start()
         
@@ -122,6 +118,7 @@ class Drone(Vehicle,threading.Thread):
             #self.running, self.frame = self.cam.read()
             self.calc_distance(self.drone.navdata.get(0, dict()).get('vx', 0))
             print self.getOdometry()
+            time.sleep(0.05)
             # show current frame
             #cv2.imshow('Front camera', self.frame)
             """
