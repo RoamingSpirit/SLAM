@@ -14,9 +14,10 @@ import threading
 import math
 from vehicle import Vehicle
 
-class Drone(Vehicle,threading.Thread):
+class Drone(Vehicle, threading.Thread):
     """
-    Class representing a connection to the ARDrone, controls it and receive navdata information
+    Class representing a connection to the ARDrone,
+    controls it and receive navdata information
     """
     running = True
     correct_psi = True
@@ -33,25 +34,25 @@ class Drone(Vehicle,threading.Thread):
         print "Ok."
         self.last_thata = self.drone.navdata.get(0, dict()).get('psi', 0)
         #cv2.namedWindow('Front camera')
-    
+
     def get_dt(self):
         """
         Return the time difference between since the last update
         """
-	now = time.time()
+        now = time.time()
         if self.old_timestamp == 0.0:
-	    self.old_timestamp = now
+            self.old_timestamp = now
             return 0.0
         dt = now-self.old_timestamp
         self.old_timestamp = now
         return dt
-        
+
     def calc_distance(self, vx, dt):
         """
         Calculate distance since last frame
         """
         return vx*dt
-            
+
     def calc_dthata(self, thata):
         """
         Calculate dthata since last call
@@ -59,16 +60,16 @@ class Drone(Vehicle,threading.Thread):
         dthata = thata - self.last_thata
         self.last_thata = thata
         return dthata
-        
+
     def getOdometry(self):
         """
         return a tuple of odometry (dxy in mm,dthata in degree, dt in s)
         """
-	dt = self.get_dt()
-	dthata = self.calc_dthata(self.drone.navdata.get(0, dict()).get('psi', 0))
+        dt = self.get_dt()
+        dthata = self.calc_dthata(self.drone.navdata.get(0, dict()).get('psi', 0))
         if self.correct_psi & (math.fabs(dthata) > 20):
-		dthata = 0
-		self.correct_psi = False	
+                dthata = 0
+                self.correct_psi = False
         return self.calc_distance(self.drone.navdata.get(0, dict()).get('vx', 0), dt), dthata, dt
         
     def initialize(self):
@@ -76,7 +77,7 @@ class Drone(Vehicle,threading.Thread):
         Lets the drone fly
         """
         print "Take off"
-        #drone.takeoff()
+        #self.drone.takeoff()
 	print "Drone in air!"
 
     def shutdown(self):
@@ -84,6 +85,7 @@ class Drone(Vehicle,threading.Thread):
         Close application
         """
         print "Shutting down..."
+        #self.drone.land()
         self.cam.release()
         self.running = False
         self.drone.halt()
