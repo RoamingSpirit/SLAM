@@ -10,11 +10,10 @@ sys.path.insert(0, '/home/pi/libardrone/python-ardrone')
 import libardrone
 import cv2
 import time
-import threading
 import math
 from vehicle import Vehicle
 
-class Drone(Vehicle, threading.Thread):
+class Drone(Vehicle):
     """
     Class representing a connection to the ARDrone,
     controls it and receive navdata information
@@ -23,11 +22,13 @@ class Drone(Vehicle, threading.Thread):
     correct_psi = True
     old_timestamp = 0.0
 
-    def __init__(self):
+    def __init__(self, log = True):
         """
         Initialize the connection and variables
         """
-        threading.Thread.__init__(self)
+        self.log = log
+        if(log):
+            self.out = open('odometry', 'w')
         print "Connecting..."
         self.cam = cv2.VideoCapture('tcp://192.168.1.1:5555')
         self.drone = libardrone.ARDrone()
@@ -70,7 +71,10 @@ class Drone(Vehicle, threading.Thread):
         if self.correct_psi & (math.fabs(dthata) > 20):
                 dthata = 0
                 self.correct_psi = False
-        return self.calc_distance(self.drone.navdata.get(0, dict()).get('vx', 0), dt), dthata, dt
+        data = self.calc_distance(self.drone.navdata.get(0, dict()).get('vx', 0), dt), dthata, dt
+        if(self.log):
+                self.out.write("%f %f %f\n" % data)
+        return data
         
     def initialize(self):
         """

@@ -117,7 +117,6 @@ def main():
     
     scanno = 0
 
-    #out = open('odometry', 'w')
     
     while(True):
         scanno+=1
