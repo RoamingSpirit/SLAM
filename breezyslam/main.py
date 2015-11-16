@@ -40,6 +40,7 @@ Change log:
 from sensor import XTION
 from sensor import FileXTION
 from server import Server
+from filedrone import FileDrone
 
 
 from drone import Drone
@@ -58,9 +59,9 @@ from select import select
 #wait for client for image stream
 stream = True
 #read form log file or use sensor
-readlog = False
+readlog = True
 
-use_odometry = True #not yet implemented
+use_odometry = False 
 
 # Map size, scale
 MAP_SIZE_PIXELS          =  1000
@@ -89,8 +90,11 @@ def main():
 
     #initialiye robot
     if(use_odometry):
-        robot = Drone()#todo initialize a vehicler
-        robot.initialize()
+        if(readlog):
+            robot = FileDrone("odometry")
+        else:
+            robot = Drone()#todo initialize a vehicler
+            robot.initialize()
             
     # Create a CoreSLAM object with laser params and optional robot object
     slam = RMHC_SLAM(sensor, MAP_SIZE_PIXELS, MAP_SIZE_METERS, 100, 300, random_seed=seed) \
@@ -113,13 +117,13 @@ def main():
     
     scanno = 0
 
-    out = open('odometry', 'w')
+    #out = open('odometry', 'w')
     
     while(True):
         scanno+=1
         if use_odometry:
             velocities = robot.getOdometry()
-            out.write(str(velocities[0]) + " | " + str(velocities[1]) + " | "+ str(velocities[2]) +"\n" )
+            #out.write(str(velocities[0]) + " " + str(velocities[1]) + " "+ str(velocities[2]) +"\n" )
             scan = sensor.scan()
             if(len(scan)<=0):
                 print 'Reader error or end of file.'
