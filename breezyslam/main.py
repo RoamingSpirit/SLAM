@@ -54,19 +54,19 @@ from time import time
 import cv2
 import sys, termios, atexit
 from select import select
+import math
 
 
 #wait for client for image stream
 stream = True
 #read form log file or use sensor
 readlog = False
-
-use_odometry = False 
+use_odometry = True 
 
 # Map size, scale
 MAP_SIZE_PIXELS          =  1000
-MAP_SIZE_METERS          =  20
-seed = 0 #whit is this used for?
+MAP_SIZE_METERS          =  30
+seed = 0 
 
 
 #for keyboard interrupt
@@ -101,7 +101,7 @@ def main():
         if(readlog):
             robot = FileDrone("odometry")
         else:
-            robot = Drone()#todo initialize a vehicler
+            robot = Drone()
             robot.initialize()
             
     # Create a CoreSLAM object with laser params and optional robot object
@@ -125,12 +125,16 @@ def main():
     
     scanno = 0
 
+    dist = 0
+    zeit = 0
     
     while(True):
         scanno+=1
         if use_odometry:
             velocities = robot.getOdometry()
-            #out.write(str(velocities[0]) + " " + str(velocities[1]) + " "+ str(velocities[2]) +"\n" )
+            dist += velocities[0]
+            zeit += velocities[2]
+           
             scan = sensor.scan()
             if(len(scan)<=0):
                 print 'Reader error or end of file.'
@@ -162,7 +166,8 @@ def main():
         robot.shutdown()
     elapsed_sec = time() - start_sec
     print('\n%d scans in %f sec = %f scans / sec' % (scanno, elapsed_sec, scanno/elapsed_sec))
-                    
+
+    print ('dist traveled:%f mm in %fs' % (dist, zeit))         
                                 
     mapbytes = createMap(slam, trajectory)
 

@@ -33,6 +33,7 @@ class FileDrone(Vehicle):
             toks = s.split()[:] # ignore ''
                             
             odometry = [float(tok) for tok in toks[:]]
+            odometry[0] = odometry[0]*10
             
 
             data.append(odometry)

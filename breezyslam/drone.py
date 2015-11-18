@@ -59,6 +59,10 @@ class Drone(Vehicle):
         Calculate dthata since last call
         """
         dthata = thata - self.last_thata
+        if dthata > 180:
+            dthata = dthata - 360
+        elif dthata < -180:
+            dthata = dthata + 360
         self.last_thata = thata
         return dthata
 
@@ -72,6 +76,7 @@ class Drone(Vehicle):
                 dthata = 0
                 self.correct_psi = False
         data = self.calc_distance(self.drone.navdata.get(0, dict()).get('vx', 0), dt), dthata, dt
+                
         if(self.log):
                 self.out.write("%f %f %f\n" % data)
         return data
