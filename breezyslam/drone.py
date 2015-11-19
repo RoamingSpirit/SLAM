@@ -18,6 +18,7 @@ class Drone(Vehicle):
     Class representing a connection to the ARDrone,
     controls it and receive navdata information
     """
+    DRONE_SPEED = 0.2
     correct_psi = True
     in_air = False
     moving = False
@@ -80,7 +81,7 @@ class Drone(Vehicle):
         """
         # Move the drone
         if self.moving or self.turning:
-            self.drone.move(0, 0.2, 0, 0.2)
+            self.drone.move(0, self.DRONE_SPEED, 0, self.DRONE_SPEED)
         else:
             self.drone.hover()
 
@@ -95,6 +96,7 @@ class Drone(Vehicle):
                 
         if(self.log):
                 self.out.write("%f %f %f\n" % data)
+
         return data
     
     def update_commands(self):
