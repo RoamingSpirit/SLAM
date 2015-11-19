@@ -19,8 +19,8 @@ class Drone(Vehicle):
     controls it and receive navdata information
     """
     correct_psi = True
-    move = False
-    turn = False
+    moving = False
+    turning = False
     in_air = False
     distance = 0
     angle = 0
@@ -57,7 +57,7 @@ class Drone(Vehicle):
         Calculate distance since last frame
         """
         dx = vx*dt
-        if move:
+        if moving:
             distance -= dx
         return dx
 
@@ -71,7 +71,7 @@ class Drone(Vehicle):
         elif dthata < -180:
             dthata = dthata + 360
         self.last_thata = thata
-        if turn:
+        if turning:
             angle -= dthata
         return dthata
 
@@ -80,20 +80,20 @@ class Drone(Vehicle):
         Return a tuple of odometry (dxy in mm,dthata in degree, dt in s)
         """
 		# Move the drone
-        if self.distance > 0 & self.move:
+        if self.distance > 0 & self.moving:
             self.drone.move_forward()
         else:
-            self.move = False
+            self.moving = False
             self.distance = 0
             self.drone.hover()
 		
 		# Turn the drone
-        if self.angle < 0 & self.turn:
+        if self.angle < 0 & self.turning:
             self.drone.turn_left()
-        elif self.angle > 0 & self.turn:
+        elif self.angle > 0 & self.turning:
             self.drone.turn_right()
         else:
-            self.turn = False
+            self.turning = False
             self.drone.hover()
 		
 		# Get odometry data
@@ -112,14 +112,14 @@ class Drone(Vehicle):
         """
         Set the distance to move forward
         """
-        self.move = True
+        self.moving = True
         self.distance = dxy
 	
     def turn(self, dtheta):
         """
         Set the turn angle
         """
-        self.turn = True
+        self.turning = True
         self.angle = dtheta
         
     def initialize(self):
@@ -136,8 +136,8 @@ class Drone(Vehicle):
         """
         print "Shutting down..."
         self.drone.land()
-	self.move = False
-	self.turn = False
+        self.moving = False
+        self.turning = False
         self.cam.release()
         self.drone.halt()
         print "Drone shutted down."
