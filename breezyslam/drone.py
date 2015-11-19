@@ -89,9 +89,9 @@ class Drone(Vehicle):
 		
 		# Turn the drone
         if self.angle < 0 & self.turning:
-            self.drone.turn_left()
+            self.drone.move(0, 0, 0, -1)
         elif self.angle > 0 & self.turning:
-            self.drone.turn_right()
+            self.drone.move(0, 0, 0, 1)
         else:
             self.turning = False
             self.drone.hover()
