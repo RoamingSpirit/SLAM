@@ -99,3 +99,11 @@ class Drone(Vehicle):
         self.running = False
         self.drone.halt()
         print "Drone shutted down."
+
+    def move(self, dxy):
+        print "move by %f mm" %dxy
+
+    def turn(self, dtheta):
+        print "turn by %f degrees (clockwise)" %dtheta
+        
+
