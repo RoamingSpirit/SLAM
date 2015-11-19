@@ -108,19 +108,19 @@ class Drone(Vehicle):
                 self.out.write("%f %f %f\n" % data)
         return data
 		
-	def move(self, dxy):
-		"""
-		Set the distance to move forward
-		"""
-		self.move = True
-		self.distance = dxy
+    def move(self, dxy):
+        """
+        Set the distance to move forward
+        """
+        self.move = True
+        self.distance = dxy
 	
-	def turn(self, dtheta):
-		"""
-		Set the turn angle
-		"""
-		self.turn = True
-		self.angle = dtheta
+    def turn(self, dtheta):
+        """
+        Set the turn angle
+        """
+        self.turn = True
+        self.angle = dtheta
         
     def initialize(self):
         """
