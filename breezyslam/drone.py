@@ -19,11 +19,10 @@ class Drone(Vehicle):
     controls it and receive navdata information
     """
     correct_psi = True
+    in_air = False
     moving = False
     turning = False
-    in_air = False
-    distance = 0
-    angle = 0
+    cmd = [0,0,0]
     old_timestamp = 0.0
 
     def __init__(self, log = True):
@@ -36,7 +35,6 @@ class Drone(Vehicle):
         print "Connecting..."
         self.cam = cv2.VideoCapture('tcp://192.168.1.1:5555')
         self.drone = libardrone.ARDrone()
-        self.drone.set_speed(0.1)
         print "Ok."
         self.last_thata = self.drone.navdata.get(0, dict()).get('psi', 0)
 
@@ -71,6 +69,7 @@ class Drone(Vehicle):
         elif dthata < -180:
             dthata = dthata + 360
         self.last_thata = thata
+        
         if self.turning:
             self.angle -= dthata
         return dthata
@@ -79,56 +78,72 @@ class Drone(Vehicle):
         """
         Return a tuple of odometry (dxy in mm,dthata in degree, dt in s)
         """
-		# Move the drone
-        if self.distance > 0 & self.moving:
-            self.drone.move_forward()
+        # Move the drone
+        if self.moving or self.turning:
+            self.drone.move(0, 0.2, 0, 0.2)
         else:
-            self.moving = False
-            self.distance = 0
             self.drone.hover()
-		
-		# Turn the drone
-        if self.angle < 0 & self.turning:
-            self.drone.move(0, 0, 0, -1)
-        elif self.angle > 0 & self.turning:
-            self.drone.move(0, 0, 0, 1)
-        else:
-            self.turning = False
-            self.drone.hover()
-		
-		# Get odometry data
+
+        # Get odometry data
         dt = self.get_dt()
         dthata = self.calc_dthata(self.drone.navdata.get(0, dict()).get('psi', 0))
         if self.correct_psi & (math.fabs(dthata) > 20):
                 dthata = 0
                 self.correct_psi = False
         data = self.calc_distance(self.drone.navdata.get(0, dict()).get('vx', 0), dt), dthata, dt
+        self.update_commands()
                 
         if(self.log):
                 self.out.write("%f %f %f\n" % data)
         return data
-		
+    
+    def update_commands(self):
+        """
+        Update the command list
+        """
+        # Move command
+        if self.cmd[2] < 0 & self.moving:
+            self.cmd[2] = 0
+            self.moving = False
+
+        # Turn command
+        if self.cmd[0] == 0:
+            if self.cmd[1] < 0:
+                self.cmd[1] = 0
+                self.turning = False
+        elif self.cmd[0] == 1:
+            if self.cmd[1] > 0:
+                self.cmd[1] = 0
+                self.turning = False
+
     def move(self, dxy):
         """
         Set the distance to move forward
         """
-        self.moving = True
-        self.distance = dxy
-	
+        if dxy < 0:
+            self.cmd[2] = 0
+        else:
+            self.cmd[2] = dxy
+            self.moving = True
+
     def turn(self, dtheta):
         """
         Set the turn angle
         """
+        if dtheta < 0:
+            self.cmd[0] = 1
+        elif dtheta > 0:
+            self.cmd[0] = 0
+        self.cmd[1] = dtheta
         self.turning = True
-        self.angle = dtheta
-        
+
     def initialize(self):
         """
         Let the drone fly
         """
         print "Take off"
         self.drone.takeoff()
-	    print "Drone in air!"
+        print "Drone in air!"
 
     def shutdown(self):
         """
@@ -141,5 +156,3 @@ class Drone(Vehicle):
         self.cam.release()
         self.drone.halt()
         print "Drone shutted down."
-        
-
