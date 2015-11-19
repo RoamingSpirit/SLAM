@@ -57,8 +57,8 @@ class Drone(Vehicle):
         Calculate distance since last frame
         """
         dx = vx*dt
-        if moving:
-            distance -= dx
+        if self.moving:
+            self.distance -= dx
         return dx
 
     def calc_dthata(self, thata):
@@ -71,8 +71,8 @@ class Drone(Vehicle):
         elif dthata < -180:
             dthata = dthata + 360
         self.last_thata = thata
-        if turning:
-            angle -= dthata
+        if self.turning:
+            self.angle -= dthata
         return dthata
 
     def getOdometry(self):
@@ -128,7 +128,7 @@ class Drone(Vehicle):
         """
         print "Take off"
         self.drone.takeoff()
-	print "Drone in air!"
+	    print "Drone in air!"
 
     def shutdown(self):
         """
