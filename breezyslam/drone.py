@@ -18,7 +18,7 @@ class Drone(Vehicle):
     Class representing a connection to the ARDrone,
     controls it and receive navdata information
     """
-    DRONE_SPEED = 0.2
+    DRONE_SPEED = 0.1
     
     correct_psi = True
     in_air = False
