@@ -19,6 +19,7 @@ class Drone(Vehicle):
     controls it and receive navdata information
     """
     DRONE_SPEED = 0.2
+    
     correct_psi = True
     in_air = False
     moving = False
@@ -57,7 +58,7 @@ class Drone(Vehicle):
         """
         dx = vx*dt
         if self.moving:
-            self.distance -= dx
+            self.cmd[2] -= dx
         return dx
 
     def calc_dthata(self, thata):
@@ -72,7 +73,7 @@ class Drone(Vehicle):
         self.last_thata = thata
         
         if self.turning:
-            self.angle -= dthata
+            self.cmd[1] -= dthata
         return dthata
 
     def getOdometry(self):
@@ -82,10 +83,16 @@ class Drone(Vehicle):
         """
         # Move the drone
         if self.moving or self.turning:
-            if cmd[0] == 0:
-                self.drone.move(0, -self.DRONE_SPEED, 0, self.DRONE_SPEED)
-            elif cmd[0] == 1:
-                self.drone.move(0, -self.DRONE_SPEED, 0, -self.DRONE_SPEED)
+            vx = 0
+            va = 0
+            if self.turning:
+                if cmd[0] == 0:
+                    va = self.DRONE_SPEED
+                elif cmd[0] == 1:
+                    va = -self.DRONE_SPEED
+            if self.moving:
+                vx = -self.DRONE_SPEED
+            self.drone.move(0, vx, 0, va)
         else:
             self.drone.hover()
 
@@ -149,6 +156,8 @@ class Drone(Vehicle):
         """
         print "Take off"
         self.drone.takeoff()
+        # TODO: Requesting drone state -> 'hover'
+        self.in_air = True
         print "Drone in air!"
 
     def shutdown(self):
@@ -159,6 +168,7 @@ class Drone(Vehicle):
         self.drone.land()
         self.moving = False
         self.turning = False
+        self.in_air = False
         self.cam.release()
         self.drone.halt()
         print "Drone shutted down."
