@@ -136,16 +136,10 @@ class Drone(Vehicle):
         """
         print "Shutting down..."
         self.drone.land()
-		self.move = False
-		self.turn = False
+	self.move = False
+	self.turn = False
         self.cam.release()
         self.drone.halt()
         print "Drone shutted down."
-
-    def move(self, dxy):
-        print "move by %f mm" %dxy
-
-    def turn(self, dtheta):
-        print "turn by %f degrees (clockwise)" %dtheta
         
 
