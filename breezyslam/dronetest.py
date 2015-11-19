@@ -5,6 +5,7 @@ import time
 try:
     drone = Drone()
     drone.initialize()
+    time.sleep(5)
     drone.turn(90)
     time.sleep(2)
     drone.turn(-90)

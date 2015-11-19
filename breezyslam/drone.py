@@ -128,7 +128,7 @@ class Drone(Vehicle):
         """
         print "Take off"
         self.drone.takeoff()
-	    print "Drone in air!"
+	print "Drone in air!"
 
     def shutdown(self):
         """
