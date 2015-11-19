@@ -18,9 +18,9 @@ class XTION(Laser):
     viewangle = 58 #asus xtion view in degrees
     linecount = 7 #lines above and below to generate average (0=online desired line)
     distance_no_detection_mm = 10000 # value used if sensor detects 0
-    scan_rate_hz = 1 #todo find value
-    detectionMargin = 5 #pixels on the sites of the scans which should be ignored
-    offsetMillimeters = 0 #offset of the sensor to the center of the robot
+    scan_rate_hz = 10 #todo find value
+    detectionMargin = 0 #pixels on the sites of the scans which should be ignored
+    offsetMillimeters = 50 #offset of the sensor to the center of the robot
     
     '''
     A class for the Asus XTION

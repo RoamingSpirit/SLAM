@@ -54,21 +54,19 @@ from time import time
 import cv2
 import sys, termios, atexit
 from select import select
+import math
 
 
 #wait for client for image stream
 stream = True
 #read form log file or use sensor
-readlog = True
-
-use_odometry = False 
+readlog = False
+use_odometry = True 
 
 # Map size, scale
 MAP_SIZE_PIXELS          =  1000
 MAP_SIZE_METERS          =  30
-seed = 9999 #whit is this used for?
-
-iterations = 600 #how many scans to make
+seed = 0 
 
 
 #for keyboard interrupt
@@ -81,7 +79,17 @@ new_term[3] = (new_term[3] & ~termios.ICANON & ~termios.ECHO)
 
 
 def main():
-   
+
+    filename ='map_'
+    if(use_odometry):
+        filename += 'withodometry_'
+    if(readlog):
+        filename += 'fromlog_'
+    if(seed==0):
+        filename += 'deterministic'
+    else:
+        filename += ('rmhc_seed' + str(seed))
+    
     #initialize the asus xtion as sensor
     if(readlog):
         sensor = FileXTION("log")
@@ -93,7 +101,7 @@ def main():
         if(readlog):
             robot = FileDrone("odometry")
         else:
-            robot = Drone()#todo initialize a vehicler
+            robot = Drone()
             robot.initialize()
             
     # Create a CoreSLAM object with laser params and optional robot object
@@ -117,12 +125,16 @@ def main():
     
     scanno = 0
 
+    dist = 0
+    zeit = 0
     
     while(True):
         scanno+=1
         if use_odometry:
             velocities = robot.getOdometry()
-            #out.write(str(velocities[0]) + " " + str(velocities[1]) + " "+ str(velocities[2]) +"\n" )
+            dist += velocities[0]
+            zeit += velocities[2]
+           
             scan = sensor.scan()
             if(len(scan)<=0):
                 print 'Reader error or end of file.'
@@ -154,14 +166,15 @@ def main():
         robot.shutdown()
     elapsed_sec = time() - start_sec
     print('\n%d scans in %f sec = %f scans / sec' % (scanno, elapsed_sec, scanno/elapsed_sec))
-                    
+
+    print ('dist traveled:%f mm in %fs' % (dist, zeit))         
                                 
     mapbytes = createMap(slam, trajectory)
 
            
-    # Save map and trajectory as PGM file    
-    pgm_save('test.pgm', mapbytes, (MAP_SIZE_PIXELS, MAP_SIZE_PIXELS))
-    image = cv2.imread("test.pgm", 0)
+    # Save map and trajectory as PGM file
+    pgm_save(filename, mapbytes, (MAP_SIZE_PIXELS, MAP_SIZE_PIXELS))
+    image = cv2.imread(filename, 0)
     print"Accessing the image.. again. So dirty."
     print"Saving as .png: ..."
     cv2.imwrite("test.png", image)
