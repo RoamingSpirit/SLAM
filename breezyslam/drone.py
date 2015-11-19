@@ -77,11 +77,15 @@ class Drone(Vehicle):
 
     def getOdometry(self):
         """
-        Return a tuple of odometry (dxy in mm,dthata in degree, dt in s)
+        Return a tuple of odometry (dxy in mm,dthata in degree, dt in s) and
+        send move commands to the drone
         """
         # Move the drone
         if self.moving or self.turning:
-            self.drone.move(0, self.DRONE_SPEED, 0, self.DRONE_SPEED)
+            if cmd[0] == 0:
+                self.drone.move(0, -self.DRONE_SPEED, 0, self.DRONE_SPEED)
+            elif cmd[0] == 1:
+                self.drone.move(0, -self.DRONE_SPEED, 0, -self.DRONE_SPEED)
         else:
             self.drone.hover()
 
