@@ -13,13 +13,13 @@ import time
 import math
 from vehicle import Vehicle
 
+DRONE_SPEED = 0.1
+
 class Drone():
     """
     Class representing a connection to the ARDrone,
     controls it and receive navdata information
-    """
-    DRONE_SPEED = 0.1
-    
+    """    
     correct_psi = True
     in_air = False
     moving = False
@@ -87,11 +87,11 @@ class Drone():
             va = 0
             if self.turning:
                 if self.cmd[0] == 0:
-                    va = self.DRONE_SPEED
+                    va = DRONE_SPEED
                 elif self.cmd[0] == 1:
-                    va = -self.DRONE_SPEED
+                    va = -DRONE_SPEED
             if self.moving:
-                vx = -self.DRONE_SPEED
+                vx = -DRONE_SPEED
             self.drone.move(0, vx, 0, va)
         else:
             self.drone.hover()
