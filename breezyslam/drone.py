@@ -13,7 +13,7 @@ import time
 import math
 from vehicle import Vehicle
 
-class Drone(Vehicle):
+class Drone():
     """
     Class representing a connection to the ARDrone,
     controls it and receive navdata information
@@ -72,7 +72,7 @@ class Drone(Vehicle):
             dthata = dthata + 360
         self.last_thata = thata
         
-        if self.turning:
+        if self.turning & self.correct_psi == False:
             self.cmd[1] -= dthata
         return dthata
 
@@ -86,9 +86,10 @@ class Drone(Vehicle):
             vx = 0
             va = 0
             if self.turning:
-                if cmd[0] == 0:
+	    	print self.cmd[1]
+                if self.cmd[0] == 0:
                     va = self.DRONE_SPEED
-                elif cmd[0] == 1:
+                elif self.cmd[0] == 1:
                     va = -self.DRONE_SPEED
             if self.moving:
                 vx = -self.DRONE_SPEED
