@@ -86,7 +86,6 @@ class Drone():
             vx = 0
             va = 0
             if self.turning:
-	    	print self.cmd[1]
                 if self.cmd[0] == 0:
                     va = self.DRONE_SPEED
                 elif self.cmd[0] == 1:
@@ -157,8 +156,13 @@ class Drone():
         """
         print "Take off"
         self.drone.takeoff()
-        # TODO: Requesting drone state -> 'hover'
-        self.in_air = True
+        x = 0
+        while self.in_air == False:
+            if (self.drone.navdata.get(0, dict()).get('state', 0) == 4) or (x == 10):
+                self.in_air = True
+            x += 1
+            time.sleep(1)
+        # TODO: Requesting drone state -> 'hover'...Testing
         print "Drone in air!"
 
     def shutdown(self):
