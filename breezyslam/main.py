@@ -45,7 +45,7 @@ from filedrone import FileDrone
 
 from drone import Drone
                 
-from breezyslam.algorithms import Deterministic_SLAM, RMHC_SLAM
+from breezyslam.algorithms import Deterministic_SLAM,  RMHC_SLAM
 
 from pgm_utils import pgm_save
 
@@ -58,15 +58,15 @@ import math
 
 
 #wait for client for image stream
-stream = True
+stream = False
 #read form log file or use sensor
 readlog = True
 use_odometry = True 
 
 # Map size, scale
 MAP_SIZE_PIXELS          =  1000
-MAP_SIZE_METERS          =  30
-seed = 0 
+MAP_SIZE_METERS          =  40
+seed = 9999 
 
 
 #for keyboard interrupt
@@ -102,7 +102,7 @@ def main():
             robot = FileDrone("odometry")
         else:
             robot = Drone()
-            robot.initialize()
+            #robot.initialize()
             
     # Create a CoreSLAM object with laser params and optional robot object
     slam = RMHC_SLAM(sensor, MAP_SIZE_PIXELS, MAP_SIZE_METERS, 100, 300, random_seed=seed) \

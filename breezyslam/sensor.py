@@ -17,8 +17,8 @@ class XTION(Laser):
 
     viewangle = 58 #asus xtion view in degrees
     linecount = 7 #lines above and below to generate average (0=online desired line)
-    distance_no_detection_mm = 10000 # value used if sensor detects 0
-    scan_rate_hz = 10 #todo find value
+    distance_no_detection_mm = 6000 # max detection range
+    scan_rate_hz = 23 #todo find value
     detectionMargin = 0 #pixels on the sites of the scans which should be ignored
     offsetMillimeters = 50 #offset of the sensor to the center of the robot
     
@@ -151,7 +151,10 @@ class FileXTION(XTION):
             toks = s.split()[0:-1] # ignore ''
                             
             lidar = [int(tok) for tok in toks[:]]
-            
+
+            for x in range(0, len(lidar)):
+                if(lidar[x]>self.distance_no_detection_mm):
+                    lidar[x]=0
 
             scans.append(lidar)
             
