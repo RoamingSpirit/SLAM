@@ -4,7 +4,7 @@ import threading
 HOST = ""
 PORT = 8888
 
-class Odometry_Server(threading.Thread):
+class Server(threading.Thread):
 	
 	running = True
 	
@@ -22,6 +22,12 @@ class Odometry_Server(threading.Thread):
 			msg = self.connection.recv(1024)
 			if msg == "odometry":
 				self.connection.send("0.1,1,1")
+			elif msg == "move":
+				dx = self.connection.recv(1024)
+				print dx
+			elif msg == "turn":
+				dthata = self.connection.recv(1024)
+				print dthata
            
 	def setup(self):
 		'''
@@ -61,5 +67,5 @@ class Odometry_Server(threading.Thread):
 		self.socket.close()
 
 if __name__ == '__main__':
-	server = Odometry_Server()
+	server = Server()
 

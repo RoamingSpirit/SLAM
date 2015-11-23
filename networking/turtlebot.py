@@ -3,7 +3,7 @@ import socket
 HOST = ""
 PORT = 8888
 
-class Odometry_Client():
+class Turtlebot():
 
 	def __init__(self):
 		"""
@@ -13,17 +13,27 @@ class Odometry_Client():
 		self.socket.connect((HOST, PORT))
 		print "Connected."
 		
-	def get_odometry(self):
+	def getOdometry(self):
 		self.socket.send("odometry")
 		data = self.socket.recv(1024)
 		tuple = data.split(",", 3)
 		return tuple
 	
 	def close(self):
-		self.socket.close()     
+		self.socket.close()
+		
+	def move(self, dx):
+		self.socket.send("move") 
+		self.socket.send(str(dx)) 
+		
+	def turn(self, dthata):
+		self.socket.send("turn") 
+		self.socket.send(str(dthata)) 
 
 if __name__ == '__main__':
-	socket = Odometry_Client()
-	print socket.get_odometry()
+	socket = Turtlebot()
+	print socket.getOdometry()
+	print socket.move(10)
+	print socket.turn(90)
 	socket.close()
 
