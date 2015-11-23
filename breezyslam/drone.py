@@ -57,8 +57,7 @@ class Drone(Vehicle):
         Calculate distance since last frame
         """
         dx = vx*dt
-        if self.moving:
-            self.cmd[2] -= dx
+        
         return dx
 
     def calc_dthata(self, thata):
@@ -102,7 +101,16 @@ class Drone(Vehicle):
         if self.correct_psi & (math.fabs(dthata) > 20):
                 dthata = 0
                 self.correct_psi = False
-        data = self.calc_distance(self.drone.navdata.get(0, dict()).get('vx', 0), dt), dthata, dt
+                
+        dx = self.calc_distance(self.drone.navdata.get(0, dict()).get('vx', 0), dt)
+        dy = self.calc_distance(self.drone.navdata.get(0, dict()).get('vy', 0), dt)
+        dxy = math.sqrt(dx*dx+dy*dy)
+        
+        if self.moving:
+            self.cmd[2] -= dxy
+            
+        data = dxy, dthata, dt
+        
         self.update_commands()
                 
         if(self.log):
