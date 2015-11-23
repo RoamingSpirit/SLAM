@@ -1,84 +1,86 @@
 import socket
-import threading
+from vehicle import Vehicle
 
 HOST = ""
 PORT = 8888
 
-class Server(threading.Thread):
-	
-	running = True
-	
-	def __init__(self):
-		threading.Thread.__init__(self)
-		self.start()
+class Server(Vehicle):
 
-	def run(self):
+	def getOdometry(self):
 		'''
-		Main loop
+		Request and receive odometry
 		'''
+		self.connection.send("odometry\n")
+		data = self.connection.recv(1024)
+		tuple = data.split(",", 3)
+		return tuple
+
+	def close(self):
+		'''
+		Close the connection.
+		'''
+		self.socket.close()
+
+	def move(self, dx):
+		'''
+		Move the TurtleBot by dx mm.
+		'''
+		self.connection.send("move,") 
+		self.connection.send(str(dx))
+		self.connection.send("\n")
+
+	def turn(self, dtheta):
+		'''
+		Turn the TurtleBot by dtheta degree.
+		'''
+		self.connection.send("turn,") 
+		self.connection.send(str(dtheta))
+		self.connection.send("\n")
+
+	def initialize(self):
+		'''
+		Iinitialize
+		'''          
 		self.setup()
+		print "Connected."
 		
-		msg = ""
-		while self.running:
-			while ";" not in msg:
-				msg += self.connection.recv(1024)
-			commands = msg.split(";")
-			if commands[len(commands)-1] == "":
-				for i in range(0, len(commands)-1):
-					detail = commands[i].split(",")
-					if detail[0] == "odometry":
-						# TODO: odometry command
-						self.connection.send("0.1,1,1") # Only testing!
-					elif detail[0] == "move":
-						# TODO: move command
-						dx = detail[1]
-						print "Move by: ", dx
-					elif detail[0] == "turn":
-						# TODO: turn command
-						dthata = detail[1]
-						print "Turn by: ", dthata
-				msg = ""
-			else:
-				msg = commands[len(commands)-1]
-				           
 	def setup(self):
 		'''
 		Setup a connection to a client on PORT.
 		'''
 		self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-		print "Socket created"
 		
 		# Bind socket to local host and port
 		try:
 			self.socket.bind((HOST, PORT))
 		except socket.error as msg:
 			print "Bind failed. Error Code : " + str(msg[0]) + " Message " + msg[1]
-			self.running = False
+		# Start listening on socket
+		self.socket.listen(1)
+		
+		# Connect to the client
+		try:
+			self.connection, addr = self.socket.accept()
+			print "Connected with " + addr[0] + ":" + str(addr[1])
+		except socket.error, e:
+			self.close()
+			print "Socket closed"
 			
-		if self.running:     
-			print "Socket bind complete"
-			
-			# Start listening on socket
-			self.socket.listen(1)
-			print "Socket now listening"
-			
-			# Connect to the client
-			try:
-				self.connection, addr = self.socket.accept()
-				print "Connected with " + addr[0] + ":" + str(addr[1])
-			except socket.error, e:
-				self.close()
-				print "Socket closed"
-				
-	def close(self):
+	def shutdown(self):
 		'''
-		Close the connection and stop the running thread.
+		Close connection
 		'''
-		self.running = False
+		self.connection.send("close\n")
+		self.connection.close()
 		self.socket.shutdown(socket.SHUT_RDWR)
 		self.socket.close()
-		print "Socket closed"
+		print "Connection closed."
 
 if __name__ == '__main__':
-	server = Server()
+	client = Server()
+	client.initialize()
+	print client.getOdometry()
+	client.move(10)
+	client.turn(90)
+	client.shutdown()
 
