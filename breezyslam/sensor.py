@@ -16,10 +16,10 @@ import math
 class XTION(Laser):
 
     viewangle = 58 #asus xtion view in degrees
-    linecount = 7 #lines above and below to generate average (0=online desired line)
-    distance_no_detection_mm = 6000 # max detection range
+    linecount = 5 #lines above and below to generate average (0=online desired line)
+    distance_no_detection_mm = 3500 # max detection range
     scan_rate_hz = 23 #todo find value
-    detectionMargin = 0 #pixels on the sites of the scans which should be ignored
+    detectionMargin = 4 #pixels on the sites of the scans which should be ignored
     offsetMillimeters = 50 #offset of the sensor to the center of the robot
     
     '''
@@ -30,9 +30,11 @@ class XTION(Laser):
         if(log):
             self.out = open('log', 'w')
         self.reader = Reader()
-        self.width = self.reader.getHeight()
-        self.height = self.reader.getWidth()
+        self.width = self.reader.getWidth()
+        self.height = self.reader.getHeight()
+        
         self.row = self.height/2 #row to read
+        
         Laser.__init__(self, self.width, self.scan_rate_hz, self.viewangle, self.distance_no_detection_mm, self.detectionMargin, self.offsetMillimeters)
         
     
@@ -91,8 +93,8 @@ class XTION(Laser):
     def getAverageDepth (self, frame_data, width, height, x, y, distance):
         sum = 0;
         count = 0
-        for xTemp in range (-distance+x, distance+1+x):            
-            value = frame_data[y*width+xTemp]
+        for yTemp in range (-distance+y, distance+1+y):            
+            value = frame_data[yTemp*width+x]
             if(value>0):
                 sum += value
                 count += 1
