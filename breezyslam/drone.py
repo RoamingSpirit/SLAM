@@ -13,13 +13,13 @@ import time
 import math
 from vehicle import Vehicle
 
-class Drone(Vehicle):
+DRONE_SPEED = 0.1
+
+class Drone():
     """
     Class representing a connection to the ARDrone,
     controls it and receive navdata information
-    """
-    DRONE_SPEED = 0.1
-    
+    """    
     correct_psi = True
     in_air = False
     moving = False
@@ -71,7 +71,7 @@ class Drone(Vehicle):
             dthata = dthata + 360
         self.last_thata = thata
         
-        if self.turning:
+        if self.turning & self.correct_psi == False:
             self.cmd[1] -= dthata
         return dthata
 
@@ -85,12 +85,12 @@ class Drone(Vehicle):
             vx = 0
             va = 0
             if self.turning:
-                if cmd[0] == 0:
-                    va = self.DRONE_SPEED
-                elif cmd[0] == 1:
-                    va = -self.DRONE_SPEED
+                if self.cmd[0] == 0:
+                    va = DRONE_SPEED
+                elif self.cmd[0] == 1:
+                    va = -DRONE_SPEED
             if self.moving:
-                vx = -self.DRONE_SPEED
+                vx = -DRONE_SPEED
             self.drone.move(0, vx, 0, va)
         else:
             self.drone.hover()
@@ -164,8 +164,13 @@ class Drone(Vehicle):
         """
         print "Take off"
         self.drone.takeoff()
-        # TODO: Requesting drone state -> 'hover'
-        self.in_air = True
+        x = 0
+        while self.in_air == False:
+            if (self.drone.navdata.get(0, dict()).get('state', 0) == 4) or (x == 10):
+                self.in_air = True
+            x += 1
+            time.sleep(1)
+        # TODO: Requesting drone state -> 'hover'...Testing
         print "Drone in air!"
 
     def shutdown(self):
