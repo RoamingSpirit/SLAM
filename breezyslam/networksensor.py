@@ -2,7 +2,7 @@ import socket
 from vehicle import Vehicle
 
 HOST = ""
-PORT = 9999
+PORT = 9001
 
 class NetworkSensor():
 
@@ -57,9 +57,9 @@ class NetworkSensor():
             self.close()
             print "Socket closed"
 
-if __name__ == '__main__':
-    client = NetworkSensor()
-    client.initialize()
-    client.get_frame()
-    client.shutdown()
+#~ if __name__ == '__main__':
+    #~ client = NetworkSensor()
+    #~ client.initialize()
+    #~ client.get_frame()
+    #~ client.shutdown()
 
