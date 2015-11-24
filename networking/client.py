@@ -1,24 +1,25 @@
 import socket
 import threading
 from vehicle import Vehicle
+from turtlebot import Turtlebot
 
-HOST = ""
+HOST = '192.168.1.108'
 PORT = 8888
 
 class Client(threading.Thread):
 	
 	running = True
 	
-	def __init__(self):
+	def __init__(self, vehicle):
 		threading.Thread.__init__(self)
-		#self.robot = vehicle
+		self.robot = vehicle
 		self.start()
 
 	def run(self):
 		'''
 		Main loop
 		'''
-		self.socket = socket.socket()
+		self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		self.socket.connect((HOST, PORT))
 		
 		msg = ""
@@ -30,16 +31,15 @@ class Client(threading.Thread):
 			for i in range(0, len(commands)-1):
 				detail = commands[i].split(",")
 				if detail[0] == "initialize":
-					#self.robot.initialize()
+					self.robot.initialize()
 					print "Initialize."
 				elif detail[0] == "odometry":
-					#self.robot.getOdometry()
-					self.socket.send("0.1,1,1") # Only testing!
+					self.socket.send(str(self.robot.getOdometry())) # Only testing!
 				elif detail[0] == "move":
-					#self.robot.move(detail[1])
+					self.robot.move(float(detail[1]))
 					print "Move by: ", detail[1]
 				elif detail[0] == "turn":
-					#self.robot.move(detail[1])
+					self.robot.turn(-float(detail[1]))
 					print "Turn by: ", detail[1]
 				elif detail[0] == "close":
 					self.close()
@@ -53,10 +53,12 @@ class Client(threading.Thread):
 		Close the connection and stop the running thread.
 		'''
 		self.running = False
-		#self.robot.shutdown()
+		self.robot.shutdown()
 		self.socket.close()
 		print "Socket closed"
 
 if __name__ == '__main__':
-	client = Client()
+        testBot = Turtlebot()
+        client = Client(testBot)
+        
 
