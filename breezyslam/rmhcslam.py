@@ -60,8 +60,8 @@ class My_SLAM(RMHC_SLAM):
             print "Start ", start_position
             print "Slam ", slam_position
         
-        #fslam = 1.5/self.values*(self.values-self.errors)-0.5
-        fslam = float(self.values-self.errors)/self.values
+        fslam = 1.5/self.values*(self.values-self.errors)-0.5
+        #fslam = float(self.values-self.errors)/self.values
         if(fslam<0):
             fslam=0
         elif(fslam>1):
