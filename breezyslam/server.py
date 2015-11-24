@@ -61,7 +61,7 @@ class Server(threading.Thread):
             print 'Socket bind complete'
              
             #Start listening on socket
-            self.socket.listen(10)
+            self.socket.listen(1)
             print 'Socket now listening'
              
             #now keep talking with the client
@@ -82,4 +82,6 @@ class Server(threading.Thread):
     def close(self):
         self.running = False
         self.socket.shutdown(socket.SHUT_RDWR)
+        
         self.socket.close()
+        
