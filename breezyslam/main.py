@@ -62,7 +62,7 @@ import math
 stream = True
 #read form log file or use sensor
 readlog = True
-use_odometry = False 
+use_odometry = True 
 
 # Map size, scale
 MAP_SIZE_PIXELS          =  1000

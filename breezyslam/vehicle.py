@@ -8,7 +8,7 @@ import abc
 
 class Vehicle(object):
 
-    @abc.abstractmethod
+    abc.abstractmethod
     def getOdometry(self):
         """return a tuple of odometry (dxy in mm,dthata in degree, dt in s)"""
         return
@@ -24,11 +24,16 @@ class Vehicle(object):
         return
 
     @abc.abstractmethod
-    def move(self, dxy):
+    def move(self):
         """move by dxy milimeters"""
         return
 
     @abc.abstractmethod
-    def turn(self, dtheta):
+    def turnLeft(self):
+        """turn by dtheta degrees (clockwise)"""
+        return
+
+    @abc.abstractmethod
+    def turnRight(self):
         """turn by dtheta degrees (clockwise)"""
         return
