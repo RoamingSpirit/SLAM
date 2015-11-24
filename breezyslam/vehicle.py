@@ -24,16 +24,6 @@ class Vehicle(object):
         return
 
     @abc.abstractmethod
-    def move(self):
+    def move(self, cmd):
         """move by dxy milimeters"""
-        return
-
-    @abc.abstractmethod
-    def turnLeft(self):
-        """turn by dtheta degrees (clockwise)"""
-        return
-
-    @abc.abstractmethod
-    def turnRight(self):
-        """turn by dtheta degrees (clockwise)"""
         return

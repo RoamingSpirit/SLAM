@@ -4,7 +4,19 @@ from vehicle import Vehicle
 HOST = ""
 PORT = 8888
 
-class Server(Vehicle):
+MOVE_FORWARD = 2
+TURN_RIGHT = 3
+TURN_LEFT = 4
+
+class NetworkVehicle(Vehicle):
+	
+	def move(self, cmd):
+		if cmd == MOVE_FORWARD:
+			self.connection.send(str(MOVE_FORWARD))
+		elif cmd == TURN_RIGHT:
+			self.connection.send(str(TURN_RIGHT))
+		elif cmd == TURN_LEFT:
+			self.connection.send(str(TURN_LEFT))
 
 	def getOdometry(self):
 		'''
@@ -15,34 +27,23 @@ class Server(Vehicle):
 		tuple = data.split(",", 3)
 		return tuple
 
-	def close(self):
-		'''
-		Close the connection.
-		'''
-		self.socket.close()
-
-	def move(self, dx):
-		'''
-		Move the TurtleBot by dx mm.
-		'''
-		self.connection.send("move,") 
-		self.connection.send(str(dx))
-		self.connection.send("\n")
-
-	def turn(self, dtheta):
-		'''
-		Turn the TurtleBot by dtheta degree.
-		'''
-		self.connection.send("turn,") 
-		self.connection.send(str(dtheta))
-		self.connection.send("\n")
-
 	def initialize(self):
 		'''
 		Iinitialize
 		'''          
 		self.setup()
+		#self.connection.send("0")
 		print "Connected."
+			
+	def shutdown(self):
+		'''
+		Close connection
+		'''
+		self.connection.send("1")
+		self.connection.close()
+		self.socket.shutdown(socket.SHUT_RDWR)
+		self.socket.close()
+		print "Connection closed."
 		
 	def setup(self):
 		'''
@@ -65,22 +66,11 @@ class Server(Vehicle):
 		except socket.error, e:
 			self.close()
 			print "Socket closed"
-			
-	def shutdown(self):
-		'''
-		Close connection
-		'''
-		self.connection.send("close\n")
-		self.connection.close()
-		self.socket.shutdown(socket.SHUT_RDWR)
-		self.socket.close()
-		print "Connection closed."
 
 if __name__ == '__main__':
-	client = Server()
+	client = NetworkVehicle()
 	client.initialize()
-	print client.getOdometry()
-	client.move(10)
-	client.turn(90)
+	client.move(MOVE_FORWARD)
+	client.move(TURN_LEFT)
 	client.shutdown()
 
