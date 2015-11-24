@@ -1,7 +1,6 @@
 import socket
 import threading
-from vehicle import Vehicle
-#from turtlebot import Turtlebot
+from drone import Drone
 
 HOST = ""
 PORT = 8888
@@ -10,10 +9,9 @@ class TurtleClient(threading.Thread):
 
     running = True
 
-    def __init__(self, vehicle, host = ""):
+    def __init__(self, host = ""):
         threading.Thread.__init__(self)
         HOST = host
-        self.robot = vehicle
         self.start()
 
     def run(self):
@@ -30,23 +28,24 @@ class TurtleClient(threading.Thread):
             else:
                 print msg
             if msg == "0":
-                #self.robot.initialize()
+                self.drone = Drone()
                 print "Initialize"
+                self.drone.initialize()
             elif msg == "1":
-                #self.robot.shutdown()
+                self.drone.shutdown()
                 self.close()
             elif msg == "2":
-                #self.robot.move()
-                #self.sock.send(self.robot.getOdometry()
                 print "Move forward"
+                self.drone.move(msg)
+                self.socket.send(self.drone.getOdometry())
             elif msg == "3":
-                #self.robot.turn(1)
-                #self.sock.send(self.robot.getOdometry()
                 print "Turn right"
+                self.drone.move(msg)
+                self.socket.send(self.robot.getOdometry())
             elif msg == "4":
-                #self.robot.turn(-1)
-                #self.sock.send(self.robot.getOdometry()
                 print "Turn left"
+                self.drone.move(msg)
+                self.socket.send(self.robot.getOdometry())
                 
     def close(self):
         '''
@@ -58,8 +57,6 @@ class TurtleClient(threading.Thread):
         print "Socket closed"
 
 if __name__ == '__main__':
-    testBot = Vehicle()
-    #testBot = Turtlebot()
     client = TurtleClient(testBot)
-        
+    
 
