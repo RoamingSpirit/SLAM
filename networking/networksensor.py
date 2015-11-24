@@ -2,34 +2,20 @@ import socket
 from vehicle import Vehicle
 
 HOST = ""
-PORT = 8888
+PORT = 9999
 
-MOVE_FORWARD = 2
-TURN_RIGHT = 3
-TURN_LEFT = 4
+class NetworkSensor():
 
-class NetworkVehicle(Vehicle):
-
-    odometry = [0.0, 0.0]
-
-    def move(self, cmd):
+    def get_frame(self):
         '''
-        Send steering commands to the robot client.
+        Request a new frame.
         '''
-        if cmd == MOVE_FORWARD:
-            self.connection.send(str(MOVE_FORWARD))
-        elif cmd == TURN_RIGHT:
-            self.connection.send(str(TURN_RIGHT))
-        elif cmd == TURN_LEFT:
-            self.connection.send(str(TURN_LEFT))
-        #data = self.connection.recv(1024)
-        #self.odometry = data.split(",", 2)
-
-    def getOdometry(self):
-        '''
-        Request and receive odometry
-        '''
-        return self.odometry
+        self.connection.send("2")
+        msg = ""
+        #~ while "\n" not in msg:
+            #~ msg += self.connection.recv(1024)
+        #~ frame = msg.split("\n")
+        #~ return frame[0]
 
     def initialize(self):
         '''
@@ -72,9 +58,8 @@ class NetworkVehicle(Vehicle):
             print "Socket closed"
 
 if __name__ == '__main__':
-    client = NetworkVehicle()
+    client = NetworkSensor()
     client.initialize()
-    client.move(MOVE_FORWARD)
-    client.move(TURN_LEFT)
+    client.get_frame()
     client.shutdown()
 
