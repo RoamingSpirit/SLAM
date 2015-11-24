@@ -15,7 +15,7 @@ _DEFAULT_SIGMA_XY_MM         = 100
 _DEFAULT_SIGMA_THETA_DEGREES = 20
 _DEFAULT_MAX_SEARCH_ITER     = 1000
 
-max_turn_speed = 10
+
 
 class My_SLAM(RMHC_SLAM):
     
@@ -26,7 +26,7 @@ class My_SLAM(RMHC_SLAM):
         
 
        
-        self.myfilter = Myfilter()
+        self.myfilter = MyFilter()
         
         RMHC_SLAM.__init__(self, laser, map_size_pixels, map_size_meters, 
                 map_quality, hole_width_mm,
@@ -34,28 +34,20 @@ class My_SLAM(RMHC_SLAM):
                 max_search_iter)
             
        
-    def update(self, scan_mm, velocities=None, command=0):
+    def update(self, scan_mm, velocities=None, command =0):
         errors=0
         self.values = len(scan_mm)
         for x in range(0, len(scan_mm)):
             if(scan_mm[x]==0):
                 errors +=1
         self.error = float(errors)/len(scan_mm)
-        self.velocities = velocities
+        self.time = velocities[2]
         self.command=command
         RMHC_SLAM.update(self, scan_mm, velocities)    
     
     def _getNewPosition(self, start_position):   
         # RMHC search is implemented as a C extension for efficiency
         slam_position = RMHC_SLAM._getNewPosition(self, start_position)
-
-        return filter.filter(slam_position, start_position, self.error, velocities[2], self.command)
-        #filter 
-        if(self.velocities == None):
-            return slam_position
-
-        #Filter here
         
-        
-        return self.myfilter(slam_position, start_position, self.error, velocities[2], self.commandself)
+        return self.myfilter(slam_position, start_position, self.error, self.time, self.command)
                              
