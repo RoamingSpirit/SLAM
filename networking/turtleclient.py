@@ -3,16 +3,16 @@ import threading
 from vehicle import Vehicle
 #from turtlebot import Turtlebot
 
-#HOST = '192.168.1.108'
 HOST = ""
 PORT = 8888
 
-class Client(threading.Thread):
+class TurtleClient(threading.Thread):
 	
 	running = True
 	
-	def __init__(self, vehicle):
+	def __init__(self, vehicle, host = ""):
 		threading.Thread.__init__(self)
+		HOST = host
 		self.robot = vehicle
 		self.start()
 
@@ -25,20 +25,27 @@ class Client(threading.Thread):
 		
 		while self.running:
 			msg = self.socket.recv(1)
-
+			if msg == "":
+				pass
+			else:
+				print msg
 			if msg == "0":
 				#self.robot.initialize()
 				print "Initialize"
 			elif msg == "1":
+				#self.robot.shutdown()
 				self.close()
 			elif msg == "2":
 				#self.robot.move()
+				#self.sock.send(self.robot.getOdometry()
 				print "Move forward"
 			elif msg == "3":
 				#self.robot.turn(1)
+				#self.sock.send(self.robot.getOdometry()
 				print "Turn right"
 			elif msg == "4":
 				#self.robot.turn(-1)
+				#self.sock.send(self.robot.getOdometry()
 				print "Turn left"
 				
 	def close(self):
@@ -52,6 +59,7 @@ class Client(threading.Thread):
 
 if __name__ == '__main__':
         testBot = Vehicle()
-        client = Client(testBot)
+        #testBot = Turtlebot()
+        client = TurtleClient(testBot)
         
 
