@@ -41,11 +41,11 @@ class TurtleClient(threading.Thread):
             elif msg == "3":
                 print "Turn right"
                 self.drone.move(msg)
-                self.socket.send(self.robot.getOdometry())
+                self.socket.send(self.drone.getOdometry())
             elif msg == "4":
                 print "Turn left"
                 self.drone.move(msg)
-                self.socket.send(self.robot.getOdometry())
+                self.socket.send(self.drone.getOdometry())
                 
     def close(self):
         '''

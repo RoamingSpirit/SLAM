@@ -44,6 +44,7 @@ from filedrone import FileDrone
 
 
 from drone import Drone
+from networkvehicle import NetworkVehicle
                 
 from breezyslam.algorithms import Deterministic_SLAM,RMHC_SLAM
 from rmhcslam import My_SLAM
@@ -61,7 +62,7 @@ import math
 #wait for client for image stream
 stream = True
 #read form log file or use sensor
-readlog = True
+readlog = False
 use_odometry = True 
 
 # Map size, scale
@@ -81,6 +82,8 @@ new_term[3] = (new_term[3] & ~termios.ICANON & ~termios.ECHO)
 
 def main():
 
+    
+
     filename ='map_'
     if(use_odometry):
         filename += 'withodometry_'
@@ -97,13 +100,7 @@ def main():
     else:
         sensor = XTION()
 
-    #initialiye robot
-    if(use_odometry):
-        if(readlog):
-            robot = FileDrone("odometry")
-        else:
-            robot = Drone()
-            #robot.initialize()
+    
             
     # Create a CoreSLAM object with laser params and optional robot object
     slam = My_SLAM(sensor, MAP_SIZE_PIXELS, MAP_SIZE_METERS, 100, 300, random_seed=seed) \
@@ -113,6 +110,15 @@ def main():
     if(stream):
         server = Server(slam, MAP_SIZE_PIXELS)
         server.start()
+
+    #initialiye robot
+    if(use_odometry):
+        if(readlog):
+            robot = FileDrone("odometry")
+        else:
+            robot = NetworkVehicle()#Drone()
+            robot.initialize()
+
     
     # Start with an empty trajectory of positions
     trajectory = []
@@ -132,7 +138,9 @@ def main():
     while(True):
         scanno+=1
         if use_odometry:
+            robot.move(2)
             velocities = robot.getOdometry()
+            print velocities
             dist += velocities[0]
             zeit += velocities[2]
            

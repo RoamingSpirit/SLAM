@@ -10,20 +10,17 @@ TURN_LEFT = 4
 
 class NetworkVehicle(Vehicle):
 
-    odometry = [0.0, 0.0]
+    odometry = [0.0, 0.0, 0.0]
 
     def move(self, cmd):
         '''
         Send steering commands to the robot client.
         '''
-        if cmd == MOVE_FORWARD:
-            self.connection.send(str(MOVE_FORWARD))
-        elif cmd == TURN_RIGHT:
-            self.connection.send(str(TURN_RIGHT))
-        elif cmd == TURN_LEFT:
-            self.connection.send(str(TURN_LEFT))
+        self.connection.send(str(cmd))
         data = self.connection.recv(1024)
-        self.odometry = data.split(",", 2)
+        toks = data.split(",", 3)
+        self.odometry = [float(tok) for tok in toks[:]]
+        return self.odometry
 
     def getOdometry(self):
         '''

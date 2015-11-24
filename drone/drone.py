@@ -76,8 +76,8 @@ class Drone():
         send move commands to the drone
         '''
         # Move the drone
-        if in_air & (not TESTING):
-            if cmd == 2:
+        if self.in_air & (not TESTING):
+            if self.cmd == 2:
                 self.drone.move(0, -DRONE_SPEED, 0, 0)
             elif self.cmd == 3:
                 self.drone.move(0, 0, 0, DRONE_SPEED)
@@ -103,7 +103,7 @@ class Drone():
         if(self.log):
             self.out.write("%f %f %f\n" % data)
 
-        return data
+        return "%f,%f,%f" % data
 
     def move(self, cmd):
         '''
