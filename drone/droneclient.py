@@ -3,7 +3,7 @@ import threading
 from drone import Drone
 
 HOST = ""
-PORT = 8888
+PORT = 9000
 
 class TurtleClient(threading.Thread):
 
@@ -57,6 +57,6 @@ class TurtleClient(threading.Thread):
         print "Socket closed"
 
 if __name__ == '__main__':
-    client = TurtleClient(testBot)
+    client = TurtleClient()
     
 
