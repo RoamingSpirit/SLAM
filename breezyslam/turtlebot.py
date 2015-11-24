@@ -18,9 +18,14 @@ class Turtlebot(Vehicle, ros_turtlebot.ROSTurtlebot):
         self._past_x = None
         self._past_y = None
         self._past_theta = None
+
         self._d_theta = None
         self._d_traveled = None
 	self._start = True
+
+	self._diffx = None
+	self._diffy = None
+	self._difftheta = None
         self._time = time.time()
         self.initialize()
 
@@ -44,19 +49,20 @@ class Turtlebot(Vehicle, ros_turtlebot.ROSTurtlebot):
         This will run the serial commands to send the odom data. the _getOdomROS function will calculate
         and store the difference between the last time it was called and now.
 
-        :return: Will return nothing, instead published to the serial port.
+        :return: (dxy in mm, dtheta in degrees, time difference)
         """
 	if self._start:
 		dxy = math.sqrt((self._past_x)**2+(self._past_y)**2)
 		dtheta = self._past_theta
 	else:
-		dxy = math.sqrt((getOdometry.x - self._past_x)**2 + (getOdometry.y - self._past_y)**2)
-		dtheta = getOdometry.theta - self._past_theta
+		dxy = math.sqrt((self._diffx - self._past_x)**2 + (self._diffy - self._past_y)**2)
+		dtheta = self._difftheta - self._past_theta
 	
-	response = (dxy,dtheta,time.time() - self._time)
-	self.getOdometry.x = self._past_x
-	self.getOdometry.y = self._past_y
-	self.getOdometry.theta = self._past_theta
+	response = (dxy*1000,dtheta,time.time() - self._time)
+	
+	self._diffx = self._past_x
+	self._diffy = self._past_y
+	self._difftheta = self._past_theta
         self._time = time.time()
         return response
     
@@ -66,8 +72,8 @@ class Turtlebot(Vehicle, ros_turtlebot.ROSTurtlebot):
         return
 
     def move(self, dxy):
-        """move by dxy milimeters"""
-        self._driveStraight(0.5, dxy/100)
+        """move by dxy Millimeters"""
+        self._driveStraight(0.5, dxy/1000)
 
 
     def turn(self, dtheta):
