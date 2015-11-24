@@ -2,7 +2,7 @@
 
 
 from breezyslam.algorithms import RMHC_SLAM
-from myfilter import MyFilter
+from Filters.myfilter import MyFilter
 import math
 
 
