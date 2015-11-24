@@ -38,12 +38,17 @@ class My_SLAM(RMHC_SLAM):
         for x in range(0, len(scan_mm)):
             if(scan_mm[x]==0):
                 self.errors +=1
+        self.velocities = velocities
         RMHC_SLAM.update(self, scan_mm, velocities)    
     
     def _getNewPosition(self, start_position):   
         # RMHC search is implemented as a C extension for efficiency
         slam_position = RMHC_SLAM._getNewPosition(self, start_position)
 
+        if(self.velocities == None):
+            return slam_position
+
+        #Filter here
         distx = slam_position.x_mm - start_position.x_mm
         disty = slam_position.y_mm - start_position.y_mm
 
