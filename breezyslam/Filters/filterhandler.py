@@ -9,13 +9,16 @@ class FilterHandler(FilterInterface):
         self.thetaFilter = thetaFilter
         self.dataFilter = SensorFilter()
 
-    def __call__(slam_position, start_position, error, time, command):
-        z_position = dataFilter(slam_position, start_position, error, time, command)
+    def __call__(self, slam_position, start_position, error, time, command):
+        z_position = self.dataFilter(slam_position, start_position, error, time, command)
         est_position = z_position.copy()
+        if(time == 0): return est_position
+        
         if(self.xFilter != None):
-            est_position.x_mm = self.xFilter(...)
+            est_position.x_mm = self.xFilter(z_position.x_mm, time)
         if(self.yFilter != None):
-            est_position.y_mm = self.yFilter(...)
+            est_position.y_mm = self.yFilter(z_position.y_mm, time)
         if(self.thetaFilter != None):
-            est_position.tehta
+            est_position.theta_degrees = self.thetaFilter(z_position.theta_degrees, time)
+        
         return est_position
