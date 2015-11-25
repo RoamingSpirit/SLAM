@@ -7,6 +7,7 @@ PORT = 9000
 MOVE_FORWARD = 2
 TURN_RIGHT = 3
 TURN_LEFT = 4
+STAGNATE = 5
 
 class NetworkVehicle(Vehicle):
 
@@ -26,7 +27,7 @@ class NetworkVehicle(Vehicle):
         '''
         Request and receive odometry
         '''
-        return self.odometry
+        return self.move(STAGNATE)
 
     def initialize(self):
         '''
@@ -34,6 +35,9 @@ class NetworkVehicle(Vehicle):
         '''          
         self.setup()
         self.connection.send("0")
+        msg = self.connection.recv(1)
+        while "1" not in msg:
+            msg = self.connection.recv(1)
         print "Connected."
             
     def shutdown(self):

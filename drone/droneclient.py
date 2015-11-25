@@ -1,11 +1,11 @@
 import socket
 import threading
-from drone import Drone
+#from drone import Drone
 
 HOST = ""
 PORT = 9000
 
-class TurtleClient(threading.Thread):
+class DroneClient(threading.Thread):
 
     running = True
 
@@ -31,6 +31,7 @@ class TurtleClient(threading.Thread):
                 self.drone = Drone()
                 print "Initialize"
                 self.drone.initialize()
+                self.socket.send("1")
             elif msg == "1":
                 self.drone.shutdown()
                 self.close()
@@ -46,17 +47,31 @@ class TurtleClient(threading.Thread):
                 print "Turn left"
                 self.drone.move(msg)
                 self.socket.send(self.drone.getOdometry())
+            elif msg == "4":
+                print "Stagnate"
+                self.socket.send(self.drone.getOdometry())
+                
+            if self.kbhit():
+                self.close()
                 
     def close(self):
         '''
         Close the connection and stop the running thread.
         '''
         self.running = False
-        self.robot.shutdown()
+        self.drone.shutdown()
         self.socket.close()
         print "Socket closed"
+        
+    def kbhit():
+        dr,dw,de = select([sys.stdin], [], [], 0)
+        return dr <> []
 
 if __name__ == '__main__':
-    client = TurtleClient()
+    try:
+        client = DroneClient()
+    except KeyboardInterrupt:
+        print 'Interrupted'
+        sys.exit(0)
     
 
