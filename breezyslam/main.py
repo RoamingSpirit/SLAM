@@ -116,7 +116,7 @@ def main():
         if(readlog):
             robot = FileDrone("odometry")
         else:
-            robot = NetworkVehicle()#Drone()
+            robot = Drone()
             robot.initialize()
 
     
@@ -138,9 +138,7 @@ def main():
     while(True):
         scanno+=1
         if use_odometry:
-            robot.move(2)
             velocities = robot.getOdometry()
-            print velocities
             dist += velocities[0]
             zeit += velocities[2]
            
