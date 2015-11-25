@@ -17,7 +17,7 @@ class NetworkVehicle(Vehicle):
         '''
         Send steering commands to the robot client.
         '''
-        self.connection.send(str(cmd))
+        self.connection.send(chr(cmd))
         data = self.connection.recv(1024)
         toks = data.split(",", 3)
         self.odometry = [float(tok) for tok in toks[:]]
@@ -32,11 +32,14 @@ class NetworkVehicle(Vehicle):
     def initialize(self):
         '''
         Iinitialize
-        '''          
-        self.setup()
-        self.connection.send("0")
+        '''
+        print "Try to bind socket.."          
+        while not self.setup():
+            pass
+        self.connection.send(chr(1))
+        print chr(1)
         msg = self.connection.recv(1)
-        while "1" not in msg:
+        while chr(1) not in msg:
             msg = self.connection.recv(1)
         print "Connected."
             
@@ -44,7 +47,7 @@ class NetworkVehicle(Vehicle):
         '''
         Close connection
         '''
-        self.connection.send("1")
+        self.connection.send(chr(1))
         self.connection.close()
         self.socket.shutdown(socket.SHUT_RDWR)
         self.socket.close()
@@ -60,22 +63,26 @@ class NetworkVehicle(Vehicle):
         try:
             self.socket.bind((HOST, PORT))
         except socket.error as msg:
-            print "Bind failed. Error Code : " + str(msg[0]) + " Message " + msg[1]
+            return False
+            
         # Start listening on socket
         self.socket.listen(1)
+        print "Wait for client.."
         
         # Connect to the client
         try:
             self.connection, addr = self.socket.accept()
             print "Connected with " + addr[0] + ":" + str(addr[1])
+            return True
         except socket.error, e:
             self.close()
-            print "Socket closed"
+            print "Socket closed."
+            return False
 
-#~ if __name__ == '__main__':
-    #~ client = NetworkVehicle()
-    #~ client.initialize()
-    #~ client.move(MOVE_FORWARD)
-    #~ client.move(TURN_LEFT)
-    #~ client.shutdown()
+if __name__ == '__main__':
+    client = NetworkVehicle()
+    client.initialize()
+    client.move(MOVE_FORWARD)
+    client.move(TURN_LEFT)
+    client.shutdown()
 
