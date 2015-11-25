@@ -30,10 +30,10 @@ class standardGH(FilterInterface):
             internal coefficients change over time. 
 
         """
-        self._xy = None
-        self._theta = None
-        self._dxy = None
-        self._dtheta = None
+        self._first = True
+        self._x_mm, self._y_mm, self._theta_degrees = None, None, None
+        self._dxy, self._dtheta = None, None
+        
         self._g = g
         self._h = h
         self._dt = None
@@ -46,6 +46,34 @@ class standardGH(FilterInterface):
     def _update(self, data, step):
         pass
 
+
+    def _fcall(self, slam_position, start_position, error, time, command):
+        """
+    	@Param: slam_position: Slam libraries next position, it is a position object from breezy slam
+    	@Param, start_position: Odometry current position, it is a position object from breezy slam
+    	@Param: error : float from 0 - 1 on how usefull the frame was. 0 == 0 error and 1 == all error
+    	@Param: time : Change in time since last call <float> 
+    	@Param: command : Not used so far
+
+    	Position class:
+    	<variable>.x_mm//.y_mm//.theta_degrees
+    	"""
+        slamX, slamY, slamTheta = slam_position.x_mm, slam_position.y_mm, slam_position.theta_degrees
+        startX, startY, startTheta = start_position.x_mm, start_position.y_mm, start_position.theta_degrees
+
+        diffX, diffY, diffTheta = abs(slamX-startX), abs(slamY-startY), abs(slamTheta-startTheta)
+
+        ## if the system is turning
+
+            
+    	## if the system is driving straight
+
+
+        ## if the system is stationary
+
+            
+            
+
     def __call__(self, slam_position, start_position, error, time, command):
     	"""
     	@Param: slam_position: Slam libraries next position, it is a position object from breezy slam
@@ -53,9 +81,25 @@ class standardGH(FilterInterface):
     	@Param: error : float from 0 - 1 on how usefull the frame was. 0 == 0 error and 1 == all error
     	@Param: time : Change in time since last call <float> 
     	@Param: command : Not used so far
+
+    	Position class:
+    	<variable>.x_mm//.y_mm//.theta_degrees
     	"""
-        self._predict()
-        self._update()
+        ## if it's the furst run...
+    	if self._first: return self._fcall(slam_position, start_position, error, time, command)
+
+        slamX, slamY, slamTheta = slam_position.x_mm, slam_position.y_mm, slam_position.theta_degrees
+        startX, startY, startTheta = start_position.x_mm, start_position.y_mm, start_position.theta_degrees
+
+        
+
+        ## if the system is stationary
+    	
+    	## if the system is turning
+
+    	## if the system is driving straight
+        
+    	
         
 
         
