@@ -1,7 +1,7 @@
 from filterinterface import FilterInterface
 import math
 
-class MyFilter(FilterInterface):
+class SensorFilter(FilterInterface):
         
     def __call__(self, slam_position, start_position, error, time, commandself):
         distx = slam_position.x_mm - start_position.x_mm
