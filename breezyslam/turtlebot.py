@@ -21,11 +21,11 @@ class Turtlebot(Vehicle, ros_turtlebot.ROSTurtlebot):
 
         self._d_theta = None
         self._d_traveled = None
-	self._start = True
+        self._start = True
 
-	self._diffx = None
-	self._diffy = None
-	self._difftheta = None
+        self._diffx = None
+        self._diffy = None
+        self._difftheta = None
         self._time = time.time()
         self.initialize()
 
