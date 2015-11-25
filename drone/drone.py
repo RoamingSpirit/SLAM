@@ -1,6 +1,6 @@
-# To change this license header, choose License Headers in Project Properties.
-# To change this template file, choose Tools | Templates
-# and open the template in the editor.
+'''
+Drone class.
+'''
 
 __author__ = "lukas"
 __date__ = "$10.11.2015 10:12:49$"
@@ -15,7 +15,7 @@ import math
 DRONE_SPEED = 0.1
 TESTING = True
 
-class Drone():
+class Drone(object):
     '''
     Class representing a connection to the ARDrone,
     controls it and receive navdata information
@@ -48,15 +48,16 @@ class Drone():
         if self.old_timestamp == 0.0:
             self.old_timestamp = now
             return 0.0
-        dt = now-self.old_timestamp
+        dt_seconds = now-self.old_timestamp
         self.old_timestamp = now
-        return dt
+        return dt_seconds
 
-    def calc_distance(self, vx, dt):
+    @classmethod
+    def calc_distance(cls, velocity_x, dt_seconds):
         '''
         Calculate distance since last frame
         '''
-        return vx*dt
+        return velocity_x*dt_seconds
 
     def calc_dthata(self, thata):
         '''
@@ -85,20 +86,20 @@ class Drone():
                 self.drone.move(0, 0, 0, -DRONE_SPEED)
 
         # Get odometry data
-        dt = self.get_dt()
+        dt_seconds = self.get_dt()
         dthata = self.calc_dthata(self.drone.navdata.get(0, dict())
         .get('psi', 0))
         if self.correct_psi & (math.fabs(dthata) > 20):
             dthata = 0
             self.correct_psi = False
 
-        dx = self.calc_distance(self.drone.navdata.get(0, dict())
-        .get('vx', 0), dt)
-        dy = self.calc_distance(self.drone.navdata.get(0, dict())
-        .get('vy', 0), dt)
-        dxy = math.sqrt(dx*dx+dy*dy)
+        dx_mm = self.calc_distance(self.drone.navdata.get(0, dict())
+        .get('vx', 0), dt_seconds)
+        dy_mm = self.calc_distance(self.drone.navdata.get(0, dict())
+        .get('vy', 0), dt_seconds)
+        dxy = math.sqrt(dx_mm*dx_mm+dy_mm*dy_mm)
 
-        data = dxy, dthata, dt
+        data = dxy, dthata, dt_seconds
 
         if(self.log):
             self.out.write("%f %f %f\n" % data)
@@ -118,13 +119,13 @@ class Drone():
         print "Take off"
         if not TESTING:
             self.drone.takeoff()
-            x = 0
+            counter = 0
             # Check if the drone is in air and hovering
             while self.in_air == False:
                 if (self.drone.navdata.get(0, dict()).
-                get('state', 0) == 4) or (x == 10):
+                get('state', 0) == 4) or (counter == 10):
                     self.in_air = True
-                x += 1
+                counter += 1
                 time.sleep(1)
             # TODO: Testing
         self.in_air = True

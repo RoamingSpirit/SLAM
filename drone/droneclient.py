@@ -1,15 +1,24 @@
+'''
+DroneClient class.
+'''
+
 import socket
 import threading
-#from drone import Drone
+from drone import Drone
 
 class DroneClient(threading.Thread):
-
+    '''
+    Class representing a client which receive drone commands
+    and send drone odometry.
+    '''
     running = True
 
     def __init__(self, host = "", port = 9000):
         threading.Thread.__init__(self)
         self.host = host
         self.port = port
+        self.drone = Drone()
+        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.start()
 
     def run(self):
@@ -17,15 +26,13 @@ class DroneClient(threading.Thread):
         Main loop
         '''
         print "Connecting.."
-        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.socket.connect((self.host, self.port))
         print "Connected to host."
-        
+
         while self.running:
             try:
                 msg = self.socket.recv(1)
                 if msg == chr(0):
-                    self.drone = Drone()
                     print "Initialize."
                     self.drone.initialize()
                     self.socket.send(chr(1))
@@ -48,14 +55,14 @@ class DroneClient(threading.Thread):
                 elif msg == chr(5):
                     print "Stagnate."
                     self.socket.send(self.drone.getOdometry())
-                    
-            except socket.error, e:
+
+            except socket.error:
                 print "Error."
                 self.close()
             except KeyboardInterrupt:
                 print "Interrupted."
                 self.close()
-                
+
     def close(self):
         '''
         Close the connection and stop the running thread.
@@ -67,9 +74,7 @@ class DroneClient(threading.Thread):
 
 if __name__ == '__main__':
     try:
-        client = DroneClient()
+        CLIENT = DroneClient()
     except KeyboardInterrupt:
         print 'Interrupted'
-        sys.exit(0)
-    
-
+        CLIENT.close()
