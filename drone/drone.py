@@ -18,7 +18,7 @@ TESTING = True
 class Drone(object):
     '''
     Class representing a connection to the ARDrone,
-    controls it and receive navdata information
+    controls it and receive navdata information.
     '''
     correct_psi = True
     in_air = False
@@ -29,7 +29,7 @@ class Drone(object):
 
     def __init__(self, log = True):
         '''
-        Initialize the connection and variables
+        Initialize the connection and variables.
         '''
         self.log = log
         if(log):
@@ -42,7 +42,7 @@ class Drone(object):
 
     def get_dt(self):
         '''
-        Return the time difference between since the last update
+        Return the time difference between since the last update.
         '''
         now = time.time()
         if self.old_timestamp == 0.0:
@@ -55,13 +55,13 @@ class Drone(object):
     @classmethod
     def calc_distance(cls, velocity_x, dt_seconds):
         '''
-        Calculate distance since last frame
+        Calculate distance since last frame.
         '''
         return velocity_x*dt_seconds
 
     def calc_dthata(self, thata):
         '''
-        Calculate dthata since last call
+        Calculate dthata since last call.
         '''
         dthata = thata - self.last_thata
         if dthata > 180:
@@ -71,10 +71,10 @@ class Drone(object):
         self.last_thata = thata
         return dthata
 
-    def getOdometry(self):
+    def get_odometry(self):
         '''
         Return a tuple of odometry (dxy in mm,dthata in degree, dt in s) and
-        send move commands to the drone
+        send move commands to the drone.
         '''
         # Move the drone
         if self.in_air & (not TESTING):
@@ -93,7 +93,7 @@ class Drone(object):
             dthata = 0
             self.correct_psi = False
 
-        dx_mm = self.calc_distance(self.drone.navdata.get(0, dict())
+        dx_mm = Drone.calc_distance(self.drone.navdata.get(0, dict())
         .get('vx', 0), dt_seconds)
         dy_mm = self.calc_distance(self.drone.navdata.get(0, dict())
         .get('vy', 0), dt_seconds)
@@ -108,13 +108,13 @@ class Drone(object):
 
     def move(self, cmd):
         '''
-        Set the moving command
+        Set the moving command.
         '''
         self.cmd = int(cmd)
 
     def initialize(self):
         '''
-        Let the drone fly
+        Let the drone fly.
         '''
         print "Take off"
         if not TESTING:
@@ -133,7 +133,7 @@ class Drone(object):
 
     def shutdown(self):
         '''
-        Close application
+        Close application.
         '''
         print "Shutting down..."
         self.in_air = False
