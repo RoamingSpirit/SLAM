@@ -62,7 +62,7 @@ import math
 #wait for client for image stream
 stream = True
 #read form log file or use sensor
-readlog = False
+readlog = True
 use_odometry = True 
 
 # Map size, scale

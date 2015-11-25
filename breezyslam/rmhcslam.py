@@ -2,7 +2,8 @@
 
 
 from breezyslam.algorithms import RMHC_SLAM
-from Filters.myfilter import MyFilter
+from Filters.filterhandler import FilterHandler
+from Filters.standardGH import standardGH
 import math
 
 
@@ -26,7 +27,7 @@ class My_SLAM(RMHC_SLAM):
         
 
        
-        self.myfilter = MyFilter()
+        self.myfilter = FilterHandler(standardGH(0.1, 0.1, 500, 0), standardGH(0.1, 0.1, 500, 0), standardGH(0.1, 0.1))
         
         RMHC_SLAM.__init__(self, laser, map_size_pixels, map_size_meters, 
                 map_quality, hole_width_mm,
