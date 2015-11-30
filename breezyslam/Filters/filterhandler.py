@@ -12,6 +12,7 @@ class FilterHandler(FilterInterface):
     def __call__(self, slam_position, start_position, error, time, command):
         z_position = self.dataFilter(slam_position, start_position, error, time, command)
         est_position = z_position.copy()
+        """
         if(time == 0): return est_position
         
         if(self.xFilter != None):
@@ -20,5 +21,5 @@ class FilterHandler(FilterInterface):
             est_position.y_mm = self.yFilter(z_position.y_mm, time)
         if(self.thetaFilter != None):
             est_position.theta_degrees = self.thetaFilter(z_position.theta_degrees, time)
-        
+        """
         return est_position

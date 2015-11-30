@@ -105,7 +105,7 @@ class XTION(Laser):
 
 class FileXTION(XTION):
     #current frame read
-    index = 0
+    index = 100
 
     '''
     A class for reading the log file of an Asus XTION
