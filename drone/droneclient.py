@@ -19,6 +19,7 @@ class DroneClient(threading.Thread):
         self.port = port
         self.drone = Drone()
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.socket.settimeout(2)
         self.start()
 
     def run(self):
@@ -32,7 +33,10 @@ class DroneClient(threading.Thread):
         while self.running:
             try:
                 msg = self.socket.recv(1)
-                if msg == chr(0):
+                if len(msg) == 0:
+                    print "Connection to server lost."
+                    self.close()
+                elif msg == chr(0):
                     print "Initialize."
                     self.drone.initialize()
                     self.socket.send(chr(1))
@@ -43,21 +47,23 @@ class DroneClient(threading.Thread):
                 elif msg == chr(2):
                     print "Move forward."
                     self.drone.move(msg)
-                    self.socket.send(self.drone.getOdometry())
+                    self.socket.send(self.drone.get_odometry())
                 elif msg == chr(3):
                     print "Turn right."
                     self.drone.move(msg)
-                    self.socket.send(self.drone.getOdometry())
+                    self.socket.send(self.drone.get_odometry())
                 elif msg == chr(4):
                     print "Turn left."
                     self.drone.move(msg)
-                    self.socket.send(self.drone.getOdometry())
+                    self.socket.send(self.drone.get_odometry())
                 elif msg == chr(5):
                     print "Stagnate."
-                    self.socket.send(self.drone.getOdometry())
+                    self.socket.send(self.drone.get_odometry())
 
-            except socket.error:
-                print "Error."
+            except socket.timeout:
+                pass
+            except socket.error, err:
+                print err
                 self.close()
             except KeyboardInterrupt:
                 print "Interrupted."
@@ -67,14 +73,11 @@ class DroneClient(threading.Thread):
         '''
         Close the connection and stop the running thread.
         '''
+        print "Shutdown."
         self.running = False
         self.drone.shutdown()
         self.socket.close()
         print "Socket closed."
 
 if __name__ == '__main__':
-    try:
-        CLIENT = DroneClient()
-    except KeyboardInterrupt:
-        print 'Interrupted'
-        CLIENT.close()
+    CLIENT = DroneClient()
