@@ -11,10 +11,10 @@ class SensorFilter(FilterInterface):
 
         est_position = slam_position.copy()
         if(math.sqrt(distx*distx+disty*disty)>50):
-            log = False
+            log = True
 
         if(math.fabs(slam_position.theta_degrees - start_position.theta_degrees)>4):
-            log = False
+            log = True
 
         if(log):
             print "\nError: ", error
@@ -22,6 +22,7 @@ class SensorFilter(FilterInterface):
             print "Slam ", slam_position
         
         fslam = 1-1.5*error
+        
         
         if(fslam<0):
             fslam=0

@@ -26,8 +26,10 @@ class My_SLAM(RMHC_SLAM):
                 max_search_iter=_DEFAULT_MAX_SEARCH_ITER):
         
 
+        g = 0.1
+        h = 0.1
        
-        self.myfilter = FilterHandler(standardGH(0.1, 0.1, 500, 0), standardGH(0.1, 0.1, 500, 0), standardGH(0.1, 0.1))
+        self.myfilter = FilterHandler(standardGH(g, h, 20000, 0), standardGH(g, h, 20000, 0), standardGH(g, h))
         
         RMHC_SLAM.__init__(self, laser, map_size_pixels, map_size_meters, 
                 map_quality, hole_width_mm,

@@ -68,7 +68,7 @@ use_odometry = True
 # Map size, scale
 MAP_SIZE_PIXELS          =  1000
 MAP_SIZE_METERS          =  40
-seed = 9999
+seed = 0
 
 
 #for keyboard interrupt
@@ -117,7 +117,7 @@ def main():
             robot = FileDrone("odometry")
         else:
             robot = Drone()
-            robot.initialize()
+            #robot.initialize()
 
     
     # Start with an empty trajectory of positions
