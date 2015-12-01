@@ -37,19 +37,19 @@ Change log:
 '''
 
 
-from sensor import XTION
-from sensor import FileXTION
-from server import Server
-from filedrone import FileDrone
+from sensor.xtion import XTION
+from sensor.xtion import FileXTION
+from network.server import Server
+from vehicle.filedrone import FileDrone
 
 
-from drone import Drone
-from networkvehicle import NetworkVehicle
+from vehicle.drone import Drone
+from vehicle.networkvehicle import NetworkVehicle
                 
 from breezyslam.algorithms import Deterministic_SLAM,RMHC_SLAM
-from rmhcslam import My_SLAM
+from slam.rmhcslam import My_SLAM
 
-from pgm_utils import pgm_save
+from utils.pgm_utils import pgm_save
 
 from sys import exit, stdout
 from time import time
@@ -60,10 +60,10 @@ import math
 
 
 #wait for client for image stream
-stream = False
+stream = True
 #read form log file or use sensor
 readlog = True
-use_odometry = False 
+use_odometry = True 
 
 # Map size, scale
 MAP_SIZE_PIXELS          =  1000
