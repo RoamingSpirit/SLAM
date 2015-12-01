@@ -49,7 +49,7 @@ from vehicle.networkvehicle import NetworkVehicle
 from breezyslam.algorithms import Deterministic_SLAM,RMHC_SLAM
 from slam.rmhcslam import My_SLAM
 
-from utils.pgm_utils import pgm_save
+from pgmutils.pgm_utils import pgm_save
 
 from sys import exit, stdout
 from time import time
