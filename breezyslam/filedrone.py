@@ -3,7 +3,7 @@ from vehicle import Vehicle
 
 class FileDrone(Vehicle):
 
-    index = 0
+    index = 100
 
     def __init__(self, dataset, datadir = '.'):
         self.data = self.load_data(datadir, dataset)

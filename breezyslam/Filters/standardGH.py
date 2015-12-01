@@ -40,7 +40,7 @@ class standardGH(sFilter):
 
     def _checkInit(self):
         sFilter._checkInit(self)
-        print self._name_+"Initialized"
+        #print self._name_+"Initialized"
 
 
             
