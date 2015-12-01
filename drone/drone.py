@@ -137,7 +137,7 @@ class Drone(object):
         '''
         print "Shutting down..."
         self.in_air = False
-        self.drone.land()
+        self.drone.land()s
         self.cam.release()
         self.drone.halt()
         print "Drone shutted down."
