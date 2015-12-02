@@ -15,7 +15,6 @@ STAGNATE = 5
 class Navigation(threading.Thread):
 
     
-
     def __init__(self, slam, MAP_SIZE_PIXELS, MAP_SIZE_METERS, ROBOT_SIZE_METERS, offset_in_scan, min_distance):
         """
         MAP_SIXE_PIXELS: map size in pixel
@@ -31,7 +30,7 @@ class Navigation(threading.Thread):
         self.ROBOT_SIZE_METERS = ROBOT_SIZE_METERS
         self.mapbytes = self.createMap()
         self.command = MOVE_FORWARD
-        self.recalculate = True
+        self.recalculate = False
         self.offset_in_scan = offset_in_scan
         self.min_distance = min_distance
     
@@ -41,7 +40,8 @@ class Navigation(threading.Thread):
         '''
         self.running = True
         while(self.running):
-            ##TODO Mapping navigation
+            if(recalculate):
+                router.getRoute()            
             time.sleep(5)
             self.mapbytes = self.createMap()
             self.position = self.slam.getpos()
