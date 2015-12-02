@@ -4,7 +4,7 @@ sensor.py : Asus xtion which emulates a laser scaner
 author: Nils Bernhardt 
 '''
 
-#from breezyslam.components import Laser
+
 from reader import Reader
 from sensor import Sensor
 
