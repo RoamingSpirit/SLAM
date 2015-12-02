@@ -8,7 +8,7 @@ author: Nils Bernhardt
 class Router():
 
     
-    def __init__(self, MAP_SIZE_PIXELS, MAP_SIZE_METERS, ROBOT_SIZE_METERS, offset_in_scan, min_distance):
+    def __init__(self, MAP_SIZE_PIXELS, MAP_SIZE_METERS, ROBOT_SIZE_METERS, min_distance):
         return
     
     def getRoute(self, position, mapbytes):

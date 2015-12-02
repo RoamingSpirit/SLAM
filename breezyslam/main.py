@@ -115,7 +115,7 @@ def main(g = 0.4, h = 0.4):
         if seed \
         else Deterministic_SLAM(sensor, MAP_SIZE_PIXELS, MAP_SIZE_METERS) 
 
-    
+    robot = None
 
     #initialiye robot
     if(use_odometry):
@@ -127,7 +127,7 @@ def main(g = 0.4, h = 0.4):
             robot = Drone()
             #robot.initialize()
     if(stream):
-        server = Server(slam, MAP_SIZE_PIXELS)
+        server = Server(slam, MAP_SIZE_PIXELS, robot)
         server.start()
 
     

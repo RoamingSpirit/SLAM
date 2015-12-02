@@ -10,7 +10,7 @@ import threading
 HOST = ''   # Symbolic name, meaning all available interfaces
 PORT = 8889 # Arbitrary non-privileged port
 
-class Server(threading.Thread):
+class ControlServer(threading.Thread):
     #Flag for running
     running = True
     

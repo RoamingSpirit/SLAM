@@ -8,7 +8,7 @@ import threading
 HOST = ''   # Symbolic name, meaning all available interfaces
 PORT = 8888 # Arbitrary non-privileged port
 
-class Server(threading.Thread):
+class MapServer(threading.Thread):
     
     #flag for running
     running = True

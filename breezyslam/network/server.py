@@ -4,6 +4,9 @@ server.py: Runs in it own threads and sends the map to a connected clients in a 
 author: Lukas
 '''
 
+from mapserver import MapServer
+from controlserver import ControlServer
+
 class Server():
     
     def __init__(self, slam, MAP_SIZE_PIXELS, vehicle):
