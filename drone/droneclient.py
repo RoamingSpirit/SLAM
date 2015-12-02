@@ -37,6 +37,9 @@ class DroneClient(threading.Thread):
                     print "Connection to server lost."
                     self.close()
                 elif msg == chr(0):
+                    print "Emergency."
+                    self.drone.emergency()
+                elif msg == chr(0):
                     print "Initialize."
                     self.drone.initialize()
                     self.socket.send(chr(1))
@@ -57,6 +60,16 @@ class DroneClient(threading.Thread):
                     self.drone.move(msg)
                     self.socket.send(self.drone.get_odometry())
                 elif msg == chr(5):
+                    print "Hover."
+                    self.drone.move(msg)
+                    self.socket.send(self.drone.get_odometry())
+                elif msg == chr(6):
+                    print "Move."
+                    commands = self.socket.recv(1024)
+                    values = commands.split(",",4)
+                    self.drone.manually_move((float(values[0]), float(values[1]), float(values[2]), float(values[3])))
+                    self.socket.send(self.drone.get_odometry())
+                elif msg == chr(7):
                     print "Stagnate."
                     self.socket.send(self.drone.get_odometry())
 

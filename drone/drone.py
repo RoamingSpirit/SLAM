@@ -25,6 +25,7 @@ class Drone(object):
     moving = False
     turning = False
     cmd = 0
+    commands = (0, 0, 0, 0)
     old_timestamp = 0.0
 
     def __init__(self, log = True):
@@ -84,6 +85,14 @@ class Drone(object):
                 self.drone.move(0, 0, 0, DRONE_SPEED)
             elif self.cmd == 4:
                 self.drone.move(0, 0, 0, -DRONE_SPEED)
+            elif self.cmd == 5:
+                self.drone.hover()
+            elif self.cmd == 6:
+                self.drone.move(commands[0], commands[1], commands[2], commands[3])
+            elif self.cmd == 8:
+                self.drone.land()
+            elif self.cmd == 8:
+                self.drone.takeoff()
 
         # Get odometry data
         dt_seconds = self.get_dt()
@@ -111,6 +120,17 @@ class Drone(object):
         Set the moving command.
         '''
         self.cmd = int(cmd)
+        
+    def manually_move(self, commands):
+        '''
+        Set the moving command.
+        '''
+        self.cmd = 6
+        self.commands = commands
+        
+    def emergency(self):
+        self.drone.reset()
+        self.in_air = False
 
     def initialize(self):
         '''
@@ -121,12 +141,12 @@ class Drone(object):
             self.drone.takeoff()
             counter = 0
             # Check if the drone is in air and hovering
-            while self.in_air == False:
-                if (self.drone.navdata.get(0, dict()).
-                get('state', 0) == 4) or (counter == 10):
-                    self.in_air = True
-                counter += 1
-                time.sleep(1)
+            #~ while self.in_air == False:
+                #~ if (self.drone.navdata.get(0, dict()).
+                #~ get('state', 0) == 4) or (counter == 10):
+                    #~ self.in_air = True
+                #~ counter += 1
+                #~ time.sleep(1)
             # TODO: Testing
         self.in_air = True
         print "Drone in air!"
@@ -137,7 +157,7 @@ class Drone(object):
         '''
         print "Shutting down..."
         self.in_air = False
-        self.drone.land()s
+        self.drone.land()
         self.cam.release()
         self.drone.halt()
         print "Drone shutted down."
