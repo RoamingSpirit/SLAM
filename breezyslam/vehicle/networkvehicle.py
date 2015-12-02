@@ -2,42 +2,40 @@
 NetworkVehilce class.
 '''
 
-import socket, time
+import socket, time, threading
 from vehicle import Vehicle
-
-HOST = ""
-PORT = 9000
-
-MOVE_FORWARD = 2
-TURN_RIGHT = 3
-TURN_LEFT = 4
-HOVER = 5
-MOVE = 6
-STAGNATE = 7
-LAND = 8
-TAKEOFF = 9
-EMERGENCY = 10
 
 class NetworkVehicle(Vehicle):
     '''
     Class representing a connection to a robot.
     '''
-    odometry = [0.0, 0.0, 0.0]
+    HOST = ""
+    PORT = 9000
+
+    MOVE = 6
+    STAGNATE = 7
+    LAND = 8
+    TAKEOFF = 9
+    EMERGENCY = 10
 
     def __init__(self):
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.manually_operated = False
+        self.odometry = [0.0, 0.0, 0.0]
+        self.lock = threading.RLock()
 
     def move(self, cmd):
         '''
         Send steering commands to the robot client.
         '''
+        self.lock.acquire()
         if not self.manually_operated:
             self.connection.send(chr(cmd))
         else:
             self.connection.send(chr(STAGNATE))
             
         data = self.connection.recv(1024)
+        self.lock.release()
         toks = data.split(",", 3)
         self.odometry = [float(tok) for tok in toks[:]]
         return self.odometry
@@ -49,12 +47,17 @@ class NetworkVehicle(Vehicle):
         string = cmd.split(".", 2)
             
         if self.manually_operated:
+            self.lock.acquire()
             self.connection.send(chr(string[0]))
             if string[0] == "6":
                 self.connection.send(string[1])
             data = self.connection.recv(1024)
+            self.lock.release()
     
     def emergency(self):
+        '''
+        Emergency stop.
+        '''
         self.connection.send(chr(EMERGENCY))
 
     def getOdometry(self):

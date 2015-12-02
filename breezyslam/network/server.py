@@ -1,5 +1,5 @@
 '''
-server.py: Runs in it own threads and sends the map to a connected clients in a loop
+server.py: Create a MapServer and a ControlServer.
 
 author: Lukas
 '''
@@ -12,8 +12,9 @@ class Server():
     def __init__(self, slam, MAP_SIZE_PIXELS, vehicle):
         self.map_server = MapServer(slam, MAP_SIZE_PIXELS)
         self.control_server = ControlServer(vehicle)
+
     '''
-    Start server..
+    Start server.
     '''
     def start(self):
         self.map_server.start()
