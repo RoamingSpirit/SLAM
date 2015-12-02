@@ -1,25 +1,25 @@
 '''
-server.py: 
-'''
+server.py: Runs in it own threads and sends the map to a connected clients in a loop
 
+author: Lukas
+'''
+ 
 import socket
 import threading
-
+ 
 HOST = ''   # Symbolic name, meaning all available interfaces
-PORT = 8888 # Arbitrary non-privileged port
+PORT = 8889 # Arbitrary non-privileged port
 
 class Server(threading.Thread):
-    
-    #flag for running
+    #Flag for running
     running = True
     
-    def __init__(self, slam, MAP_SIZE_PIXELS):
+    def __init__(self, vehicle):
         threading.Thread.__init__(self)
-        self.slam = slam
-        self.MAP_SIZE_PIXELS = MAP_SIZE_PIXELS
+        self.vehicle = vehicle
 
     '''
-    opens a second and waits till a client connects.
+    Opens a second and waits till a client connects.
     Then sends the map updates till the client disconnects.
     Start over.
     '''
@@ -28,25 +28,22 @@ class Server(threading.Thread):
         self.setup()
         
         while(self.running):
-            # Create a byte array to receive the computed maps
-            mapb = bytearray(self.MAP_SIZE_PIXELS * self.MAP_SIZE_PIXELS)
-
-            # Get final map    
-            self.slam.getmap(mapb)
             try:
-                self.connection.send(mapb)
+                cmd = self.connection.recv(1024)
+                if cmd == "10":
+                    vehicle.emergency()
+                else:
+                    vehicle.move(cmd)
             except socket.error, e:
                 print "Client disconnected"
-                if(self.running):
-                    self.setup()
-
+                self.setup()
 
     '''
-    Start server..
+    Setups a connection to a client on port 8888.
     '''
     def setup(self):
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        print 'Socket created'
+        print 'Control socket created'
          
         #Bind socket to local host and port
         try:
@@ -55,30 +52,25 @@ class Server(threading.Thread):
             print 'Bind failed. Error Code : ' + str(msg[0]) + ' Message ' + msg[1]
             self.running = False
             
-        if(self.running):     
-            print 'Socket bind complete'
-             
+        if(self.running):             
             #Start listening on socket
-            self.socket.listen(0)
-            print 'Socket now listening'
+            self.socket.listen(2)
+            print 'Control socket now listening'
              
             #now keep talking with the client
             #wait to accept a connection - blocking call
             try:
                 self.connection, addr = self.socket.accept()
-                print 'Connected with ' + addr[0] + ':' + str(addr[1])
+                print 'Control socket connected with ' + addr[0] + ':' + str(addr[1])
                 self.connection.sendall(str(self.MAP_SIZE_PIXELS)+"\n")
             except socket.error, e:
                 self.running = False
-                print 'socket closed'
-            
-            
-
+                print 'Socket closed'
 
     '''
-    Close the server.
+    closes the connection and stops the running thread.
     '''
     def close(self):
         self.running = False
         self.socket.shutdown(socket.SHUT_RDWR)
-        self.socket.close()
+        self.socket.close()      

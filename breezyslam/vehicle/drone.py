@@ -71,6 +71,7 @@ class Drone(object):
         self.last_thata = thata
         return dthata
 
+
     def getOdometry(self):
         '''
         Return a tuple of odometry (dxy in mm,dthata in degree, dt in s) and
@@ -84,6 +85,9 @@ class Drone(object):
                 self.drone.move(0, 0, 0, DRONE_SPEED)
             elif self.cmd == 4:
                 self.drone.move(0, 0, 0, -DRONE_SPEED)
+
+            elif self.cmd == 5:
+                self.drone.hover()
 
         # Get odometry data
         dt_seconds = self.get_dt()
