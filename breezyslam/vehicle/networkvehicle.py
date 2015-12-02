@@ -55,6 +55,9 @@ class NetworkVehicle(Vehicle):
             data = self.connection.recv(1024)
     
     def emergency(self):
+        '''
+        Emergency stop.
+        '''
         self.connection.send(chr(EMERGENCY))
 
     def getOdometry(self):

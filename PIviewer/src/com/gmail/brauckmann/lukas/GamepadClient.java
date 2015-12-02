@@ -1,6 +1,5 @@
 package com.gmail.brauckmann.lukas;
 
-
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -15,28 +14,32 @@ import java.net.UnknownHostException;
  */
 public class GamepadClient extends Thread {
 	/**
-	 * Host ip
+	 * Host ip.
 	 */
 	private final String host;
 	/**
-	 * Host port
+	 * Host port.
 	 */
 	private final int port;
 	/**
-	 * Reconnecting after connection loss
+	 * Reconnecting after connection loss.
 	 */
 	private boolean reconnect = true;
-	
+	/**
+	 * Flag for running.
+	 */
 	private boolean running = true;
-	
+	/**
+	 * Command string.
+	 */
 	private String cmd = "";
 
 	/**
 	 * 
 	 * @param host
-	 *            ip
+	 *            Ip.
 	 * @param port
-	 *            port
+	 *            Port.
 	 */
 	public GamepadClient(String host, int port) {
 		this.host = host;
@@ -44,14 +47,20 @@ public class GamepadClient extends Thread {
 	}
 
 	/**
-	 * stops the reconnection
+	 * Stop the reconnection.
 	 */
 	public void halt() {
 		reconnect = false;
 		running = false;
 	}
-	
-	public void setCmd(String cmd){
+
+	/**
+	 * Update command string.
+	 * 
+	 * @param cmd
+	 *            New command.
+	 */
+	public void setCmd(String cmd) {
 		this.cmd = cmd;
 	}
 
@@ -62,10 +71,12 @@ public class GamepadClient extends Thread {
 				Socket socket = null;
 				while (socket == null && reconnect) {
 					try {
+						// Connect socket to host.
 						socket = new Socket(host, port);
 					} catch (Exception e) {
 						synchronized (this) {
 							try {
+								// Wait and try to connect again.
 								this.wait(1000);
 							} catch (InterruptedException e1) {
 
@@ -75,11 +86,12 @@ public class GamepadClient extends Thread {
 				}
 				if (reconnect) {
 					BufferedWriter out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
-					
-					while (running){
+					while (running) {
+						// Send command string.
 						out.write(cmd);
 						cmd = "";
 					}
+					// Close socket.
 					out.close();
 					socket.close();
 					System.out.println("Close");

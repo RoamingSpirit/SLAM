@@ -1,5 +1,6 @@
 '''
-server.py: Runs in it own threads and sends the map to a connected clients in a loop
+server.py: Run in it own threads and
+sends the command from the gamepad to the vehicle.
 
 author: Lukas
 '''
@@ -19,9 +20,7 @@ class Server(threading.Thread):
         self.vehicle = vehicle
 
     '''
-    Opens a second and waits till a client connects.
-    Then sends the map updates till the client disconnects.
-    Start over.
+    Setup the connection and receive commands from socket.
     '''
     def run(self):
 
@@ -39,13 +38,13 @@ class Server(threading.Thread):
                 self.setup()
 
     '''
-    Setups a connection to a client on port 8888.
+    Setup a connection to a client on port 8889.
     '''
     def setup(self):
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         print 'Control socket created'
          
-        #Bind socket to local host and port
+        # Bind socket to local host and port
         try:
             self.socket.bind((HOST, PORT))
         except socket.error as msg:
@@ -53,22 +52,20 @@ class Server(threading.Thread):
             self.running = False
             
         if(self.running):             
-            #Start listening on socket
+            # Start listening on socket
             self.socket.listen(2)
             print 'Control socket now listening'
-             
-            #now keep talking with the client
-            #wait to accept a connection - blocking call
+            
+            # Wait to accept a connection - blocking call
             try:
                 self.connection, addr = self.socket.accept()
                 print 'Control socket connected with ' + addr[0] + ':' + str(addr[1])
-                self.connection.sendall(str(self.MAP_SIZE_PIXELS)+"\n")
             except socket.error, e:
                 self.running = False
                 print 'Socket closed'
 
     '''
-    closes the connection and stops the running thread.
+    Close the connection and stop the running thread.
     '''
     def close(self):
         self.running = False
