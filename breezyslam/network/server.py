@@ -41,7 +41,8 @@ class Server(threading.Thread):
                 self.connection.send(mapb)
             except socket.error, e:
                 print "Client disconnected"
-                self.setup()
+                if(self.running):
+                    self.setup()
 
     '''
     Setups a connection to a client on port 8888.
@@ -61,7 +62,7 @@ class Server(threading.Thread):
             print 'Socket bind complete'
              
             #Start listening on socket
-            self.socket.listen(1)
+            self.socket.listen(0)
             print 'Socket now listening'
              
             #now keep talking with the client
@@ -82,6 +83,4 @@ class Server(threading.Thread):
     def close(self):
         self.running = False
         self.socket.shutdown(socket.SHUT_RDWR)
-        
         self.socket.close()
-        
