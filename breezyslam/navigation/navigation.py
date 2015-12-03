@@ -8,15 +8,16 @@ from router import Router
 
 import threading
 import time
+import math
 
-MOVE_FORWARD = 2
-TURN_RIGHT = 3
-TURN_LEFT = 4
-STAGNATE = 5
+ANGLE_TOLERANCE_DEGREE = 5 #tolerance for moving forward
+TARGET_TOLERANCE_MM = 500 #min dist to target
 
 class Navigation(threading.Thread):
 
     route_lock = threading.Condition()
+    route = None
+    target = None
     
     def __init__(self, slam, MAP_SIZE_PIXELS, MAP_SIZE_METERS, ROBOT_SIZE_METERS, offset_in_scan, min_distance, commands):
         """
@@ -25,6 +26,7 @@ class Navigation(threading.Thread):
         ROBOT_SZIE_METERS: robot size in meters
         offset_in_scan: values to check in a scan for obstacles from the center
         min_distance: minimum distance to keep to obstacles
+        commans: costants for commands
         """
         self.commands = commands
         threading.Thread.__init__(self)
@@ -33,7 +35,6 @@ class Navigation(threading.Thread):
         self.MAP_SIZE_METERS = MAP_SIZE_METERS
         self.ROBOT_SIZE_METERS = ROBOT_SIZE_METERS
         self.mapbytes = self.createMap()
-        self.command = MOVE_FORWARD
         self.recalculate = True
         self.offset_in_scan = offset_in_scan
         self.min_distance = min_distance
@@ -41,7 +42,7 @@ class Navigation(threading.Thread):
     
     def run(self):
         '''
-        Do the navigation calculation here.
+        Recalcualtes a new route if necessary
         '''
         self.running = True
         while(self.running):
@@ -49,14 +50,14 @@ class Navigation(threading.Thread):
             if(self.recalculate):                
                 self.mapbytes = self.createMap()
                 self.position = self.slam.getpos()
+                print self.position
                 route = self.router.getRoute(self.position, self.mapbytes)
                 self.recalculate = False
-                print "recalculated"
+                
                 self.route_lock.acquire()
                 self.route = route
                 self.route_lock.release()
             else:
-                print "sleep"
                 self.route_lock.acquire()
                 self.route_lock.wait()
                 self.route_lock.release()
@@ -74,7 +75,6 @@ class Navigation(threading.Thread):
             if(self.checkTrajectory(scan, self.offset_in_scan, self.min_distance)== False):
                 #recalcualte route
                 self.recalculate = True
-                print "obstacle detected"
                 
                 self.route_lock.acquire()
                 self.route_lock.notify()
@@ -86,10 +86,67 @@ class Navigation(threading.Thread):
         return command
 
     def getCommand(self):
+        """
+        returns the next movement to perform
+        """
+        #check if currently recalculating ==> wait
         if(self.recalculate): return self.commands.WAIT
+        #check if no route is available ==> turn around to expand map
         if(self.route == None): return self.commands.TURN_RIGHT
-        #TODO calculate
-        return self.commands.MOVE_FORWARD
+
+        position = self.slam.getpos()
+
+        #check if target is reached and if new targets are available
+        while(self.reachedTarget(self.target, position)):
+            if(len(self.route)==0):
+                #recalcualte route
+                self.recalculate = True
+                
+                self.route_lock.acquire()
+                self.route_lock.notify()
+                self.route_lock.release()
+                return self.commands.WAIT
+            else:
+                self.target = self.route.popleft()
+
+        #chek if it is not necessary to turn
+        angle = self.getAngle(self.target, self.target)        
+        if(math.fabs(angle) < ANGLE_TOLERANCE_DEGREE):
+            return self.commands.MOVE_FORWARD
+
+        #turn
+        if(angle > 0):
+            return self.commands.TURN_RIGHT
+        else:
+            return self.commands.TURN_LEFT
+
+    def reachedTarget(self, target, position):
+        """
+        Checks if the position is in the target range
+        """
+        if(target == None): return True
+        xd = target[0]-position[0]
+        yd = target[1]-position[1]
+        dist = math.sqrt(xd*xd+yd*yd)
+        return dist < TARGET_TOLERANCE_MM
+
+    def getAngle(self, target, position):
+        """
+        Calcualtes the angel of the line between the position and the target
+        target: target position
+        position: robot position
+        return: anngle of the trajectory
+        """
+        x = float(target[0] -  position[0])
+        y = float(target[1] - position[1])
+
+        if(x == 0 and y == 0):
+            return 0
+        
+        angle = math.degrees(math.acos(x/math.sqrt(x*x+y*y)))
+        if(y<0):return -angle
+                
+        return angle
 
     def checkTrajectory(self, scan, offset, min_distance):
         """
