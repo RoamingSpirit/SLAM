@@ -68,10 +68,15 @@ class DroneClient(threading.Thread):
                     commands = self.socket.recv(1024)
                     values = commands.split(",",4)
                     self.drone.manually_move((float(values[0]), float(values[1]), float(values[2]), float(values[3])))
-                    self.socket.send(self.drone.get_odometry())
                 elif msg == chr(7):
                     print "Stagnate."
                     self.socket.send(self.drone.get_odometry())
+                elif msg == chr(8):
+                    print "Land."
+                    self.drone.land()
+                elif msg == chr(9):
+                    print "Takeoff."
+                    self.drone.initialize()
 
             except socket.timeout:
                 pass

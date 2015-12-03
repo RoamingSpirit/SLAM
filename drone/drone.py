@@ -128,7 +128,17 @@ class Drone(object):
         self.cmd = 6
         self.commands = commands
         
+    def land(self):
+        '''
+        Land.
+        '''
+        self.drone.land()
+        self.in_air = False
+        
     def emergency(self):
+        '''
+        Emergency landing.
+        '''
         self.drone.reset()
         self.in_air = False
 

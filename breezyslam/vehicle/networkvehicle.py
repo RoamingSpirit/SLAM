@@ -22,7 +22,7 @@ class NetworkVehicle(Vehicle):
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.manually_operated = False
         self.odometry = [0.0, 0.0, 0.0]
-        self.lock = threading.RLock()
+        self.lock = threading.Lock()
 
     def move(self, cmd):
         '''
@@ -51,14 +51,15 @@ class NetworkVehicle(Vehicle):
             self.connection.send(chr(string[0]))
             if string[0] == "6":
                 self.connection.send(string[1])
-            data = self.connection.recv(1024)
             self.lock.release()
     
     def emergency(self):
         '''
         Emergency stop.
         '''
+        self.lock.acquire()
         self.connection.send(chr(EMERGENCY))
+        self.lock.release()
 
     def getOdometry(self):
         '''
