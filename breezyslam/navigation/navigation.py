@@ -10,8 +10,8 @@ import threading
 import time
 import math
 
-ANGLE_TOLERANCE_DEGREE = 5
-TARGET_TOLERANCE_MM = 500
+ANGLE_TOLERANCE_DEGREE = 5 #tolerance for moving forward
+TARGET_TOLERANCE_MM = 500 #min dist to target
 
 class Navigation(threading.Thread):
 
@@ -26,6 +26,7 @@ class Navigation(threading.Thread):
         ROBOT_SZIE_METERS: robot size in meters
         offset_in_scan: values to check in a scan for obstacles from the center
         min_distance: minimum distance to keep to obstacles
+        commans: costants for commands
         """
         self.commands = commands
         threading.Thread.__init__(self)
@@ -41,7 +42,7 @@ class Navigation(threading.Thread):
     
     def run(self):
         '''
-        Do the navigation calculation here.
+        Recalcualtes a new route if necessary
         '''
         self.running = True
         while(self.running):
@@ -52,12 +53,11 @@ class Navigation(threading.Thread):
                 print self.position
                 route = self.router.getRoute(self.position, self.mapbytes)
                 self.recalculate = False
-                print "recalculated"
+                
                 self.route_lock.acquire()
                 self.route = route
                 self.route_lock.release()
             else:
-                print "sleep"
                 self.route_lock.acquire()
                 self.route_lock.wait()
                 self.route_lock.release()
@@ -75,7 +75,6 @@ class Navigation(threading.Thread):
             if(self.checkTrajectory(scan, self.offset_in_scan, self.min_distance)== False):
                 #recalcualte route
                 self.recalculate = True
-                print "obstacle detected"
                 
                 self.route_lock.acquire()
                 self.route_lock.notify()
@@ -87,16 +86,21 @@ class Navigation(threading.Thread):
         return command
 
     def getCommand(self):
+        """
+        returns the next movement to perform
+        """
+        #check if currently recalculating ==> wait
         if(self.recalculate): return self.commands.WAIT
+        #check if no route is available ==> turn around to expand map
         if(self.route == None): return self.commands.TURN_RIGHT
 
         position = self.slam.getpos()
-        
+
+        #check if target is reached and if new targets are available
         while(self.reachedTarget(self.target, position)):
             if(len(self.route)==0):
                 #recalcualte route
                 self.recalculate = True
-                print "obstacle detected"
                 
                 self.route_lock.acquire()
                 self.route_lock.notify()
@@ -105,17 +109,21 @@ class Navigation(threading.Thread):
             else:
                 self.target = self.route.popleft()
 
-        angle = self.getAngle(self.target, self.target)
-        
+        #chek if it is not necessary to turn
+        angle = self.getAngle(self.target, self.target)        
         if(math.fabs(angle) < ANGLE_TOLERANCE_DEGREE):
             return self.commands.MOVE_FORWARD
-        
+
+        #turn
         if(angle > 0):
             return self.commands.TURN_RIGHT
         else:
             return self.commands.TURN_LEFT
 
     def reachedTarget(self, target, position):
+        """
+        Checks if the position is in the target range
+        """
         if(target == None): return True
         xd = target[0]-position[0]
         yd = target[1]-position[1]
@@ -123,6 +131,12 @@ class Navigation(threading.Thread):
         return dist < TARGET_TOLERANCE_MM
 
     def getAngle(self, target, position):
+        """
+        Calcualtes the angel of the line between the position and the target
+        target: target position
+        position: robot position
+        return: anngle of the trajectory
+        """
         x = float(target[0] -  position[0])
         y = float(target[1] - position[1])
 
