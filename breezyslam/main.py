@@ -45,6 +45,7 @@ from vehicle.filedrone import FileDrone
 
 from vehicle.drone import Drone
 from vehicle.networkvehicle import NetworkVehicle
+from vehicle.commands import Commands
                 
 from breezyslam.algorithms import Deterministic_SLAM,RMHC_SLAM
 from slam.rmhcslam import My_SLAM
@@ -119,7 +120,7 @@ def main(g = 0.4, h = 0.4):
 
     #initialiye robot
     if(use_odometry):
-        navigation = Navigation(slam, MAP_SIZE_PIXELS, MAP_SIZE_METERS, ROBOT_SIZE_METERS, 150, 1000)
+        navigation = Navigation(slam, MAP_SIZE_PIXELS, MAP_SIZE_METERS, ROBOT_SIZE_METERS, 100, 1200, Commands)
         navigation.start()
         if(readlog):
             robot = FileDrone("odometry")

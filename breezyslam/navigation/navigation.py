@@ -16,8 +16,9 @@ STAGNATE = 5
 
 class Navigation(threading.Thread):
 
+    route_lock = threading.Condition()
     
-    def __init__(self, slam, MAP_SIZE_PIXELS, MAP_SIZE_METERS, ROBOT_SIZE_METERS, offset_in_scan, min_distance):
+    def __init__(self, slam, MAP_SIZE_PIXELS, MAP_SIZE_METERS, ROBOT_SIZE_METERS, offset_in_scan, min_distance, commands):
         """
         MAP_SIXE_PIXELS: map size in pixel
         MAP_SIZE_METERS: map size in meters
@@ -25,6 +26,7 @@ class Navigation(threading.Thread):
         offset_in_scan: values to check in a scan for obstacles from the center
         min_distance: minimum distance to keep to obstacles
         """
+        self.commands = commands
         threading.Thread.__init__(self)
         self.slam = slam
         self.MAP_SIZE_PIXELS = MAP_SIZE_PIXELS
@@ -32,7 +34,7 @@ class Navigation(threading.Thread):
         self.ROBOT_SIZE_METERS = ROBOT_SIZE_METERS
         self.mapbytes = self.createMap()
         self.command = MOVE_FORWARD
-        self.recalculate = False
+        self.recalculate = True
         self.offset_in_scan = offset_in_scan
         self.min_distance = min_distance
         self.router = Router(MAP_SIZE_PIXELS, MAP_SIZE_METERS, ROBOT_SIZE_METERS, min_distance)
@@ -43,11 +45,22 @@ class Navigation(threading.Thread):
         '''
         self.running = True
         while(self.running):
-            if(self.recalculate):
+            
+            if(self.recalculate):                
                 self.mapbytes = self.createMap()
                 self.position = self.slam.getpos()
-                router.getRoute(sel.position, self.map)            
-            time.sleep(5)
+                route = self.router.getRoute(self.position, self.mapbytes)
+                self.recalculate = False
+                print "recalculated"
+                self.route_lock.acquire()
+                self.route = route
+                self.route_lock.release()
+            else:
+                print "sleep"
+                self.route_lock.acquire()
+                self.route_lock.wait()
+                self.route_lock.release()
+            
             
         
 
@@ -55,17 +68,28 @@ class Navigation(threading.Thread):
         """
         return a move command based on the navigation and the scan
         """
-        ##TODO Update command
-        if(self.command == MOVE_FORWARD):
-            ##Check scan for obstacles in front
+        command = self.getCommand()
+        if(command == self.commands.MOVE_FORWARD):
+            #check scan for obstacles in front
             if(self.checkTrajectory(scan, self.offset_in_scan, self.min_distance)== False):
-                ##recalcualte route
-                self.recalcualte = True
+                #recalcualte route
+                self.recalculate = True
                 print "obstacle detected"
-                return STAGNATE
+                
+                self.route_lock.acquire()
+                self.route_lock.notify()
+                self.route_lock.release()
+                
+                return self.commands.WAIT
              
-        ##turn and stay should be always possible
-        return self.command
+        #turn and stay should be always possible
+        return command
+
+    def getCommand(self):
+        if(self.recalculate): return self.commands.WAIT
+        if(self.route == None): return self.commands.TURN_RIGHT
+        #TODO calculate
+        return self.commands.MOVE_FORWARD
 
     def checkTrajectory(self, scan, offset, min_distance):
         """
@@ -75,9 +99,11 @@ class Navigation(threading.Thread):
         min_distance: minimum distance to obstacles in the trajectory
         return: True if Trajecotry is free
         """
+        
         center = len(scan)/2
+        
         for i in range(center-offset, center+offset):
-            if(scan[i] < min_distance & scan[i] > 0):
+            if(scan[i] < min_distance and scan[i] > 0):
                 return False
         return True
 
@@ -98,6 +124,10 @@ class Navigation(threading.Thread):
         Stops navigation.
         """
         self.running = False
+        self.recalculate = False
+        self.route_lock.acquire()
+        self.route_lock.notify()
+        self.route_lock.release()
 
     def getmapbytes(self):
         """
