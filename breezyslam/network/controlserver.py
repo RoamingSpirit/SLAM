@@ -9,7 +9,7 @@ import socket
 import threading
  
 HOST = ''   # Symbolic name, meaning all available interfaces
-PORT = 8889 # Arbitrary non-privileged port
+PORT = 8000 # Arbitrary non-privileged port
 
 class ControlServer(threading.Thread):
     #Flag for running
@@ -29,40 +29,42 @@ class ControlServer(threading.Thread):
         while(self.running):
             try:
                 cmd = self.connection.recv(1024)
-                if cmd == "10":
-                    vehicle.emergency()
-                else:
-                    vehicle.move(cmd)
+                if len(cmd) > 1:
+                    if cmd[1] == ";":
+                        if cmd == "10;":
+                            self.vehicle.emergency()
+                        else:
+                            self.vehicle.move_manually(cmd)
             except socket.error, e:
-                print "Client disconnected"
+                print "ControlServer: Client disconnected."
                 self.setup()
 
     '''
-    Setup a connection to a client on port 8889.
+    Setup a connection to a client on port 8000.
     '''
     def setup(self):
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        print 'Control socket created'
+        print 'ControlServer: Socket created.'
          
         # Bind socket to local host and port
         try:
             self.socket.bind((HOST, PORT))
         except socket.error as msg:
-            print 'Bind failed. Error Code : ' + str(msg[0]) + ' Message ' + msg[1]
+            print 'ControlServer: Bind failed. Error Code : ' + str(msg[0]) + ' Message ' + msg[1]
             self.running = False
             
         if(self.running):             
             # Start listening on socket
             self.socket.listen(2)
-            print 'Control socket now listening'
+            print 'ControlServer: Socket now listening.'
             
             # Wait to accept a connection - blocking call
             try:
                 self.connection, addr = self.socket.accept()
-                print 'Control socket connected with ' + addr[0] + ':' + str(addr[1])
+                print 'ControlServer: Socket connected with ' + addr[0] + ':' + str(addr[1])
             except socket.error, e:
                 self.running = False
-                print 'Socket closed'
+                print 'ControlServer: Socket closed.'
 
     '''
     Close the connection and stop the running thread.

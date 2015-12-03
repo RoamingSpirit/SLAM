@@ -13,7 +13,7 @@ class NetworkVehicle(Vehicle):
     PORT = 9000
 
     MOVE = 6
-    STAGNATE = 7
+    ODOMETRY = 7
     LAND = 8
     TAKEOFF = 9
     EMERGENCY = 10
@@ -30,65 +30,76 @@ class NetworkVehicle(Vehicle):
         '''
         self.lock.acquire()
         if not self.manually_operated:
+            print "Move."
             self.connection.send(chr(cmd))
         else:
-            self.connection.send(chr(STAGNATE))
+            print "Just receive odometry."
+            self.connection.send(chr(NetworkVehicle.ODOMETRY))
             
         data = self.connection.recv(1024)
         self.lock.release()
         toks = data.split(",", 3)
         self.odometry = [float(tok) for tok in toks[:]]
         return self.odometry
-        
+
     def move_manually(self, cmd):
         '''
         Send steering commands to the robot client.
         '''
-        string = cmd.split(".", 2)
+        string = cmd.split(";", 2)
+        command = int(string[0])
+        if not command == 6:
+            print command
+        
+        if command == 0:
+            self.change_op_mod()
+            return
             
         if self.manually_operated:
             self.lock.acquire()
-            self.connection.send(chr(string[0]))
-            if string[0] == "6":
+            print "Move manually."
+            self.connection.send(chr(command))
+            if command == 6:
                 self.connection.send(string[1])
             self.lock.release()
-    
+
     def emergency(self):
         '''
         Emergency stop.
         '''
         self.lock.acquire()
-        self.connection.send(chr(EMERGENCY))
+        self.connection.send(chr(NetworkVehicle.EMERGENCY))
         self.lock.release()
 
     def getOdometry(self):
         '''
         Request and receive odometry.
         '''
-        return self.move(STAGNATE)
+        return self.move(NetworkVehicle.ODOMETRY)
         
     def change_op_mod(self):
         '''
         Change from manually operation to auto and reverse.
         '''
         if self.manually_operated:
+            print "Manually op mod = False"
             self.manually_operated = False
         else:
+            print "Manually op mod = True"
             self.manually_operated = True
-            self.move(HOVER)
 
     def initialize(self):
         '''
         Iinitialize
         '''
-        print "Try to bind socket.."
+        print "NetworkVehicle: Try to bind socket.."
         while not self.setup():
             pass
         self.connection.send(chr(0))
         msg = self.connection.recv(1)
         while chr(1) not in msg:
             msg = self.connection.recv(1)
-        print "Connected."
+        print "NetworkVehicle: Connected."
         
     def setup(self):
         '''
@@ -96,22 +107,22 @@ class NetworkVehicle(Vehicle):
         '''
         # Bind socket to local host and port
         try:
-            self.socket.bind((HOST, PORT))
+            self.socket.bind((NetworkVehicle.HOST, NetworkVehicle.PORT))
         except socket.error:
             return False
 
         # Start listening on socket
         self.socket.listen(1)
-        print "Wait for client.."
+        print "NetworkVehicle: Wait for client.."
 
         # Connect to the client
         try:
             self.connection, addr = self.socket.accept()
-            print "Connected with " + addr[0] + ":" + str(addr[1])
+            print "NetworkVehicle: Connected with " + addr[0] + ":" + str(addr[1])
             return True
         except socket.error:
             self.shutdown()
-            print "Socket closed."
+            print "NetworkVehicle: Socket closed."
             return False
 
     def shutdown(self):
@@ -122,7 +133,7 @@ class NetworkVehicle(Vehicle):
         self.connection.close()
         self.socket.shutdown(socket.SHUT_RDWR)
         self.socket.close()
-        print "Connection closed."
+        print "NetworkVehicle: Connection closed."
 
 #~ if __name__ == '__main__':
     #~ CLIENT = NetworkVehicle()
