@@ -57,13 +57,30 @@ public class GamepadClient extends Thread {
 	/**
 	 * Update command string.
 	 * 
-	 * @param cmd
+	 * @param c
 	 *            New command.
 	 */
-	public void setCmd(String cmd) {
+	public void sendCommand(int c) {
 		if (running) {
 			try {
-				out.write(cmd);
+				if (c == '@')
+					System.out.println(c);
+				out.write(c);
+				out.flush();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	public void sendValues(int x, int y, int z, int rz){
+		if (running) {
+			try {
+				out.write(x);
+				out.write(y);
+				out.write(z);
+				out.write(rz);
 				out.flush();
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
