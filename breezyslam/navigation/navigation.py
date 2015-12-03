@@ -16,6 +16,7 @@ STAGNATE = 5
 
 class Navigation(threading.Thread):
 
+    route_lock = threading.Condition()
     
     def __init__(self, slam, MAP_SIZE_PIXELS, MAP_SIZE_METERS, ROBOT_SIZE_METERS, offset_in_scan, min_distance, commands):
         """
@@ -44,12 +45,22 @@ class Navigation(threading.Thread):
         '''
         self.running = True
         while(self.running):
-            if(self.recalculate):
+            
+            if(self.recalculate):                
                 self.mapbytes = self.createMap()
                 self.position = self.slam.getpos()
-                self.route = router.getRoute(sel.position, self.map)
+                route = self.router.getRoute(self.position, self.mapbytes)
                 self.recalculate = False
-            time.sleep(5)
+                print "recalculated"
+                self.route_lock.acquire()
+                self.route = route
+                self.route_lock.release()
+            else:
+                print "sleep"
+                self.route_lock.acquire()
+                self.route_lock.wait()
+                self.route_lock.release()
+            
             
         
 
@@ -62,15 +73,20 @@ class Navigation(threading.Thread):
             ##Check scan for obstacles in front
             if(self.checkTrajectory(scan, self.offset_in_scan, self.min_distance)== False):
                 ##recalcualte route
-                self.recalcualte = True
+                self.recalculate = True
                 print "obstacle detected"
-                return self.commands.HOVER
+                
+                self.route_lock.acquire()
+                self.route_lock.notify()
+                self.route_lock.release()
+                
+                return self.commands.WAIT
              
         ##turn and stay should be always possible
         return command
 
     def getCommand(self):
-        if(self.recalculate): return self.commands.HOVER
+        if(self.recalculate): return self.commands.WAIT
         return self.commands.MOVE_FORWARD
 
     def checkTrajectory(self, scan, offset, min_distance):
@@ -81,9 +97,11 @@ class Navigation(threading.Thread):
         min_distance: minimum distance to obstacles in the trajectory
         return: True if Trajecotry is free
         """
+        
         center = len(scan)/2
+        
         for i in range(center-offset, center+offset):
-            if(scan[i] < min_distance & scan[i] > 0):
+            if(scan[i] < min_distance and scan[i] > 0):
                 return False
         return True
 
@@ -104,6 +122,10 @@ class Navigation(threading.Thread):
         Stops navigation.
         """
         self.running = False
+        self.recalculate = False
+        self.route_lock.acquire()
+        self.route_lock.notify()
+        self.route_lock.release()
 
     def getmapbytes(self):
         """

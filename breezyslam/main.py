@@ -120,7 +120,7 @@ def main(g = 0.4, h = 0.4):
 
     #initialiye robot
     if(use_odometry):
-        navigation = Navigation(slam, MAP_SIZE_PIXELS, MAP_SIZE_METERS, ROBOT_SIZE_METERS, 150, 1000, Commands)
+        navigation = Navigation(slam, MAP_SIZE_PIXELS, MAP_SIZE_METERS, ROBOT_SIZE_METERS, 100, 1200, Commands)
         navigation.start()
         if(readlog):
             robot = FileDrone("odometry")
