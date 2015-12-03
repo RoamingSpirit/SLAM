@@ -4,6 +4,7 @@ Class for the routing.
 author: Nils Bernhardt 
 '''
 
+from collections import deque
 
 class Router():
 
@@ -15,5 +16,5 @@ class Router():
         '''
         Return a queue of targetpoints (x_mm, y_mm)
         '''
-        return
+        return deque([(0,0),(0,0)])
        

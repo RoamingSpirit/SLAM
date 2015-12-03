@@ -70,9 +70,9 @@ class Navigation(threading.Thread):
         """
         command = self.getCommand()
         if(command == self.commands.MOVE_FORWARD):
-            ##Check scan for obstacles in front
+            #check scan for obstacles in front
             if(self.checkTrajectory(scan, self.offset_in_scan, self.min_distance)== False):
-                ##recalcualte route
+                #recalcualte route
                 self.recalculate = True
                 print "obstacle detected"
                 
@@ -82,11 +82,13 @@ class Navigation(threading.Thread):
                 
                 return self.commands.WAIT
              
-        ##turn and stay should be always possible
+        #turn and stay should be always possible
         return command
 
     def getCommand(self):
         if(self.recalculate): return self.commands.WAIT
+        if(self.route == None): return self.commands.TURN_RIGHT
+        #TODO calculate
         return self.commands.MOVE_FORWARD
 
     def checkTrajectory(self, scan, offset, min_distance):
