@@ -8,15 +8,16 @@ from router import Router
 
 import threading
 import time
+import math
 
-MOVE_FORWARD = 2
-TURN_RIGHT = 3
-TURN_LEFT = 4
-STAGNATE = 5
+ANGLE_TOLERANCE_DEGREE = 5
+TARGET_TOLERANCE_MM = 500
 
 class Navigation(threading.Thread):
 
     route_lock = threading.Condition()
+    route = None
+    target = None
     
     def __init__(self, slam, MAP_SIZE_PIXELS, MAP_SIZE_METERS, ROBOT_SIZE_METERS, offset_in_scan, min_distance, commands):
         """
@@ -33,7 +34,6 @@ class Navigation(threading.Thread):
         self.MAP_SIZE_METERS = MAP_SIZE_METERS
         self.ROBOT_SIZE_METERS = ROBOT_SIZE_METERS
         self.mapbytes = self.createMap()
-        self.command = MOVE_FORWARD
         self.recalculate = True
         self.offset_in_scan = offset_in_scan
         self.min_distance = min_distance
@@ -49,6 +49,7 @@ class Navigation(threading.Thread):
             if(self.recalculate):                
                 self.mapbytes = self.createMap()
                 self.position = self.slam.getpos()
+                print self.position
                 route = self.router.getRoute(self.position, self.mapbytes)
                 self.recalculate = False
                 print "recalculated"
@@ -88,8 +89,50 @@ class Navigation(threading.Thread):
     def getCommand(self):
         if(self.recalculate): return self.commands.WAIT
         if(self.route == None): return self.commands.TURN_RIGHT
-        #TODO calculate
-        return self.commands.MOVE_FORWARD
+
+        position = self.slam.getpos()
+        
+        while(self.reachedTarget(self.target, position)):
+            if(len(self.route)==0):
+                #recalcualte route
+                self.recalculate = True
+                print "obstacle detected"
+                
+                self.route_lock.acquire()
+                self.route_lock.notify()
+                self.route_lock.release()
+                return self.commands.WAIT
+            else:
+                self.target = self.route.popleft()
+
+        angle = self.getAngle(self.target, self.target)
+        
+        if(math.fabs(angle) < ANGLE_TOLERANCE_DEGREE):
+            return self.commands.MOVE_FORWARD
+        
+        if(angle > 0):
+            return self.commands.TURN_RIGHT
+        else:
+            return self.commands.TURN_LEFT
+
+    def reachedTarget(self, target, position):
+        if(target == None): return True
+        xd = target[0]-position[0]
+        yd = target[1]-position[1]
+        dist = math.sqrt(xd*xd+yd*yd)
+        return dist < TARGET_TOLERANCE_MM
+
+    def getAngle(self, target, position):
+        x = float(target[0] -  position[0])
+        y = float(target[1] - position[1])
+
+        if(x == 0 and y == 0):
+            return 0
+        
+        angle = math.degrees(math.acos(x/math.sqrt(x*x+y*y)))
+        if(y<0):return -angle
+                
+        return angle
 
     def checkTrajectory(self, scan, offset, min_distance):
         """
