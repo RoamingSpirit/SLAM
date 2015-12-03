@@ -67,8 +67,8 @@ public class Main {
 			ip = JOptionPane.showInputDialog("Enter IP", loadDefaultIP());
 		}
 		storeDefaultIP(ip);
-		new Client(frame, panel, ip, 8888).start();
-		new Gamepad(new GamepadClient(ip, 8889)).start();
+		//new Client(frame, panel, ip, 8888).start();
+		new Gamepad(new GamepadClient(ip, 8000)).start();
 	}
 
 	/**

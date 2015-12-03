@@ -5,8 +5,10 @@ Drone class.
 __author__ = "lukas"
 __date__ = "$10.11.2015 10:12:49$"
 
+#~ import sys
+#~ sys.path.insert(0, '/home/pi/libardrone/python-ardrone')
 import sys
-sys.path.insert(0, '/home/pi/libardrone/python-ardrone')
+sys.path.insert(0, '/home/lukas/Dokumente/Libs/libardrone/python-ardrone')
 import libardrone
 import cv2
 import time
@@ -35,10 +37,10 @@ class Drone(object):
         self.log = log
         if(log):
             self.out = open('odometry', 'w')
-        print "Connecting..."
+        print "Drone: Establish connection to the drone..."
         self.cam = cv2.VideoCapture('tcp://192.168.1.1:5555')
         self.drone = libardrone.ARDrone()
-        print "Ok."
+        print "Drone: Ok."
         self.last_thata = self.drone.navdata.get(0, dict()).get('psi', 0)
 
     def get_dt(self):
@@ -119,7 +121,7 @@ class Drone(object):
         '''
         Set the moving command.
         '''
-        self.cmd = int(cmd)
+        self.cmd = cmd
         
     def manually_move(self, commands):
         '''
@@ -146,7 +148,7 @@ class Drone(object):
         '''
         Let the drone fly.
         '''
-        print "Take off"
+        print "Drone: Take off"
         if not TESTING:
             self.drone.takeoff()
             counter = 0
@@ -159,15 +161,15 @@ class Drone(object):
                 #~ time.sleep(1)
             # TODO: Testing
         self.in_air = True
-        print "Drone in air!"
+        print "Drone: In air!"
 
     def shutdown(self):
         '''
         Close application.
         '''
-        print "Shutting down..."
+        print "Drone: Shutting down..."
         self.in_air = False
         self.drone.land()
         self.cam.release()
         self.drone.halt()
-        print "Drone shutted down."
+        print "Drone: Shutted down."

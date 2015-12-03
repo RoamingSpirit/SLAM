@@ -13,6 +13,10 @@ import java.net.UnknownHostException;
  *
  */
 public class GamepadClient extends Thread {
+
+	BufferedWriter out;
+	
+	Socket socket = null;
 	/**
 	 * Host ip.
 	 */
@@ -28,11 +32,7 @@ public class GamepadClient extends Thread {
 	/**
 	 * Flag for running.
 	 */
-	private boolean running = true;
-	/**
-	 * Command string.
-	 */
-	private String cmd = "";
+	private boolean running = false;
 
 	/**
 	 * 
@@ -61,18 +61,27 @@ public class GamepadClient extends Thread {
 	 *            New command.
 	 */
 	public void setCmd(String cmd) {
-		this.cmd = cmd;
+		if (running) {
+			try {
+				out.write(cmd);
+				out.flush();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 	}
 
 	@Override
 	public void run() {
 		while (reconnect) {
 			try {
-				Socket socket = null;
 				while (socket == null && reconnect) {
 					try {
 						// Connect socket to host.
 						socket = new Socket(host, port);
+						out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
+						running = true;
 					} catch (Exception e) {
 						synchronized (this) {
 							try {
@@ -85,11 +94,8 @@ public class GamepadClient extends Thread {
 					}
 				}
 				if (reconnect) {
-					BufferedWriter out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
 					while (running) {
-						// Send command string.
-						out.write(cmd);
-						cmd = "";
+
 					}
 					// Close socket.
 					out.close();

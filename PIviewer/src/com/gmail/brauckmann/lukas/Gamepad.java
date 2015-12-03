@@ -64,10 +64,10 @@ public class Gamepad extends Thread {
 		if (running)
 			// Start client.
 			client.start();
-		boolean move = false;
 		while (running) {
 			controller.poll();
 			Component[] components = controller.getComponents();
+
 			// Move values.
 			float x = 0;
 			float y = 0;
@@ -75,52 +75,70 @@ public class Gamepad extends Thread {
 			float rz = 0;
 
 			// Parse values from the controller.
-			for (int i = 0; i < components.length; i++) {
-				if (components[i].getName().equals("Base 3")) {
-					// Emergency.
-					client.setCmd("10");
-				} else if (components[i].getName().equals("Thumb 2")) {
-					// Land.
-					client.setCmd("7");
-				} else if (components[i].getName().equals("Trigger")) {
-					// Takeoff.
-					client.setCmd("9");
-				} else if (components[i].getName().equals("Base 4")) {
-					// Enable/disable user mode.
-					client.setCmd("0");
-				} else if (components[i].getName().equals("x")) {
-					if (Math.abs(components[i].getPollData()) > 0.01) {
-						x = components[i].getPollData();
-						move = true;
+			try{
+				for (int i = 0; i < components.length; i++) {
+					if (components[i].getName().equals("Base 3")) {
+						// Emergency.
+						if (components[i].getPollData() == 1.0f){
+							client.setCmd("10;");
+							Thread.sleep(500);
+							continue;
+						}
+					} else if (components[i].getName().equals("Thumb 2")) {
+						// Land.
+						if (components[i].getPollData() == 1.0f){
+							client.setCmd("8;");
+							Thread.sleep(500);
+							continue;
+						}
+					} else if (components[i].getName().equals("Trigger")) {
+						// Takeoff.
+						if (components[i].getPollData() == 1.0f){
+							client.setCmd("9;");
+							Thread.sleep(500);
+							continue;
+						}
+					} else if (components[i].getName().equals("Base 4")) {
+						// Enable/disable user mode.
+						if (components[i].getPollData() == 1.0f) {
+							System.out.println("User mod");
+							client.setCmd("0;");
+							Thread.sleep(500);
+							continue;
+						}
 					}
-				} else if (components[i].getName().equals("y")) {
-					if (Math.abs(components[i].getPollData()) > 0.01) {
-						y = components[i].getPollData();
-						move = true;
+					if (components[i].getName().equals("x")) {
+						if (Math.abs(components[i].getPollData()) > 0.1) {
+							x = components[i].getPollData();
+						}
 					}
-				} else if (components[i].getName().equals("z")) {
-					if (Math.abs(components[i].getPollData()) > 0.01) {
-						z = components[i].getPollData();
-						move = true;
+					if (components[i].getName().equals("y")) {
+						if (Math.abs(components[i].getPollData()) > 0.1) {
+							y = components[i].getPollData();
+						}
 					}
-				} else if (components[i].getName().equals("rz")) {
-					if (Math.abs(components[i].getPollData()) > 0.01) {
-						rz = components[i].getPollData();
-						move = true;
+					if (components[i].getName().equals("z")) {
+						if (Math.abs(components[i].getPollData()) > 0.1) {
+							z = components[i].getPollData();
+						}
 					}
-				}
-				if (move) {
+					if (components[i].getName().equals("rz")) {
+						if (Math.abs(components[i].getPollData()) > 0.1) {
+							rz = components[i].getPollData();
+						}
+					}
 					// Create move command string.
-					String cmd = "6.";
+					String cmd = "6;";
 					cmd += String.valueOf(x) + ",";
 					cmd += String.valueOf(y) + ",";
-					cmd += String.valueOf(-z) + ",";
+					cmd += String.valueOf(z) + ",";
 					cmd += String.valueOf(rz);
 					client.setCmd(cmd);
-				} else
-					// Hover.
-					client.setCmd("5");
+				}
+			}catch (InterruptedException e){
+				
 			}
+				
 		}
 	}
 }
