@@ -17,7 +17,7 @@ STAGNATE = 5
 class Navigation(threading.Thread):
 
     
-    def __init__(self, slam, MAP_SIZE_PIXELS, MAP_SIZE_METERS, ROBOT_SIZE_METERS, offset_in_scan, min_distance):
+    def __init__(self, slam, MAP_SIZE_PIXELS, MAP_SIZE_METERS, ROBOT_SIZE_METERS, offset_in_scan, min_distance, commands):
         """
         MAP_SIXE_PIXELS: map size in pixel
         MAP_SIZE_METERS: map size in meters
@@ -25,6 +25,7 @@ class Navigation(threading.Thread):
         offset_in_scan: values to check in a scan for obstacles from the center
         min_distance: minimum distance to keep to obstacles
         """
+        self.commands = commands
         threading.Thread.__init__(self)
         self.slam = slam
         self.MAP_SIZE_PIXELS = MAP_SIZE_PIXELS
@@ -32,7 +33,7 @@ class Navigation(threading.Thread):
         self.ROBOT_SIZE_METERS = ROBOT_SIZE_METERS
         self.mapbytes = self.createMap()
         self.command = MOVE_FORWARD
-        self.recalculate = False
+        self.recalculate = True
         self.offset_in_scan = offset_in_scan
         self.min_distance = min_distance
         self.router = Router(MAP_SIZE_PIXELS, MAP_SIZE_METERS, ROBOT_SIZE_METERS, min_distance)
@@ -46,7 +47,8 @@ class Navigation(threading.Thread):
             if(self.recalculate):
                 self.mapbytes = self.createMap()
                 self.position = self.slam.getpos()
-                router.getRoute(sel.position, self.map)            
+                self.route = router.getRoute(sel.position, self.map)
+                self.recalculate = False
             time.sleep(5)
             
         
@@ -55,17 +57,21 @@ class Navigation(threading.Thread):
         """
         return a move command based on the navigation and the scan
         """
-        ##TODO Update command
-        if(self.command == MOVE_FORWARD):
+        command = self.getCommand()
+        if(command == self.commands.MOVE_FORWARD):
             ##Check scan for obstacles in front
             if(self.checkTrajectory(scan, self.offset_in_scan, self.min_distance)== False):
                 ##recalcualte route
                 self.recalcualte = True
                 print "obstacle detected"
-                return STAGNATE
+                return self.commands.HOVER
              
         ##turn and stay should be always possible
-        return self.command
+        return command
+
+    def getCommand(self):
+        if(self.recalculate): return self.commands.HOVER
+        return self.commands.MOVE_FORWARD
 
     def checkTrajectory(self, scan, offset, min_distance):
         """
