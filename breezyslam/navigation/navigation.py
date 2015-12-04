@@ -5,6 +5,7 @@ author: Nils Bernhardt
 '''
 
 from router import Router
+from tentaclerouter import TentacleRouter
 
 import threading
 import time
@@ -19,7 +20,7 @@ class Navigation(threading.Thread):
     route = None
     target = None
     
-    def __init__(self, slam, MAP_SIZE_PIXELS, MAP_SIZE_METERS, ROBOT_SIZE_METERS, offset_in_scan, min_distance, commands):
+    def __init__(self, slam, mapconfig, ROBOT_SIZE_METERS, offset_in_scan, min_distance, commands):
         """
         MAP_SIXE_PIXELS: map size in pixel
         MAP_SIZE_METERS: map size in meters
@@ -31,14 +32,13 @@ class Navigation(threading.Thread):
         self.commands = commands
         threading.Thread.__init__(self)
         self.slam = slam
-        self.MAP_SIZE_PIXELS = MAP_SIZE_PIXELS
-        self.MAP_SIZE_METERS = MAP_SIZE_METERS
+        self.mapconfig = mapconfig
         self.ROBOT_SIZE_METERS = ROBOT_SIZE_METERS
         self.mapbytes = self.createMap()
         self.recalculate = True
         self.offset_in_scan = offset_in_scan
         self.min_distance = min_distance
-        self.router = Router(MAP_SIZE_PIXELS, MAP_SIZE_METERS, ROBOT_SIZE_METERS, min_distance)
+        self.router = TentacleRouter(mapconfig, ROBOT_SIZE_METERS, min_distance)
     
     def run(self):
         '''
@@ -169,7 +169,7 @@ class Navigation(threading.Thread):
         creates the map and stores it a byte array.
         """
         # Create a byte array to receive the computed maps
-        mapbytes = bytearray(self.MAP_SIZE_PIXELS * self.MAP_SIZE_PIXELS)
+        mapbytes = bytearray(self.mapconfig.SIZE_PIXELS * self.mapconfig.SIZE_PIXELS)
     
         # Get final map    
         self.slam.getmap(mapbytes)

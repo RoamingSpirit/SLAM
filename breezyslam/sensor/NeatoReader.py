@@ -16,7 +16,7 @@ class NeatoReader:
     
     def __init__(self):
         Baudrate = 115200 #comminication speed
-        COMport = 'COM8' # check to see devices to see where it is connected
+        COMport = '/dev/ttyACM0' # check to see devices to see where it is connected
         
         self.neatoSerial = serial.Serial(COMport, Baudrate)
         self.scan = self.scan #add the method
@@ -67,12 +67,12 @@ class NeatoReader:
                             print "Data recorded was weird. Look, data is: ", x
                             break
                 endRead = 1
-                self.neatoSerial.close()
+                
                 print "ending"
                 return intArray
+            #self.neatoSerial.close()
                 
-Banana = NeatoReader()
-print Banana.scan()
+
 
         
             

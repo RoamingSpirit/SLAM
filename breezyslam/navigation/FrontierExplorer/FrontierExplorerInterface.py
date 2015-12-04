@@ -20,4 +20,7 @@ class FEI(object):
 
     @abc.abstractmethod
     def findFrontiers(self, position, mapbytes, width):
+        """
+        return a priority queue with coordinates (x_pixels, y_pixels)
+        """
         pass

@@ -39,9 +39,11 @@ Change log:
 
 from sensor.xtion import XTION
 from sensor.xtion import FileXTION
+from sensor.Neato import NEATO
 from network.server import Server
 from vehicle.filedrone import FileDrone
 
+from mapconfig import MapConfig
 
 from vehicle.drone import Drone
 from vehicle.networkvehicle import NetworkVehicle
@@ -107,7 +109,7 @@ def main(g = 0.4, h = 0.4):
     if(readlog):
         sensor = FileXTION("log")
     else:
-        sensor = XTION()
+        sensor = NEATO()#XTION()
 
     
             
@@ -120,7 +122,7 @@ def main(g = 0.4, h = 0.4):
 
     #initialiye robot
     if(use_odometry):
-        navigation = Navigation(slam, MAP_SIZE_PIXELS, MAP_SIZE_METERS, ROBOT_SIZE_METERS, 100, 1200, Commands)
+        navigation = Navigation(slam, MapConfig(), ROBOT_SIZE_METERS, 100, 1200, Commands)
         navigation.start()
         if(readlog):
             robot = FileDrone("odometry")

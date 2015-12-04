@@ -4,7 +4,6 @@ Created on Wed Dec 02 12:13:15 2015
 
 @author: Guillermo the Great
 """
-import XV_11_decoder3 as xv3
 from sensor import Sensor
 
 import NeatoReader as nr
