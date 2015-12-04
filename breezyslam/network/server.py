@@ -25,4 +25,9 @@ class Server():
     '''
     def close(self):
         self.map_server.close()
-        self.control_server.close()      
+        self.map_server.join()
+        print "MapServer closed."
+        
+        self.control_server.close()
+        self.control_server.join()
+        print "ControlServer closed."
