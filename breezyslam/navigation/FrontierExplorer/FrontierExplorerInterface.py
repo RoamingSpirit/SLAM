@@ -5,9 +5,19 @@ import abc
 class FEI(object):
 
     @abc.abstractmethod
-    def expandObstacles(self):
+    def __init__(self, MAP_CODE_TOUPLE):
         pass
 
     @abc.abstractmethod
-    def findFrontiers(self):
+    def expandObstacles(self, position, mapbytes):
+        """
+        This should return an updated mapbytes
+        :param position:
+        :param mapbytes:
+        :return:
+        """
+        pass
+
+    @abc.abstractmethod
+    def findFrontiers(self, position, mapbytes, width):
         pass
