@@ -20,56 +20,54 @@ class NetworkVehicle(Vehicle):
 
     def __init__(self):
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.manually_operated = False
+        self.manually_operated = True
+        self.is_emergency = False
         self.odometry = [0.0, 0.0, 0.0]
-        self.lock = threading.Lock()
 
     def move(self, cmd):
         '''
         Send steering commands to the robot client.
         '''
-        self.lock.acquire()
-        if not self.manually_operated:
-            print "Move."
-            self.connection.send(chr(cmd))
-        else:
-            print "Just receive odometry."
-            self.connection.send(chr(NetworkVehicle.ODOMETRY))
-            
-        data = self.connection.recv(1024)
-        self.lock.release()
-        toks = data.split(",", 3)
-        self.odometry = [float(tok) for tok in toks[:]]
-        return self.odometry
+        if not self.is_emergency:
+            if not self.manually_operated:
+                self.connection.send(chr(cmd))
+            else:
+                self.connection.send(chr(NetworkVehicle.ODOMETRY))
+                
+            # Receive and parse odometry.
+            data = self.connection.recv(1024)
+            toks = data.split(",", 3)
+            self.odometry = [float(tok) for tok in toks[:]]
+            return self.odometry
+        return [0.0, 0.0, 0.0]
 
-    def move_manually(self, cmd):
+    def move_manually(self, command, values = ("", "", "", "")):
         '''
         Send steering commands to the robot client.
         '''
-        string = cmd.split(";", 2)
-        command = int(string[0])
-        if not command == 6:
-            print command
-        
-        if command == 0:
-            self.change_op_mod()
-            return
+        if not self.is_emergency:
             
-        if self.manually_operated:
-            self.lock.acquire()
-            print "Move manually."
-            self.connection.send(chr(command))
-            if command == 6:
-                self.connection.send(string[1])
-            self.lock.release()
+            if command == 0:
+                self.change_op_mod()
+                return
+                
+            if self.manually_operated:
+                self.connection.send(chr(command))
+                if command == 6:
+                    for i in range(0, 4):
+                        self.connection.send(values[i])
 
     def emergency(self):
         '''
         Emergency stop.
         '''
-        self.lock.acquire()
+        if self.is_emergency:
+            self.is_emergency = False
+        else:
+            self.is_emergency = True
+
+        print "NetworkVehicle: Emergency!"
         self.connection.send(chr(NetworkVehicle.EMERGENCY))
-        self.lock.release()
 
     def getOdometry(self):
         '''

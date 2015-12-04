@@ -24,17 +24,25 @@ class ControlServer(threading.Thread):
     '''
     def run(self):
 
-        self.setup()
+        while not self.setup():
+            pass
         
         while(self.running):
             try:
-                cmd = self.connection.recv(1024)
-                if len(cmd) > 1:
-                    if cmd[1] == ";":
-                        if cmd == "10;":
-                            self.vehicle.emergency()
-                        else:
-                            self.vehicle.move_manually(cmd)
+                cmd = self.connection.recv(1)
+                if not cmd == "":
+                    if cmd == "@":
+                        print "ControlServer: Emergency!"
+                        self.vehicle.emergency()
+                    elif cmd == "6":
+                        x = self.connection.recv(1)
+                        y = self.connection.recv(1)
+                        z = self.connection.recv(1)
+                        rz = self.connection.recv(1)
+                        print "Commands: ", ord(x), ord(y), ord(z), ord(rz)
+                        self.vehicle.move_manually(int(cmd), (x, y, z, rz))
+                    else:
+                        self.vehicle.move_manually(int(cmd))
             except socket.error, e:
                 print "ControlServer: Client disconnected."
                 self.setup()
@@ -44,14 +52,12 @@ class ControlServer(threading.Thread):
     '''
     def setup(self):
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        print 'ControlServer: Socket created.'
          
         # Bind socket to local host and port
         try:
             self.socket.bind((HOST, PORT))
         except socket.error as msg:
-            print 'ControlServer: Bind failed. Error Code : ' + str(msg[0]) + ' Message ' + msg[1]
-            self.running = False
+            return False
             
         if(self.running):             
             # Start listening on socket
@@ -62,9 +68,10 @@ class ControlServer(threading.Thread):
             try:
                 self.connection, addr = self.socket.accept()
                 print 'ControlServer: Socket connected with ' + addr[0] + ':' + str(addr[1])
+                return True
             except socket.error, e:
-                self.running = False
                 print 'ControlServer: Socket closed.'
+                return False
 
     '''
     Close the connection and stop the running thread.
