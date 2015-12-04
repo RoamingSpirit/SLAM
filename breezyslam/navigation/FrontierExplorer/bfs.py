@@ -19,7 +19,7 @@ class bfsFE(FEI):
         #TODO : Priority queue the list based off closeness to the robot
         #TODO : implement get neighbor functions < Located in the MapTools.py File >
 
-        ## TODO : What are the dimensions of the map in terms of pixles or mm or?
+        ## TODO : What are the dimensions of the map in terms of pixles or mm or? pixels
 
 
     def expandObstacles(self, position, mapbytes):
