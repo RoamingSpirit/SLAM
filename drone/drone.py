@@ -27,7 +27,7 @@ class Drone(object):
     moving = False
     turning = False
     cmd = 0
-    commands = (0, 0, 0, 0)
+    commands = [0.0, 0.0, 0.0, 0.0]
     old_timestamp = 0.0
 
     def __init__(self, log = True):
@@ -93,7 +93,7 @@ class Drone(object):
                 self.drone.move(commands[0], commands[1], commands[2], commands[3])
             elif self.cmd == 8:
                 self.drone.land()
-            elif self.cmd == 8:
+            elif self.cmd == 9:
                 self.drone.takeoff()
 
         # Get odometry data
@@ -123,13 +123,17 @@ class Drone(object):
         '''
         self.cmd = cmd
         
-    def manually_move(self, commands):
+    def manually_move(self, x, y, z, rz):
         '''
         Set the moving command.
         '''
         self.cmd = 6
-        self.commands = commands
-        
+        self.commands[0] = x
+        self.commands[1] = y
+        self.commands[2] = -z
+        self.commands[3] = rz
+        print "Commands: ", self.commands
+
     def land(self):
         '''
         Land.

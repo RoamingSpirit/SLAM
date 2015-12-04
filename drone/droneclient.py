@@ -65,16 +65,12 @@ class DroneClient(threading.Thread):
                     self.socket.send(self.drone.get_odometry())
                 # Testing commands.
                 elif msg == chr(6):
-                    print "Move."
-                    commands = self.socket.recv(1024)
-                    if len(commands) == 4:
-                        values = commands.split(",",4)
-                        print values
-                        self.drone.manually_move
-                        ((float(values[0]), float(values[1]),
-                        -float(values[2]), float(values[3])))
+                    x = float(ord(self.socket.recv(1)))/10-1
+                    y = float(ord(self.socket.recv(1)))/10-1
+                    z = float(ord(self.socket.recv(1)))/10-1
+                    rz = float(ord(self.socket.recv(1)))/10-1
+                    self.drone.manually_move(x, y, z, rz)
                 elif msg == chr(7):
-                    print "Odometry."
                     self.socket.send(self.drone.get_odometry())
                 elif msg == chr(8):
                     print "Land."

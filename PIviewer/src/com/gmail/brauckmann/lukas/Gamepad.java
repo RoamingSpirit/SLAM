@@ -70,10 +70,10 @@ public class Gamepad extends Thread {
 			Component[] components = controller.getComponents();
 			boolean moving = false;
 			// Move values.
-			int x = 0;
-			int y = 0;
-			int z = 0;
-			int rz = 0;
+			float x = 0;
+			float y = 0;
+			float z = 0;
+			float rz = 0;
 
 			// Parse values from the controller.
 			try {
@@ -103,31 +103,33 @@ public class Gamepad extends Thread {
 						if (components[i].getPollData() == 1.0f) {
 							System.out.println("User mod");
 							client.sendCommand('0');
+							client.sendCommand('6');
+							client.sendValues(0, 0, 0, 0);
 							Thread.sleep(500);
 							continue;
 						}
 					} else {
 						if (components[i].getName().equals("x")) {
 							if (Math.abs(components[i].getPollData()) > 0.1) {
-								x = (int) components[i].getPollData() * 100;
+								y = components[i].getPollData();
 								moving = true;
 							}
 						}
 						if (components[i].getName().equals("y")) {
 							if (Math.abs(components[i].getPollData()) > 0.1) {
-								y = (int) components[i].getPollData() * 100;
+								x = components[i].getPollData();
 								moving = true;
 							}
 						}
 						if (components[i].getName().equals("z")) {
 							if (Math.abs(components[i].getPollData()) > 0.1) {
-								z = (int) components[i].getPollData() * 100;
+								rz = components[i].getPollData();
 								moving = true;
 							}
 						}
 						if (components[i].getName().equals("rz")) {
 							if (Math.abs(components[i].getPollData()) > 0.1) {
-								rz = (int) components[i].getPollData() * 100;
+								z = components[i].getPollData();
 								moving = true;
 							}
 						}
@@ -137,6 +139,7 @@ public class Gamepad extends Thread {
 							client.sendValues(x, y, z, rz);
 							hover = false;
 						} else if (!hover) {
+							System.out.println("Moving: " + moving);
 							client.sendCommand('6');
 							client.sendValues(0, 0, 0, 0);
 							hover = true;

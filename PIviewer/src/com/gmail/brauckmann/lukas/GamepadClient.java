@@ -63,8 +63,6 @@ public class GamepadClient extends Thread {
 	public void sendCommand(int c) {
 		if (running) {
 			try {
-				if (c == '@')
-					System.out.println(c);
 				out.write(c);
 				out.flush();
 			} catch (IOException e) {
@@ -74,14 +72,19 @@ public class GamepadClient extends Thread {
 		}
 	}
 	
-	public void sendValues(int x, int y, int z, int rz){
+	public void sendValues(float x, float y, float z, float rz){
 		if (running) {
 			try {
-				out.write(x);
-				out.write(y);
-				out.write(z);
-				out.write(rz);
+				int ix = (int) ((x+1) * 10);
+				int iy = (int) ((y+1) * 10);
+				int iz = (int) ((z+1) * 10);
+				int irz = (int) ((rz+1) * 10);
+				out.write(ix);
+				out.write(iy);
+				out.write(iz);
+				out.write(irz);
 				out.flush();
+				System.out.println(ix + ", " + iy + ", " + iz + ", " + irz);
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
