@@ -65,7 +65,7 @@ import math
 
 
 #wait for client for image stream
-stream = True
+stream = False
 #read form log file or use sensor
 readlog = True
 use_odometry = True 
@@ -109,7 +109,7 @@ def main(g = 0.4, h = 0.4):
     if(readlog):
         sensor = FileXTION("log")
     else:
-        sensor = NEATO()#XTION()
+        sensor = XTION()
 
     
             

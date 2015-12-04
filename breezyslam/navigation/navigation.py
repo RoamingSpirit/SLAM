@@ -61,7 +61,7 @@ class Navigation(threading.Thread):
                 self.route_lock.acquire()
                 self.route_lock.wait()
                 self.route_lock.release()
-            
+        print "Navigation terminated"            
             
         
 

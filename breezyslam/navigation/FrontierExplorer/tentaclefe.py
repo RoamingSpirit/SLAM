@@ -24,12 +24,11 @@ class TentacleFE(FEI):
         self.min_dist = min_dist
 
 
-    @abc.abstractmethod
     def findFrontiers(self, position, mapbytes, width):
         """
         return a priority queue with coordinates (x_pixels, y_pixels)
         """
-        return self.getTargets(position[0], position[1], mapbytes, self.mapconf.SIXE_PIXELS, self.tentacls, self.max_search, self.min_dist)
+        return self.getTargets(position[0], position[1], mapbytes, self.mapconf.SIZE_PIXELS, self.tentacles, self.max_search, self.min_dist)
 
     def getTargets(self, x, y, mapbytes, map_size, tentacles, max_search, min_dist):
         """
@@ -41,13 +40,13 @@ class TentacleFE(FEI):
             angle = a * angleDif
             dx = math.cos(angle)
             dy = math.sin(angle)
-            values.append(getTentacleValue(x, y, mapbytes, mapsize, dx, dy, max_search, min_dist))
+            values.append(self.getTentacleValue(x, y, mapbytes, map_size, dx, dy, max_search, min_dist))
 
-        frontiers = Queue.PriorityQueue()
+        frontiers = PriorityQueue()
         current = None
         maxPos = tentacles/4
         for i in range(0, len(values)):
-            if(values[i][2] == UNKOWN):
+            if(values[i][2] == UNKNOWN):
                 if(current == None):
                     current = [values[i]]
                 elif(len(current) < maxPos):
@@ -78,11 +77,17 @@ class TentacleFE(FEI):
         """
         #make value iteratable
         if(math.fabs(dx)>math.fabs(dy)):
-            dx = float(dx)/dy
-            dy = 1
+            if(dy == 0):
+                dx = 1
+            else:
+                dx = float(dx)/dy
+                dy = 1
         else:
-            dy = float(dy)/dx
-            dx =1
+            if(dx==0):
+                dy=1
+            else:
+                dy = float(dy)/dx
+                dx =1
         step_dist = math.sqrt(dx*dx+dy*dy)
         steps = int(max_dist/step_dist)
         start = int(min_dist/step_dist)
@@ -93,5 +98,5 @@ class TentacleFE(FEI):
             if(value == UNKNOWN): return (x,y, unknown)
             if(value != FREE): return (x, y, WALL)
                 
-        return (x, y, FREE)
+        return (xc, yc, FREE)
 

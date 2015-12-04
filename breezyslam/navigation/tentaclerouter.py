@@ -8,13 +8,13 @@ from collections import deque
 import math
 
 from router import Router
-from FrountierExplore.tentaclefe import TentacleFE
+from FrontierExplorer.tentaclefe import TentacleFE
 
 class TentacleRouter(Router):
 
     
     def __init__(self, mapconfig, ROBOT_SIZE_METERS, min_distance):
-        prev_positions = deque()
+        self.prev_positions = deque()
         self.mapconfig = mapconfig
         self.SCAN_DIST_PIXELS = 3500 #todo
         tentacles = self.calcTentacles(mapconfig.mToPixels(ROBOT_SIZE_METERS), self.SCAN_DIST_PIXELS)
@@ -24,7 +24,9 @@ class TentacleRouter(Router):
         '''
         Return a queue of targetpoints (x_mm, y_mm)
         '''
-        return deque([(0,0),(0,0)])
+        x_pixels = self.mapconfig.mmToPixels(position[0])
+        y_pixels = self.mapconfig.mmToPixels(position[1])
+        return deque([self.getNext(x_pixels, y_pixels, mapbytes)])
 
     def calcTentacles(self, robot_size, dist):
         return int(2 * math.pi * dist / robot_size+1)
@@ -33,16 +35,16 @@ class TentacleRouter(Router):
         '''
         Return a targetpoint (x_pixels, y_pixels)
         '''
-        frontiers = fe.findFrontiers((x_pixels, y_pixels), mapbytes, self.mapconfig.SIZE_PIXELS)
+        frontiers = self.fe.findFrontiers((x_pixels, y_pixels), mapbytes, self.mapconfig.SIZE_PIXELS)
         
         
-        if(len(frontiers)==0):
-            if(len(self.prev_position) == 0):
+        if(frontiers.empty()):
+            if(len(self.prev_positions) == 0):
                 ##do deep search
                 return None
             else:
                 return self.prev_position.popleft()
         else:
             self.prev_positions.append((x_pixels, y_pixels))
-            return frontiers.get()
+            return frontiers.get()[1]
        
