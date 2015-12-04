@@ -26,9 +26,9 @@ class DroneClient(threading.Thread):
         '''
         Main loop
         '''
-        print "Connecting.."
+        print "DroneClient: Connecting.."
         self.socket.connect((self.host, self.port))
-        print "Connected to host."
+        print "DroneClient: Connected to host."
 
         while self.running:
             try:
@@ -36,6 +36,9 @@ class DroneClient(threading.Thread):
                 if len(msg) == 0:
                     print "Connection to server lost."
                     self.close()
+                elif msg == chr(10):
+                    print "Emergency."
+                    self.drone.emergency()
                 elif msg == chr(0):
                     print "Initialize."
                     self.drone.initialize()
@@ -46,19 +49,35 @@ class DroneClient(threading.Thread):
                     self.close()
                 elif msg == chr(2):
                     print "Move forward."
-                    self.drone.move(msg)
+                    self.drone.move(ord(msg))
                     self.socket.send(self.drone.get_odometry())
                 elif msg == chr(3):
                     print "Turn right."
-                    self.drone.move(msg)
+                    self.drone.move(ord(msg))
                     self.socket.send(self.drone.get_odometry())
                 elif msg == chr(4):
                     print "Turn left."
-                    self.drone.move(msg)
+                    self.drone.move(ord(msg))
                     self.socket.send(self.drone.get_odometry())
                 elif msg == chr(5):
-                    print "Stagnate."
+                    print "Hover."
+                    self.drone.move(ord(msg))
                     self.socket.send(self.drone.get_odometry())
+                # Testing commands.
+                elif msg == chr(6):
+                    x = float(ord(self.socket.recv(1)))/10-1
+                    y = float(ord(self.socket.recv(1)))/10-1
+                    z = float(ord(self.socket.recv(1)))/10-1
+                    rz = float(ord(self.socket.recv(1)))/10-1
+                    self.drone.manually_move(x, y, z, rz)
+                elif msg == chr(7):
+                    self.socket.send(self.drone.get_odometry())
+                elif msg == chr(8):
+                    print "Land."
+                    self.drone.land()
+                elif msg == chr(9):
+                    print "Takeoff."
+                    self.drone.initialize()
 
             except socket.timeout:
                 pass
@@ -73,11 +92,11 @@ class DroneClient(threading.Thread):
         '''
         Close the connection and stop the running thread.
         '''
-        print "Shutdown."
+        print "DroneClient: Shutdown."
         self.running = False
         self.drone.shutdown()
         self.socket.close()
-        print "Socket closed."
+        print "DroneClient: Socket closed."
 
 if __name__ == '__main__':
     CLIENT = DroneClient()

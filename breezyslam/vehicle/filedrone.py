@@ -1,6 +1,7 @@
 
 from vehicle import Vehicle
 
+
 class FileDrone(Vehicle):
 
     index = 0
@@ -51,3 +52,9 @@ class FileDrone(Vehicle):
         else:
             self.index += 1
             return self.data[self.index - 1]
+
+    def move(self, cmd):
+        '''
+        Set the moving command.
+        '''
+        return self.getOdometry()

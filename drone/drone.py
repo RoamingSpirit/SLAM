@@ -5,8 +5,10 @@ Drone class.
 __author__ = "lukas"
 __date__ = "$10.11.2015 10:12:49$"
 
+#~ import sys
+#~ sys.path.insert(0, '/home/pi/libardrone/python-ardrone')
 import sys
-sys.path.insert(0, '/home/pi/libardrone/python-ardrone')
+sys.path.insert(0, '/home/lukas/Dokumente/Libs/libardrone/python-ardrone')
 import libardrone
 import cv2
 import time
@@ -25,6 +27,7 @@ class Drone(object):
     moving = False
     turning = False
     cmd = 0
+    commands = [0.0, 0.0, 0.0, 0.0]
     old_timestamp = 0.0
 
     def __init__(self, log = True):
@@ -34,10 +37,10 @@ class Drone(object):
         self.log = log
         if(log):
             self.out = open('odometry', 'w')
-        print "Connecting..."
+        print "Drone: Establish connection to the drone..."
         self.cam = cv2.VideoCapture('tcp://192.168.1.1:5555')
         self.drone = libardrone.ARDrone()
-        print "Ok."
+        print "Drone: Ok."
         self.last_thata = self.drone.navdata.get(0, dict()).get('psi', 0)
 
     def get_dt(self):
@@ -84,6 +87,14 @@ class Drone(object):
                 self.drone.move(0, 0, 0, DRONE_SPEED)
             elif self.cmd == 4:
                 self.drone.move(0, 0, 0, -DRONE_SPEED)
+            elif self.cmd == 5:
+                self.drone.hover()
+            elif self.cmd == 6:
+                self.drone.move(commands[0], commands[1], commands[2], commands[3])
+            elif self.cmd == 8:
+                self.drone.land()
+            elif self.cmd == 9:
+                self.drone.takeoff()
 
         # Get odometry data
         dt_seconds = self.get_dt()
@@ -110,34 +121,59 @@ class Drone(object):
         '''
         Set the moving command.
         '''
-        self.cmd = int(cmd)
+        self.cmd = cmd
+        
+    def manually_move(self, x, y, z, rz):
+        '''
+        Set the moving command.
+        '''
+        self.cmd = 6
+        self.commands[0] = x
+        self.commands[1] = y
+        self.commands[2] = -z
+        self.commands[3] = rz
+        print "Commands: ", self.commands
+
+    def land(self):
+        '''
+        Land.
+        '''
+        self.drone.land()
+        self.in_air = False
+        
+    def emergency(self):
+        '''
+        Emergency landing.
+        '''
+        self.drone.reset()
+        self.in_air = False
 
     def initialize(self):
         '''
         Let the drone fly.
         '''
-        print "Take off"
+        print "Drone: Take off"
         if not TESTING:
             self.drone.takeoff()
             counter = 0
             # Check if the drone is in air and hovering
-            while self.in_air == False:
-                if (self.drone.navdata.get(0, dict()).
-                get('state', 0) == 4) or (counter == 10):
-                    self.in_air = True
-                counter += 1
-                time.sleep(1)
+            #~ while self.in_air == False:
+                #~ if (self.drone.navdata.get(0, dict()).
+                #~ get('state', 0) == 4) or (counter == 10):
+                    #~ self.in_air = True
+                #~ counter += 1
+                #~ time.sleep(1)
             # TODO: Testing
         self.in_air = True
-        print "Drone in air!"
+        print "Drone: In air!"
 
     def shutdown(self):
         '''
         Close application.
         '''
-        print "Shutting down..."
+        print "Drone: Shutting down..."
         self.in_air = False
-        self.drone.land()s
+        self.drone.land()
         self.cam.release()
         self.drone.halt()
-        print "Drone shutted down."
+        print "Drone: Shutted down."

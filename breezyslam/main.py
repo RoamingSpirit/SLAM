@@ -45,11 +45,14 @@ from vehicle.filedrone import FileDrone
 
 from vehicle.drone import Drone
 from vehicle.networkvehicle import NetworkVehicle
+from vehicle.commands import Commands
                 
 from breezyslam.algorithms import Deterministic_SLAM,RMHC_SLAM
 from slam.rmhcslam import My_SLAM
 
 from pgmutils.pgm_utils import pgm_save
+
+from navigation.navigation import Navigation
 
 from sys import exit, stdout
 from time import time
@@ -69,6 +72,7 @@ use_odometry = True
 MAP_SIZE_PIXELS          =  1000
 MAP_SIZE_METERS          =  40
 seed = 9999
+ROBOT_SIZE_METERS = 0.4
 
 
 #for keyboard interrupt
@@ -81,6 +85,9 @@ new_term[3] = (new_term[3] & ~termios.ICANON & ~termios.ECHO)
 
 
 def main(g = 0.4, h = 0.4):
+
+   
+
 
     
 
@@ -109,17 +116,20 @@ def main(g = 0.4, h = 0.4):
         if seed \
         else Deterministic_SLAM(sensor, MAP_SIZE_PIXELS, MAP_SIZE_METERS) 
 
-    if(stream):
-        server = Server(slam, MAP_SIZE_PIXELS)
-        server.start()
+    robot = None
 
     #initialiye robot
     if(use_odometry):
+        navigation = Navigation(slam, MAP_SIZE_PIXELS, MAP_SIZE_METERS, ROBOT_SIZE_METERS, 100, 1200, Commands)
+        navigation.start()
         if(readlog):
             robot = FileDrone("odometry")
         else:
             robot = Drone()
             #robot.initialize()
+    if(stream):
+        server = Server(slam, MAP_SIZE_PIXELS, robot)
+        server.start()
 
     
     # Start with an empty trajectory of positions
@@ -136,14 +146,28 @@ def main(g = 0.4, h = 0.4):
 
     dist = 0
     zeit = 0
+
+    ##make initial scan
+    scan = sensor.scan()
     
     while(True):
         scanno+=1
         if use_odometry:
-            velocities = robot.getOdometry()
+            ##navigaiton
+            # Create a byte array to receive the computed maps
+            mapbytes = bytearray(MAP_SIZE_PIXELS * MAP_SIZE_PIXELS)
+    
+            # Get final map    
+            #slam.getmap(mapbytes)
+            
+            command = navigation.update(scan)
+
+            ##odometry
+            velocities = robot.move(command)
             dist += velocities[0]
             zeit += velocities[2]
-           
+
+            ##lidar
             scan = sensor.scan()
             
             if(len(scan)<=0):
@@ -152,7 +176,8 @@ def main(g = 0.4, h = 0.4):
             
             # Update SLAM with lidar and velocities
             slam.update(scan, velocities)
-            
+
+
         else:
             scan = sensor.scan()
             if(len(scan)<=0):
@@ -168,12 +193,16 @@ def main(g = 0.4, h = 0.4):
         # Add new position to trajectory
         trajectory.append((x_mm, y_mm))
 
+
         if kbhit():
             break
 
-    # Report elapsed time
+    
     if(use_odometry):
         robot.shutdown()
+        navigation.stop()
+        
+    # Report elapsed time   
     elapsed_sec = time() - start_sec
     print('\n%d scans in %f sec = %f scans / sec' % (scanno, elapsed_sec, scanno/elapsed_sec))
 
@@ -190,6 +219,7 @@ def main(g = 0.4, h = 0.4):
     print"Accessing the image.. again. So dirty."
     print"Saving as .png: ..."
     cv2.imwrite("test.png", image)
+
     
     
     if(stream):

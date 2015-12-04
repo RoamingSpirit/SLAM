@@ -1,4 +1,5 @@
 package com.live.bernhardt.nils;
+
 import java.awt.BorderLayout;
 import java.awt.EventQueue;
 import java.io.BufferedReader;
@@ -10,6 +11,9 @@ import java.io.IOException;
 
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+
+import com.gmail.brauckmann.lukas.Gamepad;
+import com.gmail.brauckmann.lukas.GamepadClient;
 
 /**
  * Creates a window and starts a thread for connection.
@@ -63,7 +67,8 @@ public class Main {
 			ip = JOptionPane.showInputDialog("Enter IP", loadDefaultIP());
 		}
 		storeDefaultIP(ip);
-		new Client(frame, panel, ip, 8888).start();
+		//new Client(frame, panel, ip, 8888).start();
+		new Gamepad(new GamepadClient(ip, 8000)).start();
 	}
 
 	/**
