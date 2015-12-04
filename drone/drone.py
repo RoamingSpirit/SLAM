@@ -24,8 +24,6 @@ class Drone(object):
     '''
     correct_psi = True
     in_air = False
-    moving = False
-    turning = False
     cmd = 0
     commands = [0.0, 0.0, 0.0, 0.0]
     old_timestamp = 0.0
@@ -45,7 +43,7 @@ class Drone(object):
 
     def get_dt(self):
         '''
-        Return the time difference between since the last update.
+        Return the time difference since the last update.
         '''
         now = time.time()
         if self.old_timestamp == 0.0:
@@ -80,17 +78,23 @@ class Drone(object):
         send move commands to the drone.
         '''
         # Move the drone
-        if self.in_air & (not TESTING):
+        if self.in_air and (not TESTING):
             if self.cmd == 2:
+                print "Move foreward"
                 self.drone.move(0, -DRONE_SPEED, 0, 0)
             elif self.cmd == 3:
+                print "Turn right"
                 self.drone.move(0, 0, 0, DRONE_SPEED)
             elif self.cmd == 4:
+                print "Turn left"
                 self.drone.move(0, 0, 0, -DRONE_SPEED)
             elif self.cmd == 5:
+                print "Hover"
                 self.drone.hover()
             elif self.cmd == 6:
-                self.drone.move(commands[0], commands[1], commands[2], commands[3])
+                print "Move command:"
+                print self.commands[0], self.commands[1], self.commands[2], self.commands[3]
+                self.drone.move(self.commands[0], self.commands[1], self.commands[2], self.commands[3])
             elif self.cmd == 8:
                 self.drone.land()
             elif self.cmd == 9:
@@ -153,8 +157,9 @@ class Drone(object):
         Let the drone fly.
         '''
         print "Drone: Take off"
-        if not TESTING:
+        if not TESTING and self.in_air:
             self.drone.takeoff()
+            self.drone.hover()
             counter = 0
             # Check if the drone is in air and hovering
             #~ while self.in_air == False:
