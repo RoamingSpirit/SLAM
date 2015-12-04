@@ -48,19 +48,15 @@ class DroneClient(threading.Thread):
                     self.drone.shutdown()
                     self.close()
                 elif msg == chr(2):
-                    print "Move forward."
                     self.drone.move(ord(msg))
                     self.socket.send(self.drone.get_odometry())
                 elif msg == chr(3):
-                    print "Turn right."
                     self.drone.move(ord(msg))
                     self.socket.send(self.drone.get_odometry())
                 elif msg == chr(4):
-                    print "Turn left."
                     self.drone.move(ord(msg))
                     self.socket.send(self.drone.get_odometry())
                 elif msg == chr(5):
-                    print "Hover."
                     self.drone.move(ord(msg))
                     self.socket.send(self.drone.get_odometry())
                 # Testing commands.
@@ -73,10 +69,8 @@ class DroneClient(threading.Thread):
                 elif msg == chr(7):
                     self.socket.send(self.drone.get_odometry())
                 elif msg == chr(8):
-                    print "Land."
                     self.drone.land()
                 elif msg == chr(9):
-                    print "Takeoff."
                     self.drone.initialize()
 
             except socket.timeout:
