@@ -51,7 +51,7 @@ class aStarPlanner(PPI):
             if nodeX == goalX and nodeY == goalY:
                 break
 
-            nodeNeighbors = self._getNeighbors(nodeX, nodeY, mapbytes,FOUR_EXPAND=FOUR_EXPAND)
+            nodeNeighbors = self._getNeighbors(nodeX, nodeY, mapbytes,FOUR_EXPAND)
             for next in nodeNeighbors:
                 nextStepCost = cost_so_far[current_node] + self.mapconf.costTravel(current_node, next)
                 if next not in cost_so_far or nextStepCost < cost_so_far[next]:
@@ -65,7 +65,8 @@ class aStarPlanner(PPI):
     def _pathFromDict(self, astarDict, goal):
         """
         This function uses A* to generate a from start to end and then returns it.
-        :param start:
+        :param astarDict : dictionary search tree being stored as to,from as key,value. Therefore can recreate the path by using the goal.
+        :param goal : the goal location of the robot
         :return: list of points (x,y touples) that is the path to take to the goal
         """
         path = [goal]                      ## Initialize path
@@ -73,47 +74,42 @@ class aStarPlanner(PPI):
         ## Prime the statements for iterating to the end of the path
         current_location = goal
         prev = astarDict[current_location]
-        path.append(prev)
+        path.insert(0,prev)
         current_location = prev
 
-        ## TODO: Make this so it adds to the start of th elist not the end.
         ## Traverse the tree from leaves to trunk
         while prev is not None:
             prev = astarDict[current_location]
             if prev is None:
                 continue
-            path.append(prev)
+            path.insert(0,prev)
             current_location = prev
-
-        path.reverse()                              ## Reverse the list so it goes from start to finish
 
         return path
 
 
 
-    def _getNeighbors(self, x,y,map, FOUR_EXPAND=True):
-        # def getNeighbors(x, y, map, width, FOUR_EXPAND):
+    def _getNeighbors(self, x,y,map, neighborlist):
+        """
+        This returns the neighbors around the x and y locaiton on a map. the neighbors explored are by the neighborslist
+        that is passed in the arguments.
+
+        :param x: x location of the robot
+        :param y: y location of the robot
+        :param map: this is the map that the robot exsists in
+        :param neighborlist: a string representation of a list that can be eval'ed. Should be of the form: "[(),(),()...]"
+        :return: Dictionary of the search tree.
+        """
+
+        neighborlist = eval(neighborlist)
+
         if map is None:
             raise RuntimeError("Map is none")
 
-        four_expand = [(x+1,y),
-                       (x-1,y),
-                       (x,y+1),
-                       (x,y-1)]
-        eight_expand = []; eight_expand.extend(four_expand)
-        eight_expand.extend([(x+1,y+1),
-                             (x+1,y-1),
-                             (x-1,y-1),
-                             (x-1,y+1)])
         ret_list = []
-        num_expand = []
-        ## Pick how many surrounding nodes to expand
-        if FOUR_EXPAND: num_expand.extend(four_expand)
-        else: num_expand.extend(eight_expand)
-
-        for v in num_expand:
+        for neighbor in neighborlist:
             try:
-                tx,ty = v
+                tx,ty = neighbor
                 ## Screen out the values that are out of bounds
                 if self.mapconf.outofBounds(tx,ty):
                     continue
@@ -123,6 +119,5 @@ class aStarPlanner(PPI):
             except Exception,e:
                 print "Something else has errored in 'getNeighhbors'"
                 raise e
-
 
         return ret_list
