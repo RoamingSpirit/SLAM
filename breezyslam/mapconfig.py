@@ -1,8 +1,14 @@
+import math
+
 
 class MapConfig():
 
     SIZE_PIXELS = 1000
     SIZE_METERS = 40
+
+    UNKNOWN = 127
+    FREE = 255
+    WALL = 0
     
     def getValue(self,x, y, mapbytes):
         """
@@ -48,4 +54,8 @@ class MapConfig():
         :param goal: (x,y) touple
         :return:
         """
-        raise NotImplementedError("This method needs to be implemetned in the mapconfig class")
+
+        x1, y1 = start
+        x2, y2 = goal
+
+        return math.sqrt((x1-x2)**2 + (y1-y2)**2)

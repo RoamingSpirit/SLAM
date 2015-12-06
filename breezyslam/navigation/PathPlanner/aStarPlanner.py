@@ -13,12 +13,11 @@ class aStarPlanner(PPI):
 
     def makePath(self, position, mapbytes, goal):
         """
-        This returns a path from position to goal (within a min_dist) safety factor.
 
-        :param position:
-        :param mapbytes:
-        :param goal:
-        :return:
+        :param position: (x,y,theta) touple of the position of the robot
+        :param mapbytes: version of the map
+        :param goal: (x,y) touple of the goal
+        :return: list of touples that the system can travel to
         """
         aStarSearchTree = self._astar(position, mapbytes, goal)
         path = self._pathFromDict(aStarSearchTree, goal)

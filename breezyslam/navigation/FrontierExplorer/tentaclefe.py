@@ -10,9 +10,7 @@ from Queue import PriorityQueue
 
 import math
 
-UNKNOWN = 127
-FREE = 255
-WALL = 0
+
 
 class TentacleFE(FEI):
 
@@ -46,17 +44,17 @@ class TentacleFE(FEI):
         current = None
         maxPos = tentacles/4
         for i in range(0, len(values)):
-            if(values[i][2] == UNKNOWN):
+            if(values[i][2] == self.mapconf.UNKNOWN):
                 if(current == None):
                     current = [values[i]]
                 elif(len(current) < maxPos):
                     current.append(values[i])
                 else:
-                    frontiers.put((len(current), getCenter(current)))
+                    frontiers.put((len(current), self.getCenter(current)))
                     current = None
             else:
                 if(current != None):
-                    frontiers.put((len(current), getCenter(current)))
+                    frontiers.put((len(current), self.getCenter(current)))
                     current = None
         
         return frontiers
@@ -94,9 +92,9 @@ class TentacleFE(FEI):
         for i in range(start,steps):
             x = dx*i + xc
             y = dy*i + yc
-            value = tools.getValue(x, y, mapbytes, self.mapsize)
-            if(value == UNKNOWN): return (x,y, unknown)
-            if(value != FREE): return (x, y, WALL)
+            value = self.mapconf.getValue(x, y, mapbytes, self.mapsize)
+            if(value == self.mapconf.UNKNOWN): return (x,y, self.mapconf.UNKNOWN)
+            if(value != self.mapconf.FREE): return (x, y, self.mapconf.WALL)
                 
-        return (xc, yc, FREE)
+        return (xc, yc, self.mapconf.FREE)
 

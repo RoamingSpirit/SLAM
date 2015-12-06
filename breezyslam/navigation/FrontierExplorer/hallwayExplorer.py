@@ -8,13 +8,12 @@ import Queue
 
 
 class HallwayExplorer(FEI):
+    divList = [8,40]
 
+    def __init__(self, mapconf, numDivisions):
+        self._setDiv(numDivisions)
+        self.mapconf = mapconf
 
-    def __init__(self, MAP_CODE_TOUPLE, MAP_SIZE_PIXELS, MAP_SIZE_METERS, ROBOT_SIZE_METERS):
-        self._WALL, self._UNK, self._OPN = MAP_CODE_TOUPLE
-        self._MAP_SIZE_PIXELS = MAP_SIZE_PIXELS
-        self._MAP_SIZE_METERS = MAP_SIZE_METERS
-        self._ROBOT_SIZE_METERS = ROBOT_SIZE_METERS
 
         #TODO : Implement functions to translate the map to pixles or mm
         #TODO : Implement function to easily reference pixles from the map
@@ -24,6 +23,12 @@ class HallwayExplorer(FEI):
         #TODO : What is position in these? A x and y location? DOes it include direction?
 
         ## TODO : What are the dimensions of the map in terms of pixles or mm or? pixels
+
+    def _setDiv(self, numDivisions):
+        ## Set the number of divisions for the map to be divided
+        if numDivisions > len(self.divList):self.div = self.divList[-1]
+        elif numDivisions < 0: self.div = self.divList[0]
+        else: self.div = self.divList[numDivisions]
 
 
     def expandObstacles(self, position, mapbytes):
@@ -35,8 +40,29 @@ class HallwayExplorer(FEI):
         :param mapbytes: 1d representation of a 2d map in #TODO : What are the dimensions of the map?
         :return:
         """
+
         return
 
+
+    def divideFind(self, position, mapbytes):
+        smallImageSize = self.mapconf.SIZE_PIXELS/self.div
+        ## TODO : Ensure that the difVlist guarentees odd size
+        ## Because the image is an odd size (guarenteed by divList set) we can find the guarenteed center
+        cntr = ((smallImageSize - 1)/2) + 1
+        pointList = []
+
+        for y in xrange(self.div):
+            for x in xrange(self.div):
+                pointList.append((x*smallImageSize + cntr,y*smallImageSize + cntr))
+        wall_list = []
+
+        for point in pointList:
+            x,y = point
+            val = self.mapconf.getValue(x, y, mapbytes)
+            if val == self.mapconf.WALL:
+                wall_list.append(point)
+
+        return wall_list
 
     def findFrontiers(self, position, mapbytes, width):
         frontiers = Queue.PriorityQueue()
@@ -52,7 +78,7 @@ class HallwayExplorer(FEI):
             newy = (y - cy) + cy
             counter = 1
 
-            while v != self._WALL or v != self._UNK:
+            while v != self.mapconf.WALL or v != self.mapconf.WALL:
                 if MT.outofBounds(newx,newy,width):
                     raise RuntimeError("Edge of map detected in findFrontiers")
                 v = MT.getValue(newx, newy, mapbytes, width)
@@ -61,7 +87,7 @@ class HallwayExplorer(FEI):
                 counter = counter + 1
 
 
-            if v == self._UNK:
+            if v == self.mapconf.UNKNONW:
                 frontiers.put((counter,(newx,newy)))
 
         return frontiers
