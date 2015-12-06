@@ -50,7 +50,7 @@ class aStarPlanner(PPI):
             if nodeX == goalX and nodeY == goalY:
                 break
 
-            nodeNeighbors = self._getNeighbors(nodeX, nodeY, mapbytes,FOUR_EXPAND)
+            nodeNeighbors = self.mapconf.getNeighbors(nodeX, nodeY, mapbytes,FOUR_EXPAND)
             for next in nodeNeighbors:
                 nextStepCost = cost_so_far[current_node] + self.mapconf.costTravel(current_node, next)
                 if next not in cost_so_far or nextStepCost < cost_so_far[next]:
@@ -88,35 +88,3 @@ class aStarPlanner(PPI):
 
 
 
-    def _getNeighbors(self, x,y,map, neighborlist):
-        """
-        This returns the neighbors around the x and y locaiton on a map. the neighbors explored are by the neighborslist
-        that is passed in the arguments.
-
-        :param x: x location of the robot
-        :param y: y location of the robot
-        :param map: this is the map that the robot exsists in
-        :param neighborlist: a string representation of a list that can be eval'ed. Should be of the form: "[(),(),()...]"
-        :return: Dictionary of the search tree.
-        """
-
-        neighborlist = eval(neighborlist)
-
-        if map is None:
-            raise RuntimeError("Map is none")
-
-        ret_list = []
-        for neighbor in neighborlist:
-            try:
-                tx,ty = neighbor
-                ## Screen out the values that are out of bounds
-                if self.mapconf.outofBounds(tx,ty):
-                    continue
-                inbound_value = self.mapconf.getValue(x,y,map)
-                ret_list.append((tx,ty,inbound_value))
-
-            except Exception,e:
-                print "Something else has errored in 'getNeighhbors'"
-                raise e
-
-        return ret_list

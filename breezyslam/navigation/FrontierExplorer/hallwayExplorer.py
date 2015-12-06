@@ -40,11 +40,16 @@ class HallwayExplorer(FEI):
         :param mapbytes: 1d representation of a 2d map in #TODO : What are the dimensions of the map?
         :return:
         """
+        wall_list = self.divideFind(mapbytes)
+        wall_list = self.mapconf.likeNeighbors(wall_list,self.mapconf.WALL, mapbytes)
 
-        return
+        for wall in wall_list:
+            self.mapconf.dialateNode(wall,mapbytes)
+
+        return mapbytes
 
 
-    def divideFind(self, position, mapbytes):
+    def divideFind(self, mapbytes):
         smallImageSize = self.mapconf.SIZE_PIXELS/self.div
         ## TODO : Ensure that the difVlist guarentees odd size
         ## Because the image is an odd size (guarenteed by divList set) we can find the guarenteed center
@@ -92,11 +97,5 @@ class HallwayExplorer(FEI):
 
         return frontiers
 
-
-    """
-        Thoughts:
-            We could do a 'hallway classifier' algorithm that expands 8 ways out to find walls and
-            unknown regions and then use those lists to expand from there
-    """
 
 

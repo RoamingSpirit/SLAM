@@ -43,7 +43,7 @@ class TentacleRouter(Router):
                 ##do deep search
                 return None
             else:
-                return self.prev_position.popleft()
+                return self.prev_positions.popleft()
         else:
             self.prev_positions.append((x_pixels, y_pixels))
             return frontiers.get()[1]

@@ -44,7 +44,14 @@ class MapConfig():
         return (self.SIZE_METERS*1000.0)/self.SIZE_PIXELS*value
 
     def outofBounds(self, x,y):
-        return not (x >= self.SIZE_PIXELS or y >= self.SIZE_PIXELS or x < 0 or y < 0)
+        """
+        Returns True if the value is out of bounds of a specific map
+
+        :param x: x location
+        :param y: y location
+        :return: boolean representing if the value is out of bounds or not
+        """
+        return (x >= self.SIZE_PIXELS or y >= self.SIZE_PIXELS or x < 0 or y < 0)
 
     def costTravel(self, start, goal):
         """
@@ -59,3 +66,89 @@ class MapConfig():
         x2, y2 = goal
 
         return math.sqrt((x1-x2)**2 + (y1-y2)**2)
+
+
+    def dialateNode(self,node, map):
+            """
+            This dialates one node on a map and returns the map.
+            :param map: A list of lists of intigers with min 0 and max 100
+            :param node: x,y tuple of the location
+            :param max_x: width of the map
+            :param max_y: height of the map
+            :return:
+            """
+            x,y = node
+            gen_neighbors = [(x-1,y-1),             ## All possible neighbors
+                             (x+1,y+1),
+                             (x+1,y-1),
+                             (x-1,y+1),
+                             (x,y+1),
+                             (x,y-1),
+                             (x-1,y),
+                             (x+1,y)]
+
+            for n in gen_neighbors:
+                nx,ny = n
+                if not self.outofBounds(nx,ny):
+                    self.setValue(nx,ny,self.WALL,map)
+            return map
+
+
+    def likeNeighbors(self, listOfPoints, pointValue, mapbytes):
+        """
+        This function returns a list of the surrounding points that are the same as the pointValue passed. The points are
+        found as surrounding on the mapbytes map
+
+        :param listOfPoints: list of (x,y) touples that represent the the points to search
+        :param pointValue: INT :: This is the value of the neighbors that we want
+        :param mapbytes: This is the 1d rep of the 2d map
+        :return: list of (x,y) touples that including the listOfPoints passed.
+        """
+        # neighborlist = []
+        # for point in listOfPoints:
+        #     x,y = point
+        #     gettingNeighbors = True
+        #     while gettingNeighbors:
+        #
+        raise NotImplementedError("Work in progress, had to stop to do something else")
+
+
+
+
+
+    def getNeighbors(self, x,y,map, neighborlist):
+        """
+        This returns the neighbors around the x and y locaiton on a map. the neighbors explored are by the neighborslist
+        that is passed in the arguments.
+
+        :param x: x location of the robot
+        :param y: y location of the robot
+        :param map: this is the map that the robot exsists in
+        :param neighborlist: a string representation of a list that can be eval'ed. Should be of the form: "[(),(),()...]"
+        :return: Dictionary of the search tree.
+        """
+
+        neighborlist = eval(neighborlist)
+
+        if map is None:
+            raise RuntimeError("Map is none")
+
+        ret_list = []
+        for neighbor in neighborlist:
+            try:
+                tx,ty = neighbor
+                ## Screen out the values that are out of bounds
+                if self.outofBounds(tx,ty):
+                    continue
+                inbound_value = self.getValue(x,y,map)
+                ret_list.append((tx,ty,inbound_value))
+
+            except Exception,e:
+                print "Something else has errored in 'getNeighhbors'"
+                raise e
+
+        return ret_list
+
+
+
+
