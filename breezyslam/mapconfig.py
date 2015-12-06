@@ -39,3 +39,13 @@ class MapConfig():
 
     def outofBounds(self, x,y):
         return not (x >= self.SIZE_PIXELS or y >= self.SIZE_PIXELS or x < 0 or y < 0)
+
+    def costTravel(self, start, goal):
+        """
+        Calculates the cost of travel from one node to the next.
+
+        :param start: (x,y) touple
+        :param goal: (x,y) touple
+        :return:
+        """
+        raise NotImplementedError("This method needs to be implemetned in the mapconfig class")
