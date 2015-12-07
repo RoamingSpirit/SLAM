@@ -158,7 +158,7 @@ def main(g = 0.4, h = 0.4):
             ##navigaiton
             
             command = navigation.update(scan)
-            #print command
+            print command
 
             ##odometry
             velocities = robot.move(command)
