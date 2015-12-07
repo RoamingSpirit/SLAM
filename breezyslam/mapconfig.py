@@ -104,13 +104,36 @@ class MapConfig():
         :param mapbytes: This is the 1d rep of the 2d map
         :return: list of (x,y) touples that including the listOfPoints passed.
         """
-        # neighborlist = []
-        # for point in listOfPoints:
-        #     x,y = point
-        #     gettingNeighbors = True
-        #     while gettingNeighbors:
-        #
-        raise NotImplementedError("Work in progress, had to stop to do something else")
+        ERRROR = True
+        if not ERRROR:
+
+            FOUR_EXPAND = "[(x+1,y), (x-1,y), (x,y+1), (x,y-1)]"
+            neighborlist = set()
+            to_explore_list = set()
+            for point in listOfPoints:
+                x,y = point
+                gettingNeighbors = True
+                for neighbor in self.getNeighbors(x,y,mapbytes,FOUR_EXPAND):   ## 4 expanding for now.
+                    nx,ny = neighbor
+                    if self.getValue(nx,ny,mapbytes) == self.WALL:
+                        to_explore_list.add(neighbor)
+                        neighborlist.add(neighbor)
+
+                ## TODO : Fix this code, set cannot change size while iterating over it.
+                """ It might be a smart idea to write your own 'set' class or something. Something that can be mutated
+                while you're for looping over it or something. Idk, we just need to make sure that we expand all of like
+                neighbors around a certain point. The point of this is to expand obstacles... """
+                while gettingNeighbors:
+                    for node in to_explore_list:
+                        nx,ny = node
+                        nodeNeighbors = self.getNeighbors(nx,ny,mapbytes,FOUR_EXPAND)
+                        for neighbor in nodeNeighbors:
+                            nnx,nny = neighbor
+                            if self.getValue(nnx,nny,mapbytes) == self.WALL:
+                                to_explore_list.add(neighbor)
+                                neighborlist.add(neighbor)
+        else:
+            raise  NotImplementedError("likeNeighbors not implemented")
 
 
 
