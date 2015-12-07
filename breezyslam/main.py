@@ -65,9 +65,9 @@ import math
 
 
 #wait for client for image stream
-stream = False
+stream = True
 #read form log file or use sensor
-readlog = True
+readlog = False
 use_odometry = True 
 
 # Map size, scale
@@ -158,7 +158,7 @@ def main(g = 0.4, h = 0.4):
             ##navigaiton
             
             command = navigation.update(scan)
-            print command
+            #print command
 
             ##odometry
             velocities = robot.move(command)
