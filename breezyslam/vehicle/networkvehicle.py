@@ -1,5 +1,5 @@
 """
-NetworkVehilce class.
+NetworkVehicle class.
 """
 
 import socket
@@ -23,6 +23,7 @@ class NetworkVehicle(Vehicle):
 
     def __init__(self):
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.connection = socket.socket()
         self.manually_operated = True
         self.is_emergency = False
         self.odometry = [0.0, 0.0, 0.0]
@@ -41,17 +42,17 @@ class NetworkVehicle(Vehicle):
 
             # Receive and parse odometry.
             data = self.connection.recv(1024)
-            toks = data.split(",", 3)
-            self.odometry = [float(tok) for tok in toks[:]]
+            values = data.split(",", 3)
+            self.odometry = [float(tok) for tok in values[:]]
             return self.odometry
         return [0.0, 0.0, 0.0]
 
     def move_manually(self, command, values=("", "", "", "")):
         """
         Send steering commands to the robot client.
-        :param command:
-        :param values:
-        :return:
+        :param command: Moving command.
+        :param values: Parameters for manual moving.
+        :return: None.
         """
         if not self.is_emergency:
 
@@ -103,6 +104,7 @@ class NetworkVehicle(Vehicle):
         print "NetworkVehicle: Try to bind socket.."
         while not self.setup():
             pass
+        self.connection.settimeout(2)
         self.connection.send(chr(0))
         msg = self.connection.recv(1)
         while chr(1) not in msg:
