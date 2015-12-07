@@ -42,7 +42,7 @@ class Turtlebot(Vehicle, ros_turtlebot.ROSTurtlebot):
             raise NotImplementedError("Turtlebot Subclass not properly instantiated")
         return
 
-    def getOdometry(self):
+    def get_odometry(self):
         """
 
         This will run the serial commands to send the odom data. the _getOdomROS function will calculate
@@ -63,7 +63,7 @@ class Turtlebot(Vehicle, ros_turtlebot.ROSTurtlebot):
         self._diffy = self._past_y
         self._difftheta = self._past_theta
         self._time = time.time()
-        return response
+        return "%f,%f,%f" % response
 
     def shutdown(self):
         """

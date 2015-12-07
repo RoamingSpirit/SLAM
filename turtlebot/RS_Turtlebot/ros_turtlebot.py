@@ -30,7 +30,6 @@ class ROSTurtlebot(object):
         self._past_x = 0
         self._past_y = 0
         self._past_theta = 0
-        self._moving = False
 
         self._odom_tf.sendTransform((0, 0, 0),
                                     (0, 0, 0, 1),
@@ -126,7 +125,6 @@ class ROSTurtlebot(object):
         """  Publishes a stop message to the robot
         :return:None
         """
-        self._moving = False
         self._publishTwist(0, 0, self._pub)
 
     def _driveStraight(self, speed):
@@ -145,8 +143,7 @@ class ROSTurtlebot(object):
         elif speed < 0:
             speed = 0
 
-        while self.moving:
-            self._spinWheels(speed, speed, 0.1)
+        self._spinWheels(speed, speed, 0.1)
 
     def _rotate(self, speed=0.05):
         """
@@ -154,9 +151,7 @@ class ROSTurtlebot(object):
         :param speed: <int or double> The speed at which the robot should rotate
         :return: None
         """
-        self._moving = True
-        while self._moving:
-            self._spinWheels(speed, -speed, .1)
+        self._spinWheels(speed, -speed, .1)
 
     def _normalizeTheta(self, quaternian_touple):
         """

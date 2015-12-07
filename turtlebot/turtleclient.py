@@ -4,12 +4,13 @@ TurtleClient class.
 
 import socket
 import threading
+from turtlebot import Turtlebot
 
 
 class TurtleClient(threading.Thread):
     """
-    Class representing a client which receive drone commands
-    and send drone odometry.
+    Class representing a client which receive turtlebot commands
+    and send turtlebot odometry.
     """
 
     def __init__(self, host="", port=9000):
@@ -18,7 +19,7 @@ class TurtleClient(threading.Thread):
         self.socket.settimeout(2)
         self.host = host
         self.port = port
-        self.turtle = TurtleBot()
+        self.turtle = Turtlebot()
         self.running = True
         self.start()
 
@@ -36,9 +37,6 @@ class TurtleClient(threading.Thread):
                 if len(msg) == 0:
                     print "Connection to server lost."
                     self.close()
-                elif msg == chr(10):
-                    print "Emergency."
-                    self.turtle.emergency()
                 elif msg == chr(0):
                     print "Initialize."
                     self.turtle.initialize()
@@ -63,20 +61,13 @@ class TurtleClient(threading.Thread):
                     print "Wait."
                     self.turtle.move(ord(msg))
                     self.socket.send(self.turtle.get_odometry())
-                # Testing commands.
-                elif msg == chr(6):
-                    x = float(ord(self.socket.recv(1))) / 10 - 1
-                    y = float(ord(self.socket.recv(1))) / 10 - 1
-                    z = float(ord(self.socket.recv(1))) / 10 - 1
-                    rz = float(ord(self.socket.recv(1))) / 10 - 1
-                    self.turtle.manually_move(x, y, z, rz)
-                elif msg == chr(7):
-                    self.socket.send(self.turtle.get_odometry())
+                else:
+                    print "Error: Invalid command!"
 
             except socket.timeout:
                 pass
-            except socket.error, err:
-                print err
+            except socket.error, error:
+                print error
                 self.close()
             except KeyboardInterrupt:
                 print "Interrupted."
@@ -88,7 +79,7 @@ class TurtleClient(threading.Thread):
         """
         print "TurtleClient: Shutdown."
         self.running = False
-        self.drone.shutdown()
+        self.turtle.shutdown()
         self.socket.close()
         print "TurtleClient: Socket closed."
 

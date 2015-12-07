@@ -80,7 +80,7 @@ class Drone(object):
         # Move the drone
         if self.in_air and (not TESTING):
             if self.cmd == 2:
-                print "Move foreward"
+                print "Move forward"
                 self.drone.move(0, -DRONE_SPEED, 0, 0)
             elif self.cmd == 3:
                 print "Turn right"
