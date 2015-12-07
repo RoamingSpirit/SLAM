@@ -2,7 +2,6 @@ __author__ = 'troyhughes'
 
 
 from FrontierExplorerInterface import FEI
-import MapTools as MT
 import Queue
 
 
@@ -72,7 +71,7 @@ class HallwayExplorer(FEI):
     def findFrontiers(self, position, mapbytes, width):
         frontiers = Queue.PriorityQueue()
         cx,cy = position   # Get the current x and y of the robot from the position touple
-        hallwayExpand = MT.getNeighbors(cx,cy,mapbytes,width,FOUR_EXPAND = False)
+        hallwayExpand = self.mapconf.getNeighbors(cx,cy,mapbytes,width,FOUR_EXPAND = False)
 
         for square in hallwayExpand:
             x,y,v = square
@@ -83,10 +82,9 @@ class HallwayExplorer(FEI):
             newy = (y - cy) + cy
             counter = 1
 
-            while v != self.mapconf.WALL or v != self.mapconf.WALL:
-                if MT.outofBounds(newx,newy,width):
-                    raise RuntimeError("Edge of map detected in findFrontiers")
-                v = MT.getValue(newx, newy, mapbytes, width)
+            while (v != self.mapconf.WALL or v != self.mapconf.WALL) and \
+                    not (self.mapconf.outofBounds(newx,newy,width)):
+                v = self.mapconf.getValue(newx, newy, mapbytes, width)
                 newx = (x - cx) + newx
                 newy = (y - cy) + newy
                 counter = counter + 1
