@@ -18,15 +18,15 @@ class ControlServer(threading.Thread):
 
     def __init__(self, vehicle):
         threading.Thread.__init__(self)
+        self.connection = socket.socket()
         self.vehicle = vehicle
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.connection = socket.socket()
 
     def run(self):
         """
         Setup the connection and receive commands from socket.
         """
-        while not self.setup():
+        while not self.setup() and self.running:
             pass
 
         self.connection.settimeout(2)
@@ -65,15 +65,15 @@ class ControlServer(threading.Thread):
         if self.running:
             # Start listening on socket
             self.socket.listen(2)
-            print 'ControlServer: Socket now listening.'
+            print "ControlServer: Socket now listening."
 
             # Wait to accept a connection - blocking call
             try:
                 self.connection, address = self.socket.accept()
-                print 'ControlServer: Socket connected with ' + address[0] + ':' + str(address[1])
+                print "ControlServer: Socket connected with " + address[0] + ":" + str(address[1])
                 return True
-            except socket.error, e:
-                print 'ControlServer: Socket closed.'
+            except socket.error:
+                print "ControlServer: Socket closed."
                 return False
 
     def close(self):
@@ -81,8 +81,6 @@ class ControlServer(threading.Thread):
         Close the connection and stop the running thread.
         """
         self.running = False
-        print "Running = False."
         self.socket.shutdown(socket.SHUT_RDWR)
-        print "Socket shutdown."
         self.socket.close()
         print "Socket closed."
