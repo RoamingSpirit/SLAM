@@ -94,4 +94,4 @@ class TurtleClient(threading.Thread):
 
 
 if __name__ == '__main__':
-    CLIENT = DroneClient()
+    CLIENT = TurtleClient()

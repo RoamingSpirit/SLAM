@@ -23,7 +23,7 @@ class XTION(Sensor):
 
     def __init__(self, log=True):
         self.log = log
-        if (log):
+        if log:
             self.out = open('log', 'w')
         self.reader = Reader()
         self.width = self.reader.getWidth()
@@ -40,23 +40,22 @@ class XTION(Sensor):
         :return: Array with the values.
         """
         frame = self.reader.readFrame()
-        data = self.readLine(frame, self.width, self.height, self.row)
+        data = self.read_line(frame, self.width, self.height, self.row)
         return data
 
-    '''
-    #Prints the depth value for every pixel in one line
-    #frame_data - depth frame
-    #width -  width of the frame
-    #height - heigth of the frame
-    #line - line to print
-    return one data row converted as lidar
-    '''
-
-    def readLine(self, frame_data, width, height, line):
+    def read_line(self, frame_data, width, height, line):
+        """
+        Print the depth value for every pixel in one line.
+        :param frame_data: depth frame.
+        :param width: width of the frame.
+        :param height: height of the frame.
+        :param line: line to print.
+        :return: one data row converted as lidar.
+        """
         data = []
         for x in range(width - 1, -1, -1):
             value = self.getAverageDepth(frame_data, width, height, x, line, self.linecount)
-            converted = self.toLidarValue(value, x, width)
+            converted = self.to_lidar_value(value, x, width)
             if self.log:
                 self.out.write(str(converted) + ' ')
             data.append(converted)
@@ -64,15 +63,14 @@ class XTION(Sensor):
             self.out.write('\n')
         return data
 
-    '''
-    Converts the measured value of the asus xtion to the value a lidar would measure
-    value: value to convert
-    x: x position of the value
-    width: of the frame
-    return: converted value
-    '''
-
-    def toLidarValue(self, value, x, width):
+    def to_lidar_value(self, value, x, width):
+        """
+        Convert the measured value of the asus xtion to the value a lidar would measure.
+        :param value: value to convert.
+        :param x: x position of the value.
+        :param width: of the frame.
+        :return: converted value.
+        """
         angle = (float(width) / 2 - x) / width * self.viewangle
         return int(value / math.cos(math.radians(angle)))
 
@@ -129,15 +127,13 @@ class FileXTION(XTION):
         else:
             return []
 
-    '''
-    loads a stroed log file and saves the scans.
-    datadir: directionary of the file
-    dataset: filename
-    return: scans, width of the scans
-    '''
-
     def load_data(self, datadir, dataset):
-
+        """
+        Load a stored log file and saves the scans.
+        :param datadir: directionary of the file.
+        :param dataset: filename.
+        :return: scans, width of the scans
+        """
         filename = '%s/%s' % (datadir, dataset)
         print('Loading data from %s...' % filename)
 
