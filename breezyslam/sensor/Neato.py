@@ -26,7 +26,6 @@ class NEATO(Sensor):
         #if(log):
          #   self.out = open('log', 'w')
         self.sensor = nr.NeatoReader()
-        
         Sensor.__init__(self, self.width, self.scan_rate_hz, self.viewangle, self.distance_no_detection_mm, self.detectionMargin, self.offsetMillimeters)
         
         

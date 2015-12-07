@@ -14,14 +14,17 @@ import signal
 
 class NeatoReader:
     
-    def __init__(self):
+    def __init__(self, log = True):
         Baudrate = 115200 #comminication speed
         COMport = '/dev/ttyACM0' # check to see devices to see where it is connected
         
         self.neatoSerial = serial.Serial(COMport, Baudrate)
         self.scan = self.scan #add the method
         self.message = "ShowDist\n" #used to get usable information from lidar. Send this message before receiving from lidar
-        
+
+        self.log = log
+        if(log):
+            self.out = open('logNeato', 'w')
         
         """
         read_scan
@@ -60,19 +63,25 @@ class NeatoReader:
                     if len(x.split()) > 1:
                         try:
                             #We split the string into 3, and return the middle (which is the distance)
-                            intArray.append(int(x.split(' ', 3)[1]))
+                            toks = x.split(' ', 3)
+                            value = toks[1]
+                            if(self.log):
+                                self.out.write(value + ' ')
+                            #intArray.append(int(value))
     
-                        except IndexError:
+                        except IndexError, ValueError:
                             #self.neatoSerial.close()
                             print "Data recorded was weird. Look, data is: ", x
                             break
                 endRead = 1
-                
+                if(self.log):
+                    self.out.write('\n')
                 print "ending"
                 return intArray
             #self.neatoSerial.close()
                 
 
-
-        
+banana = NeatoReader()
+while(True):
+    print banana.scan()
             

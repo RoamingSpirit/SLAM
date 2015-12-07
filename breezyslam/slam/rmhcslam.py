@@ -12,7 +12,7 @@ _DEFAULT_MAP_QUALITY         = 100 # out of 255
 _DEFAULT_HOLE_WIDTH_MM       = 300
 
 # Random mutation hill-climbing (RMHC) params
-_DEFAULT_SIGMA_XY_MM         = 40 #w/out odometry 45
+_DEFAULT_SIGMA_XY_MM         = 45 #w/out odometry 45
 _DEFAULT_SIGMA_THETA_DEGREES = 2.5#w/out odometry 2.5
 _DEFAULT_MAX_SEARCH_ITER     = 1000#w/out odometry 1000
 
