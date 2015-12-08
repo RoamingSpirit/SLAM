@@ -122,13 +122,13 @@ def main(g = 0.4, h = 0.4):
 
     #initialiye robot
     if(use_odometry):
-        navigation = Navigation(slam, MapConfig(), ROBOT_SIZE_METERS, 100, 1200, Commands)
+        navigation = Navigation(slam, MapConfig(), ROBOT_SIZE_METERS, 100, 800, Commands)
         navigation.start()
         if(readlog):
             robot = FileDrone("odometry")
         else:
-            robot = Drone()
-            #robot.initialize()
+            robot = NetworkVehicle() #Drone()
+            robot.initialize()
     if(stream):
         server = Server(slam, MAP_SIZE_PIXELS, robot)
         server.start()
@@ -158,13 +158,13 @@ def main(g = 0.4, h = 0.4):
             ##navigaiton
             
             command = navigation.update(scan)
-            print command
+            #print command
 
             ##odometry
             velocities = robot.move(command)
             dist += velocities[0]
             zeit += velocities[2]
-
+	    print velocities
             ##lidar
             scan = sensor.scan()
             

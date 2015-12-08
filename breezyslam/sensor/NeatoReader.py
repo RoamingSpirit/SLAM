@@ -88,9 +88,11 @@ class NeatoReader:
             #self.neatoSerial.close()
                 
 
+"""
 banana = NeatoReader(os = 'Windows')
 scans = 0
 while(scans < 10):
     print banana.scan()
     scans += 1
-            
+    """
+

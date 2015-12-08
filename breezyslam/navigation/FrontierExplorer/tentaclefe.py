@@ -106,8 +106,8 @@ class TentacleFE(FEI):
             y = int(dy*i + yc)
             value = self.mapconf.getValue(x, y, mapbytes)
             if(value == self.mapconf.UNKNOWN): return (x,y, self.mapconf.UNKNOWN)
-            if(value != self.mapconf.FREE): return (x, y, self.mapconf.WALL)
-
+            #if(value != self.mapconf.FREE): return (x, y, self.mapconf.WALL)
+            if(value < self.mapconf.UNKNOWN): return (x, y, self.mapconf.WALL)
            
         return (xc, yc, self.mapconf.FREE)
 
