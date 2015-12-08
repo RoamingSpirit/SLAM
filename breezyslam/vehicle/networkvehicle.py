@@ -3,8 +3,7 @@ NetworkVehicle class.
 """
 
 import socket
-import time
-import threading
+
 from vehicle import Vehicle
 
 
