@@ -25,15 +25,25 @@ class XtionClient(threading.Thread):
             try:
                 msg = self.socket.recv(1)
                 if len(msg) == 0:
-                    print "Connection to server lost."
+                    print "SensorClient: Connection to server lost."
                     self.close()
+                elif msg == chr(0):
+                    print "SensorClient: Initialize."
+                    parameters = self.xtion.get_parameters()
+                    for i in range(0, len(parameters), 1):
+                        self.socket.send(str(parameters[i]))
+                        self.socket.send(",")
+                    self.socket.send("\n")
                 elif msg == chr(1):
-                    print "Shutdown"
+                    print "SensorClient: Shutdown"
                     self.close()
                 elif msg == chr(2):
-                    print "Scan."
+                    print "SensorClient: Scan."
                     scan = self.xtion.scan()
-                    self.socket.send(self.turtle.get_odometry())
+                    for value in scan:
+                        self.socket.send(value)
+                        self.socket.send(",")
+                    self.socket.send("\n")
 
             except socket.timeout:
                 pass

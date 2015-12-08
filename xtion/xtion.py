@@ -34,6 +34,16 @@ class XTION(Sensor):
         Sensor.__init__(self, self.width, self.scan_rate_hz, self.viewangle, self.distance_no_detection_mm,
                         self.detectionMargin, self.offsetMillimeters)
 
+    def get_parameters(self):
+        parameters = []
+        parameters[0] = self.width
+        parameters[1] = self.scan_rate_hz
+        parameters[2] = self.viewangle
+        parameters[3] = self.distance_no_detection_mm
+        parameters[4] = self.detectionMargin
+        parameters[5] = self.offsetMillimeters
+        return parameters
+
     def scan(self):
         """
         Scan one line.
@@ -58,7 +68,7 @@ class XTION(Sensor):
             converted = self.to_lidar_value(value, x, width)
             if self.log:
                 self.out.write(str(converted) + ' ')
-            data.append(converted)
+            data.append(str(converted))
         if self.log:
             self.out.write('\n')
         return data
