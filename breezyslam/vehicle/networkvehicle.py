@@ -47,7 +47,7 @@ class NetworkVehicle(Vehicle):
                 values = data.split(",", 3)
                 self.odometry = [float(tok) for tok in values[:]]
                 if(self.log):
-                    self.out.write("%f %f %f\n" % self.odometry)
+                    self.out.write("%f %f %f\n" % (self.odometry[0], self.odometry[1], self.odometry[2]))
                 return self.odometry
         except socket.timeout:
             print "Timeout: Return [0.0, 0.0, 0.0]."

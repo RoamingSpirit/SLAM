@@ -18,7 +18,7 @@ class TentacleRouter(Router):
         self.mapconfig = mapconfig
         self.SCAN_DIST_PIXELS = mapconfig.mmToPixels(3500) #todo
         tentacles = self.calcTentacles(mapconfig.mToPixels(ROBOT_SIZE_METERS), self.SCAN_DIST_PIXELS)
-        self.fe = TentacleFE(mapconfig, tentacles, mapconfig.mmToPixels(500), mapconfig.mmToPixels(4000)) #TODO
+        self.fe = TentacleFE(mapconfig, tentacles, mapconfig.mmToPixels(500), mapconfig.mmToPixels(5000)) #TODO
 
     def getRoute(self, position, mapbytes):
         '''
@@ -34,7 +34,7 @@ class TentacleRouter(Router):
 
     def calcTentacles(self, robot_size, dist):
         print dist, robot_size
-        return int(2 * math.pi * dist / robot_size+1)
+        return int(2 * math.pi * dist / robot_size * 2)
     
     def getNext(self, x_pixels, y_pixels, mapbytes):
         '''

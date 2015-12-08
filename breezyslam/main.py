@@ -70,7 +70,7 @@ import math
 stream = True
 #read form log file or use sensor
 readlog = False
-use_odometry = False 
+use_odometry = True 
 
 # Map size, scale
 MAP_SIZE_PIXELS          =  1000
@@ -111,7 +111,7 @@ def main(g = 0.4, h = 0.4):
     if(readlog):
         sensor = FileXTION("log")
     else:
-        sensor = NetworkSensor() #XTION()
+        sensor = XTION()#NetworkSensor() #
 
     
             
@@ -124,8 +124,8 @@ def main(g = 0.4, h = 0.4):
 
     #initialiye robot
     if(use_odometry):
-        navigation = Navigation(slam, MapConfig(), ROBOT_SIZE_METERS, 100, 800, Commands)
-        navigation.start()
+        navigation = Navigation(slam, MapConfig(), ROBOT_SIZE_METERS, 50, 800, Commands)
+        
         if(readlog):
             robot = FileDrone("odometry")
         else:
@@ -151,6 +151,8 @@ def main(g = 0.4, h = 0.4):
     dist = 0
     zeit = 0
 
+    if(use_odometry): navigation.start()
+
     ##make initial scan
     scan = sensor.scan()
     
@@ -166,7 +168,7 @@ def main(g = 0.4, h = 0.4):
             velocities = robot.move(command)
             dist += velocities[0]
             zeit += velocities[2]
-	    print velocities
+	    
             ##lidar
             scan = sensor.scan()
             

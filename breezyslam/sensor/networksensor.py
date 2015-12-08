@@ -49,7 +49,7 @@ class NetworkSensor(Sensor):
         while not self.setup():
             pass
         print "Connected."
-        self.connection.send("0")
+        self.connection.send(chr(0))
         scan = ""
         while "\n" not in scan:
             scan += self.connection.recv(1)
