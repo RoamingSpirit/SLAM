@@ -21,7 +21,9 @@ class NetworkVehicle(Vehicle):
     TAKEOFF = 9
     EMERGENCY = 10
 
-    def __init__(self):
+    def __init__(self, log = True):
+        self.log = log
+        if(log): self.out = open('odomerty','w')
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.connection = socket.socket()
         self.manually_operated = False
@@ -45,6 +47,8 @@ class NetworkVehicle(Vehicle):
                 data = self.connection.recv(1024)
                 values = data.split(",", 3)
                 self.odometry = [float(tok) for tok in values[:]]
+                if(self.log):
+                    self.out.write("%f %f %f\n" % self.odometry)
                 return self.odometry
         except socket.timeout:
             print "Timeout: Return [0.0, 0.0, 0.0]."
