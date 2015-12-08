@@ -73,7 +73,7 @@ use_odometry = True
 # Map size, scale
 MAP_SIZE_PIXELS          =  1000
 MAP_SIZE_METERS          =  40
-seed = 0
+seed = 9999
 ROBOT_SIZE_METERS = 0.4
 
 
@@ -164,7 +164,7 @@ def main(g = 0.4, h = 0.4):
             velocities = robot.move(command)
             dist += velocities[0]
             zeit += velocities[2]
-
+	    print velocities
             ##lidar
             scan = sensor.scan()
             

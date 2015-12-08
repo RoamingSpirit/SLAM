@@ -8,6 +8,8 @@ import math
 
 
 class Turtlebot(Vehicle, ros_turtlebot.ROSTurtlebot):
+
+
     def __init__(self):
         """
         This will handle all of the initialization information for the turtlebot
@@ -48,18 +50,13 @@ class Turtlebot(Vehicle, ros_turtlebot.ROSTurtlebot):
         and store the difference between the last time it was called and now.
         :return: (dxy in mm, dtheta in degrees, time difference)
         """
-	if self._start:
-		dxy = math.sqrt((self._past_x)**2+(self._past_y)**2)
-		dtheta = self._past_theta
-	else:
-		dxy = math.sqrt((self._diffx - self._past_x)**2 + (self._diffy - self._past_y)**2)
-		dtheta = self._difftheta - self._past_theta
-	
-	response = (dxy*1000,dtheta,time.time() - self._time)
-	
-	self._diffx = self._past_x
-	self._diffy = self._past_y
-	self._difftheta = self._past_theta
+
+        self.odom_lock.acquire()
+        response = (self._accumXY*1000,self._accumT,time.time() - self._time)
+        self._accumXY = 0
+        self._accumT = 0
+        self.odom_lock.release()
+
         self._time = time.time()
         return response
     

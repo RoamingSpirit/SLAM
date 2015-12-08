@@ -16,12 +16,15 @@ from geometry_msgs.msg import Twist
 from geometry_msgs.msg import Quaternion
 from geometry_msgs.msg import PoseStamped
 
-
 from nav_msgs.msg import Odometry
 from std_msgs.msg import Empty
 from kobuki_msgs.msg import BumperEvent
 
-class ROSTurtlebot(object):
+import threading
+
+class ROSTurtlebot(object, threading.Thread):
+    odom_lock = threading.Condition()
+
     def __init__(self):
         rospy.init_node("Roaming_Spirit_Odom")
         self._sub = rospy.Subscriber('/odom', Odometry, self._getOdomROS, queue_size=3)
@@ -37,6 +40,18 @@ class ROSTurtlebot(object):
                                     "base_footprint","odom")
 
         self._wheelbase = 0.352
+        self._past_x =None
+        self._past_y = None
+        self._past_theta = None
+
+        self._d_theta = None
+        self._d_traveled = None
+
+
+        threading.Thread.__init__(self)
+        self._accumXY = 0
+        self._accumT = 0
+
 
         sleeper = rospy.Duration(1)
         rospy.sleep(sleeper)
@@ -51,12 +66,7 @@ class ROSTurtlebot(object):
         :param msg: This is the message that the robot receives from listening to the '/odom' topic
         :return: None
         """
-        self._past_x
-        self._past_y
-        self._past_theta
 
-        self._d_theta
-        self._d_traveled
 
         # Find the distance traveled
         self._d_traveled = math.sqrt((self._past_x - msg.pose.pose.position.x)**2 +
@@ -81,6 +91,12 @@ class ROSTurtlebot(object):
         self._past_x = msg.pose.pose.position.x
         self._past_y = msg.pose.pose.position.y
         self._past_theta = current_theta_rad
+
+        self.odom_lock.acquire()
+        #Fill the accumulator variabnles:
+        self._accumXY = self._accumXY + self._d_traveled
+        self._accumT = self._accumT + self._d_theta
+        self.odom_lock.release()
 
 
     def _publishTwist(self, u, w, publisher):

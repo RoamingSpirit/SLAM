@@ -35,7 +35,7 @@ class Navigation(threading.Thread):
         self.mapconfig = mapconfig
         self.ROBOT_SIZE_METERS = ROBOT_SIZE_METERS
         self.mapbytes = self.createMap()
-        self.recalculate = True
+        self.recalculate = False
         self.offset_in_scan = offset_in_scan
         self.min_distance = min_distance
         self.router = TentacleRouter(mapconfig, ROBOT_SIZE_METERS, min_distance)
@@ -45,6 +45,8 @@ class Navigation(threading.Thread):
         Recalcualtes a new route if necessary
         '''
         self.running = True
+        time.wait(5)
+        self.recalculate = True
         while(self.running):
             
             if(self.recalculate):                
