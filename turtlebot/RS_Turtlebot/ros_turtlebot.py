@@ -160,7 +160,7 @@ class ROSTurtlebot(object):
         :param speed: <int or double> The speed at which the robot should rotate
         :return: None
         """
-	self._spinWheels(speed,-speed)
+        self._spinWheels(speed,-speed)
 
 
     def _normalizeTheta(self, quaternian_touple):
