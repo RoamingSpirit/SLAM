@@ -24,7 +24,7 @@ class NetworkVehicle(Vehicle):
     def __init__(self):
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.connection = socket.socket()
-        self.manually_operated = True
+        self.manually_operated = False
         self.is_emergency = False
         self.odometry = [0.0, 0.0, 0.0]
 
@@ -34,17 +34,22 @@ class NetworkVehicle(Vehicle):
         :param cmd: Move command.
         :return: Odometry data.
         """
-        if not self.is_emergency:
-            if not self.manually_operated:
-                self.connection.send(chr(cmd))
-            else:
-                self.connection.send(chr(NetworkVehicle.ODOMETRY))
+        try:
+            if not self.is_emergency:
+                if not self.manually_operated:
+                    self.connection.send(chr(cmd))
+                else:
+                    self.connection.send(chr(NetworkVehicle.ODOMETRY))
 
-            # Receive and parse odometry.
-            data = self.connection.recv(1024)
-            values = data.split(",", 3)
-            self.odometry = [float(tok) for tok in values[:]]
-            return self.odometry
+                # Receive and parse odometry.
+                data = self.connection.recv(1024)
+                values = data.split(",", 3)
+                self.odometry = [float(tok) for tok in values[:]]
+                return self.odometry
+        except socket.timeout:
+            print "Timeout: Return [0.0, 0.0, 0.0]."
+        except socket.error, error:
+            print error
         return [0.0, 0.0, 0.0]
 
     def move_manually(self, command, values=("", "", "", "")):
@@ -104,12 +109,17 @@ class NetworkVehicle(Vehicle):
         print "NetworkVehicle: Try to bind socket.."
         while not self.setup():
             pass
-        self.connection.settimeout(2)
-        self.connection.send(chr(0))
-        msg = self.connection.recv(1)
-        while chr(1) not in msg:
+        try:
+            self.connection.settimeout(2)
+            self.connection.send(chr(0))
             msg = self.connection.recv(1)
-        print "NetworkVehicle: Connected."
+            while chr(1) not in msg:
+                msg = self.connection.recv(1)
+            print "NetworkVehicle: Connected."
+        except socket.timeout:
+            print "Timeout."
+        except socket.error, error:
+            print error
 
     def setup(self):
         """
@@ -139,11 +149,16 @@ class NetworkVehicle(Vehicle):
         """
         Close connection
         """
-        self.connection.send(chr(1))
-        self.connection.close()
-        self.socket.shutdown(socket.SHUT_RDWR)
-        self.socket.close()
-        print "NetworkVehicle: Connection closed."
+        try:
+            self.connection.send(chr(1))
+            self.connection.close()
+            self.socket.shutdown(socket.SHUT_RDWR)
+            self.socket.close()
+            print "NetworkVehicle: Connection closed."
+        except socket.timeout:
+            print "Timeout."
+        except socket.error, error:
+            print error
 
     # ~ if __name__ == '__main__':
     # ~ CLIENT = NetworkVehicle()
