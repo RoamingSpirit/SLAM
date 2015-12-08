@@ -1,19 +1,20 @@
-'''
+"""
 DroneClient class.
-'''
+"""
 
 import socket
 import threading
 from drone import Drone
 
+
 class DroneClient(threading.Thread):
-    '''
+    """
     Class representing a client which receive drone commands
     and send drone odometry.
-    '''
+    """
     running = True
 
-    def __init__(self, host = "", port = 9000):
+    def __init__(self, host="", port=9000):
         threading.Thread.__init__(self)
         self.host = host
         self.port = port
@@ -23,9 +24,9 @@ class DroneClient(threading.Thread):
         self.start()
 
     def run(self):
-        '''
-        Main loop
-        '''
+        """
+        Main loop.
+        """
         print "DroneClient: Connecting.."
         self.socket.connect((self.host, self.port))
         print "DroneClient: Connected to host."
@@ -61,10 +62,10 @@ class DroneClient(threading.Thread):
                     self.socket.send(self.drone.get_odometry())
                 # Testing commands.
                 elif msg == chr(6):
-                    x = float(ord(self.socket.recv(1)))/10-1
-                    y = float(ord(self.socket.recv(1)))/10-1
-                    z = float(ord(self.socket.recv(1)))/10-1
-                    rz = float(ord(self.socket.recv(1)))/10-1
+                    x = float(ord(self.socket.recv(1))) / 10 - 1
+                    y = float(ord(self.socket.recv(1))) / 10 - 1
+                    z = float(ord(self.socket.recv(1))) / 10 - 1
+                    rz = float(ord(self.socket.recv(1))) / 10 - 1
                     self.drone.manually_move(x, y, z, rz)
                 elif msg == chr(7):
                     self.socket.send(self.drone.get_odometry())
@@ -83,14 +84,15 @@ class DroneClient(threading.Thread):
                 self.close()
 
     def close(self):
-        '''
+        """
         Close the connection and stop the running thread.
-        '''
+        """
         print "DroneClient: Shutdown."
         self.running = False
         self.drone.shutdown()
         self.socket.close()
         print "DroneClient: Socket closed."
+
 
 if __name__ == '__main__':
     CLIENT = DroneClient()

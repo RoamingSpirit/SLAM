@@ -52,6 +52,7 @@ class Navigation(threading.Thread):
                 self.position = self.slam.getpos()
                 print self.position
                 route = self.router.getRoute(self.position, self.mapbytes)
+                print "Target: %f,%f" % (route[0])
                 self.recalculate = False
                 
                 self.route_lock.acquire()
@@ -110,7 +111,13 @@ class Navigation(threading.Thread):
                 self.target = self.route.popleft()
 
         #chek if it is not necessary to turn
-        angle = self.getAngle(self.target, self.target)        
+        destangle = self.getAngle(self.target, position)%360
+        current = position[2] % 360
+        angle = destangle - current
+        
+        if(angle>180):angle = angle - 360
+        if(angle<-180):angle = angle + 360
+        
         if(math.fabs(angle) < ANGLE_TOLERANCE_DEGREE):
             return self.commands.MOVE_FORWARD
 

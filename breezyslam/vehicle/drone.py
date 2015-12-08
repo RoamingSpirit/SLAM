@@ -108,7 +108,7 @@ class Drone(object):
         if(self.log):
             self.out.write("%f %f %f\n" % data)
 
-        return "%f,%f,%f" % data
+        return data
 
     def move(self, cmd):
         '''

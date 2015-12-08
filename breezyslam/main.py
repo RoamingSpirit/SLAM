@@ -65,9 +65,9 @@ import math
 
 
 #wait for client for image stream
-stream = False
+stream = True
 #read form log file or use sensor
-readlog = True
+readlog = False
 use_odometry = True 
 
 # Map size, scale
@@ -156,13 +156,9 @@ def main(g = 0.4, h = 0.4):
         scanno+=1
         if use_odometry:
             ##navigaiton
-            # Create a byte array to receive the computed maps
-            mapbytes = bytearray(MAP_SIZE_PIXELS * MAP_SIZE_PIXELS)
-    
-            # Get final map    
-            #slam.getmap(mapbytes)
             
             command = navigation.update(scan)
+            print command
 
             ##odometry
             velocities = robot.move(command)
@@ -280,6 +276,7 @@ def mm2pix(mm):
 ##get arguments
 g = 0.1
 h = 0.1
+
 
 if(len(sys.argv)>1):
     if(sys.argv[1] == "help"):
