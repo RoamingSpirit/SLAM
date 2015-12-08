@@ -57,6 +57,8 @@ class XTION(Sensor):
         for x in range(width - 1, -1, -1):
             value = self.getAverageDepth(frame_data, width, height, x, line, self.linecount)
             converted = self.toLidarValue(value, x, width)
+            if converted > 3500:
+                converted = 0
             if self.log:
                 self.out.write(str(converted) + ' ')
             data.append(converted)

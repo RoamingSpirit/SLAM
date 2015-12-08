@@ -24,7 +24,7 @@ class NetworkVehicle(Vehicle):
     def __init__(self):
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.connection = socket.socket()
-        self.manually_operated = True
+        self.manually_operated = False
         self.is_emergency = False
         self.odometry = [0.0, 0.0, 0.0]
 

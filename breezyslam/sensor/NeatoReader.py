@@ -81,7 +81,4 @@ class NeatoReader:
             #self.neatoSerial.close()
                 
 
-banana = NeatoReader()
-while(True):
-    print banana.scan()
             

@@ -73,7 +73,7 @@ use_odometry = True
 # Map size, scale
 MAP_SIZE_PIXELS          =  1000
 MAP_SIZE_METERS          =  40
-seed = 9999
+seed = 0
 ROBOT_SIZE_METERS = 0.4
 
 
@@ -122,13 +122,13 @@ def main(g = 0.4, h = 0.4):
 
     #initialiye robot
     if(use_odometry):
-        navigation = Navigation(slam, MapConfig(), ROBOT_SIZE_METERS, 100, 1200, Commands)
+        navigation = Navigation(slam, MapConfig(), ROBOT_SIZE_METERS, 100, 800, Commands)
         navigation.start()
         if(readlog):
             robot = FileDrone("odometry")
         else:
-            robot = Drone()
-            #robot.initialize()
+            robot = NetworkVehicle() #Drone()
+            robot.initialize()
     if(stream):
         server = Server(slam, MAP_SIZE_PIXELS, robot)
         server.start()
@@ -158,7 +158,7 @@ def main(g = 0.4, h = 0.4):
             ##navigaiton
             
             command = navigation.update(scan)
-            print command
+            #print command
 
             ##odometry
             velocities = robot.move(command)
