@@ -5,7 +5,7 @@ from xtion import XTION
 
 class XtionClient(threading.Thread):
 
-    def __init__(self, host="", port=10000):
+    def __init__(self, host="", port=9001):
         threading.Thread.__init__(self)
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.socket.settimeout(2)
