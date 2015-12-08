@@ -35,13 +35,13 @@ class XTION(Sensor):
                         self.detectionMargin, self.offsetMillimeters)
 
     def get_parameters(self):
-        parameters = []
-        parameters[0] = self.width
-        parameters[1] = self.scan_rate_hz
-        parameters[2] = self.viewangle
-        parameters[3] = self.distance_no_detection_mm
-        parameters[4] = self.detectionMargin
-        parameters[5] = self.offsetMillimeters
+        parameters = [None]*6
+        parameters[0] = str(self.width)
+        parameters[1] = str(self.scan_rate_hz)
+        parameters[2] = str(self.viewangle)
+        parameters[3] = str(self.distance_no_detection_mm)
+        parameters[4] = str(self.detectionMargin)
+        parameters[5] = str(self.offsetMillimeters)
         return parameters
 
     def scan(self):

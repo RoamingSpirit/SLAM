@@ -168,7 +168,7 @@ def main(g = 0.4, h = 0.4):
             velocities = robot.move(command)
             dist += velocities[0]
             zeit += velocities[2]
-	    
+	    print velocities
             ##lidar
             scan = sensor.scan()
             

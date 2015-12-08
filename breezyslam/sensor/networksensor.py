@@ -25,7 +25,7 @@ class NetworkSensor(Sensor):
 
         self.initialize()
 
-        super.__init__(self, self.width, self.scan_rate_hz, self.viewangle,
+        Sensor.__init__(self, self.width, self.scan_rate_hz, self.viewangle,
                        self.distance_no_detection_mm, self.detection_margin, self.offset_millimeters)
 
     def scan(self):
@@ -53,7 +53,10 @@ class NetworkSensor(Sensor):
         scan = ""
         while "\n" not in scan:
             scan += self.connection.recv(1)
-        values = scan.split(",")
+        values = scan.split(",",5)
+        print len(values)
+        for value in values:
+            print value
         parameters = [int(tok) for tok in values[:]]
         self.width = parameters[0]
         self.scan_rate_hz = parameters[1]

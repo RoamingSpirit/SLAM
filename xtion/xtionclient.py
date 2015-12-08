@@ -1,25 +1,23 @@
 import socket
-import threading
 from xtion import XTION
 
 
-class XtionClient(threading.Thread):
+class XtionClient():
 
     def __init__(self, host="", port=9001):
-        threading.Thread.__init__(self)
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.socket.settimeout(2)
         self.running = True
         self.host = host
         self.port = port
         self.xtion = XTION()
-        self.start()
+        self.run()
 
     def run(self):
         """
         Main loop.
         """
-        self.socket.connect((HOST, PORT))
+        self.socket.connect((self.host, self.port))
 
         while self.running:
             try:
@@ -30,9 +28,8 @@ class XtionClient(threading.Thread):
                 elif msg == chr(0):
                     print "SensorClient: Initialize."
                     parameters = self.xtion.get_parameters()
-                    for i in range(0, len(parameters), 1):
-                        self.socket.send(str(parameters[i]))
-                        self.socket.send(",")
+                    msg = ",".join(parameters)
+                    self.socket.send(msg)
                     self.socket.send("\n")
                 elif msg == chr(1):
                     print "SensorClient: Shutdown"
@@ -40,10 +37,9 @@ class XtionClient(threading.Thread):
                 elif msg == chr(2):
                     print "SensorClient: Scan."
                     scan = self.xtion.scan()
-                    for value in scan:
-                        self.socket.send(value)
-                        self.socket.send(",")
-                    self.socket.send("\n")
+                    msg = ",".join(scan)
+                    self.socket.send(msg)
+                    self.socket.send('\n')
 
             except socket.timeout:
                 pass
