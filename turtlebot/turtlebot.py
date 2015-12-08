@@ -55,8 +55,7 @@ class Turtlebot(Vehicle, ros_turtlebot.ROSTurtlebot):
         print "Accumulated value is: ", self._accumT
         self._accumXY = 0.0
         self._accumT = 0.0
-        # response = (dxy * 1000, dtheta, time.time() - self._time)
-        response = (0.0, 0.0, time.time() - self._time)
+        response = (self._accumXY*1000, math.degrees(self._accumT), time.time() - self._time)
         self._time = time.time()
         msg = "%f,%f,%f" % response
         print msg
