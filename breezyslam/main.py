@@ -40,6 +40,8 @@ Change log:
 from sensor.xtion import XTION
 from sensor.xtion import FileXTION
 from sensor.Neato import NEATO
+from sensor.networksensor import NetworkSensor
+
 from network.server import Server
 from vehicle.filedrone import FileDrone
 
@@ -68,7 +70,7 @@ import math
 stream = True
 #read form log file or use sensor
 readlog = False
-use_odometry = True 
+use_odometry = False 
 
 # Map size, scale
 MAP_SIZE_PIXELS          =  1000
@@ -109,7 +111,7 @@ def main(g = 0.4, h = 0.4):
     if(readlog):
         sensor = FileXTION("log")
     else:
-        sensor = XTION()
+        sensor = NetworkSensor() #XTION()
 
     
             
