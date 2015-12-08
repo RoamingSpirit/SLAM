@@ -85,4 +85,4 @@ class TurtleClient(threading.Thread):
 
 
 if __name__ == '__main__':
-    CLIENT = TurtleClient()
+    CLIENT = TurtleClient("192.168.0.100")

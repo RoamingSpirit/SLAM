@@ -6,7 +6,7 @@ import math
 
 
 class Turtlebot(Vehicle, ros_turtlebot.ROSTurtlebot):
-    SPEED = 0.5
+    SPEED = 0.15
 
     def __init__(self):
         """
@@ -50,27 +50,23 @@ class Turtlebot(Vehicle, ros_turtlebot.ROSTurtlebot):
 
         :return: (dxy in mm, dtheta in degrees, time difference)
         """
-        if self._start:
-            dxy = math.sqrt(self._past_x ** 2 + self._past_y ** 2)
-            dtheta = self._past_theta
-        else:
-            dxy = math.sqrt((self._diffx - self._past_x) ** 2 + (self._diffy - self._past_y) ** 2)
-            dtheta = self._difftheta - self._past_theta
-
-        response = (dxy * 1000, dtheta, time.time() - self._time)
-
-        self._diffx = self._past_x
-        self._diffy = self._past_y
-        self._difftheta = self._past_theta
+        dxy = self._accumXY
+        dtheta = self._accumT
+        print "Accumulated value is: ", self._accumT
+        self._accumXY = 0.0
+        self._accumT = 0.0
+        # response = (dxy * 1000, dtheta, time.time() - self._time)
+        response = (0.0, 0.0, time.time() - self._time)
         self._time = time.time()
-        return "%f,%f,%f" % response
+        msg = "%f,%f,%f" % response
+        print msg
+        return msg
 
     def shutdown(self):
         """
         Stop every running thread.
         """
         self._stopRobot()
-        return
 
     def move(self, command):
         """
@@ -84,11 +80,11 @@ class Turtlebot(Vehicle, ros_turtlebot.ROSTurtlebot):
         elif command == 3:
             # Turn right.
             self._stopRobot()
-            self._rotate(Turtlebot.SPEED)
+            self._rotate(-Turtlebot.SPEED)
         elif command == 4:
             # Turn left.
             self._stopRobot()
-            self._rotate(-Turtlebot.SPEED)
+            self._rotate(Turtlebot.SPEED)
         elif command == 5:
             # Wait.
             self._stopRobot()
