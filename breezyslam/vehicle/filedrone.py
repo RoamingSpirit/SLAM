@@ -62,3 +62,10 @@ class FileDrone(Vehicle):
     def getSize(self):
         #TODO return size in meter
         return 0.4
+
+
+    def shutdown(self):
+        '''
+        Nothing todo
+        '''
+        return 

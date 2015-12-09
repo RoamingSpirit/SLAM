@@ -100,9 +100,10 @@ def main(log, readlog, only_odometry, sensorFile, odomFile, resultname, mapconfi
             #check if scan is valid
             if(len(scan)<=0):
                 print "Sensor terminated."
+                break
 
             #Update SLAM
-            slam.update(scan)
+            slam.update(scan, velocities)
 
             # Get new position
             x_mm, y_mm, theta_degrees = slam.getpos()    
@@ -113,6 +114,7 @@ def main(log, readlog, only_odometry, sensorFile, odomFile, resultname, mapconfi
     except KeyboardInterrupt:
         print "Program stoped!"
     finally:
+        print "Shutting down."
         if(sensor != None): sensor.shutdown()
         if(navigation != None): navigation.stop()
         if(robot != None): robot.shutdown()
@@ -246,8 +248,7 @@ if(len(sys.argv)>1):
                     print "Unknown parameter: " + value[0]
                     print helptext
                     sys.exit()
-
-
+            
 mapconfig = MapConfig(size_pixels, size_meters)
 
 main(log, readlog, only_odometry, sensorFile, odomFile, resultname, mapconfig)
