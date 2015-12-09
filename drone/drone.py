@@ -62,18 +62,21 @@ class Drone(Vehicle):
     def calc_distance(cls, velocity_x, dt_seconds):
         """
         Calculate distance since last frame.
+        :param dt_seconds: Time since last call.
+        :param velocity_x: Current velocity
         """
         return velocity_x * dt_seconds
 
     def calc_dthata(self, thata):
         """
         Calculate dthata since last call.
+        :param thata: Current rotate angle.
         """
         dthata = thata - self.last_thata
         if dthata > 180:
-            dthata = dthata - 360
+            dthata -= 360
         elif dthata < -180:
-            dthata = dthata + 360
+            dthata += 360
         self.last_thata = thata
         return dthata
 
@@ -129,6 +132,7 @@ class Drone(Vehicle):
     def move(self, cmd):
         """
         Set the moving command.
+        :param cmd:  Command.
         """
         self.cmd = cmd
 
@@ -189,4 +193,4 @@ class Drone(Vehicle):
         self.drone.land()
         self.cam.release()
         self.drone.halt()
-        print "Drone: Shutted down."
+        print "Drone: Shut down."

@@ -21,15 +21,13 @@ class MapServer(threading.Thread):
         self.slam = slam
         self.MAP_SIZE_PIXELS = MAP_SIZE_PIXELS
 
-    '''
-    opens a second and waits till a client connects.
-    Then sends the map updates till the client disconnects.
-    Start over.
-    '''
-
     def run(self):
 
-        print "MapServer: Try to bind socket..."
+        """
+        Opens a second and waits till a client connects.
+        Then sends the map updates till the client disconnects.
+        Start over.
+        """
         while not self.setup() and self.running:
             pass
 
@@ -46,10 +44,6 @@ class MapServer(threading.Thread):
                 print "MapServer: Client disconnected"
                 if self.running:
                     self.setup()
-
-    '''
-    Start server..
-    '''
 
     def setup(self):
         """
@@ -72,14 +66,12 @@ class MapServer(threading.Thread):
                 print "MapServer: Socket connected with " + address[0] + ":" + str(address[1])
                 return True
             except socket.error:
-                print "MapServer: Socket closed."
                 return False
 
-    '''
-    Close the server.
-    '''
-
     def close(self):
+        """
+        Close the server.
+        """
         self.running = False
         self.socket.shutdown(socket.SHUT_RDWR)
         self.socket.close()
