@@ -40,7 +40,8 @@ class TurtleClient(threading.Thread):
                 elif msg == chr(0):
                     print "Initialize."
                     self.turtle.initialize()
-                    self.socket.send(chr(1))
+                    self.socket.send(str(self.turtle.getSize()))
+                    self.socket.send("\n")
                 elif msg == chr(1):
                     print "Shutdown"
                     self.turtle.shutdown()

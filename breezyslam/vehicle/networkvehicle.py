@@ -3,7 +3,6 @@ NetworkVehicle class.
 """
 
 import socket
-
 from vehicle import Vehicle
 
 
@@ -11,6 +10,7 @@ class NetworkVehicle(Vehicle):
     """
     Class representing a connection to a robot.
     """
+
     HOST = ""
     PORT = 9000
 
@@ -20,13 +20,15 @@ class NetworkVehicle(Vehicle):
     TAKEOFF = 9
     EMERGENCY = 10
 
-    def __init__(self, log = True):
+    def __init__(self, log=True):
         self.log = log
-        if(log): self.out = open('odomerty','w')
+        if(log): self.out = open('odomerty2','w')
+
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.connection = socket.socket()
         self.manually_operated = False
         self.is_emergency = False
+        self.size = 0.0
         self.odometry = [0.0, 0.0, 0.0]
 
     def move(self, cmd):
@@ -46,13 +48,13 @@ class NetworkVehicle(Vehicle):
                 data = self.connection.recv(1024)
                 values = data.split(",", 3)
                 self.odometry = [float(tok) for tok in values[:]]
-                if(self.log):
-                    self.out.write("%f %f %f\n" % self.odometry)
+                if self.log:
+                    self.out.write("%f %f %f\n" % (self.odometry[0], self.odometry[1], self.odometry[2]))
                 return self.odometry
         except socket.timeout:
             print "Timeout: Return [0.0, 0.0, 0.0]."
         except socket.error, error:
-            print error
+            print error, "Return [0.0, 0.0, 0.0]."
         return [0.0, 0.0, 0.0]
 
     def move_manually(self, command, values=("", "", "", "")):
@@ -105,6 +107,9 @@ class NetworkVehicle(Vehicle):
             print "Manually op mod = True"
             self.manually_operated = True
 
+    def getSize(self):
+        return self.size
+
     def initialize(self):
         """
         Initialize.
@@ -116,8 +121,11 @@ class NetworkVehicle(Vehicle):
             self.connection.settimeout(2)
             self.connection.send(chr(0))
             msg = self.connection.recv(1)
-            while chr(1) not in msg:
-                msg = self.connection.recv(1)
+            while "\n" not in msg:
+                msg += self.connection.recv(1)
+            msg = msg.split("\n")
+            self.size = float(msg[0])
+
             print "NetworkVehicle: Connected."
         except socket.timeout:
             print "Timeout."
@@ -163,10 +171,10 @@ class NetworkVehicle(Vehicle):
         except socket.error, error:
             print error
 
-    # ~ if __name__ == '__main__':
-    # ~ CLIENT = NetworkVehicle()
-    # ~ CLIENT.initialize()
-    # ~ time.sleep(10)
-    # ~ CLIENT.move(MOVE_FORWARD)
-    # ~ CLIENT.move(TURN_LEFT)
-    # ~ CLIENT.shutdown()
+            # ~ if __name__ == '__main__':
+            # ~ CLIENT = NetworkVehicle()
+            # ~ CLIENT.initialize()
+            # ~ time.sleep(10)
+            # ~ CLIENT.move(MOVE_FORWARD)
+            # ~ CLIENT.move(TURN_LEFT)
+            # ~ CLIENT.shutdown()

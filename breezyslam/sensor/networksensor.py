@@ -12,12 +12,23 @@ PORT = 9001
 
 class NetworkSensor(Sensor):
 
-    def __init__(self, width, scan_rate_hz, viewangle, distance_no_detection_mm, detectionMargin, offsetMillimeters):
-        super.__init__(self, width, scan_rate_hz, viewangle, distance_no_detection_mm, detectionMargin, offsetMillimeters)
+    def __init__(self):
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.connection = socket.socket()
 
-    def get_frame(self):
+        self.width = 0
+        self.scan_rate_hz = 0
+        self.viewangle = 0
+        self.distance_no_detection_mm = 0
+        self.detection_margin = 0
+        self.offset_millimeters = 0
+
+        self.initialize()
+
+        Sensor.__init__(self, self.width, self.scan_rate_hz, self.viewangle,
+                       self.distance_no_detection_mm, self.detection_margin, self.offset_millimeters)
+
+    def scan(self):
         """
         Request a new frame.
         :return: Frame data.
@@ -27,9 +38,8 @@ class NetworkSensor(Sensor):
         while "\n" not in scan:
             scan += self.connection.recv(1)
 
-        values = data.split(",", 3)
-        frame = [float(tok) for tok in values[:]]
-
+        values = scan.split(",")
+        frame = [int(tok) for tok in values[:]]
         return frame
 
     def initialize(self):
@@ -38,8 +48,23 @@ class NetworkSensor(Sensor):
         """
         while not self.setup():
             pass
-        self.connection.send("0")
         print "Connected."
+        self.connection.send(chr(0))
+        scan = ""
+        while "\n" not in scan:
+            scan += self.connection.recv(1)
+        values = scan.split(",", 5)
+        print len(values)
+        for value in values:
+            print value
+        parameters = [int(tok) for tok in values[:]]
+        self.width = parameters[0]
+        self.scan_rate_hz = parameters[1]
+        self.viewangle = parameters[2]
+        self.distance_no_detection_mm = parameters[3]
+        self.detection_margin = parameters[4]
+        self.offset_millimeters = parameters[5]
+        print "Initialized."
 
     def setup(self):
         """

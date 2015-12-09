@@ -43,7 +43,8 @@ class DroneClient(threading.Thread):
                 elif msg == chr(0):
                     print "Initialize."
                     self.drone.initialize()
-                    self.socket.send(chr(1))
+                    self.socket.send(str(self.drone.getSize()))
+                    self.socket.send("\n")
                 elif msg == chr(1):
                     print "Shutdown"
                     self.drone.shutdown()

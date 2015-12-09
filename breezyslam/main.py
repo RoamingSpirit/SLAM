@@ -1,234 +1,142 @@
-'''
-log2pgm.py : BreezySLAM Python demo.  Makes scans with an ASUS xtion and produces a .PGM image file showing robot 
-             trajectory and final map.
-             
-For details see
-
-    @inproceedings{coreslam-2010,
-      author    = {Bruno Steux and Oussama El Hamzaoui}, modified by Nils Bernhardt
-      title     = {CoreSLAM: a SLAM Algorithm in less than 200 lines of C code},
-      booktitle = {11th International Conference on Control, Automation, 
-                   Robotics and Vision, ICARCV 2010, Singapore, 7-10 
-                   December 2010, Proceedings},
-      pages     = {1975-1979},
-      publisher = {IEEE},
-      year      = {2010}
-    }
-                 
-Copyright (C) 2014 Simon D. Levy
-
-This code is free software: you can redistribute it and/or modify
-it under the terms of the GNU Lesser General Public License as 
-published by the Free Software Foundation, either version 3 of the 
-License, or (at your option) any later version.
-
-This code is distributed in the hope that it will be useful,     
-but WITHOUT ANY WARRANTY without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU Lesser General Public License 
-along with this code.  If not, see <http://www.gnu.org/licenses/>.
-
-Change log:
-
-20-APR-2014 - Simon D. Levy - Get params from command line
-05-JUN-2014 - SDL - get random seed from command line
-'''
-
-
 from sensor.xtion import XTION
 from sensor.xtion import FileXTION
-from sensor.Neato import NEATO
+
 from network.server import Server
+
 from vehicle.filedrone import FileDrone
+from vehicle.networkvehicle import NetworkVehicle
+from vehicle.commands import Commands
 
 from mapconfig import MapConfig
 
-from vehicle.drone import Drone
-from vehicle.networkvehicle import NetworkVehicle
-from vehicle.commands import Commands
-                
-from breezyslam.algorithms import Deterministic_SLAM,RMHC_SLAM
+from navigation.navigation import Navigation
+
 from slam.rmhcslam import My_SLAM
 
 from pgmutils.pgm_utils import pgm_save
 
-from navigation.navigation import Navigation
+from breezyslam.algorithms import Deterministic_SLAM
 
-from sys import exit, stdout
 from time import time
-import cv2
-import sys, termios, atexit
-from select import select
 import math
+import sys
 
 
-#wait for client for image stream
-stream = True
-#read form log file or use sensor
-readlog = False
-use_odometry = True 
+#seed for RMHC
+SEED = 9999
+#LIDAR offset from the center which must be checked for obstacles
+RELEVANT_LIDARS = 50 
+#Distance the robot should keep from any obstacle in mm
+SECURITY_DIST_MM = 800
 
-# Map size, scale
-MAP_SIZE_PIXELS          =  1000
-MAP_SIZE_METERS          =  40
-seed = 9999
-ROBOT_SIZE_METERS = 0.4
-
-
-#for keyboard interrupt
-fd = sys.stdin.fileno()
-new_term = termios.tcgetattr(fd)
-old_term = termios.tcgetattr(fd)
-
-# new terminal setting unbuffered
-new_term[3] = (new_term[3] & ~termios.ICANON & ~termios.ECHO)
-
-
-def main(g = 0.4, h = 0.4):
-
-   
-
-
-    
-
-    filename ='map_%f_%f' % (g,h)
-    """
-    if(use_odometry):
-        filename += 'withodometry_'
-    if(readlog):
-        filename += 'fromlog_'
-    if(seed==0):
-        filename += 'deterministic'
-    else:
-        filename += ('rmhc_seed' + str(seed))
-    """
-    
-    #initialize the asus xtion as sensor
-    if(readlog):
-        sensor = FileXTION("log")
-    else:
-        sensor = XTION()
-
-    
-            
-    # Create a CoreSLAM object with laser params and optional robot object
-    slam = My_SLAM(sensor, MAP_SIZE_PIXELS, MAP_SIZE_METERS, random_seed=seed, g=g, h=h) \
-        if seed \
-        else Deterministic_SLAM(sensor, MAP_SIZE_PIXELS, MAP_SIZE_METERS) 
-
+def main(log, readlog, only_odometry, sensorFile, odomFile, resultname, mapconfig):
+    initialized = False
+    sensor = None
+    navigation = None
     robot = None
-
-    #initialiye robot
-    if(use_odometry):
-        navigation = Navigation(slam, MapConfig(), ROBOT_SIZE_METERS, 100, 800, Commands)
-        navigation.start()
+    server = None
+    try:
+        #Initialize Sensor
         if(readlog):
-            robot = FileDrone("odometry")
+            sensor = FileXTION(sensorFile)
         else:
-            robot = NetworkVehicle() #Drone()
+            sensor = XTION(log)
+
+        #Initialize Slam
+        if(only_odometry):
+            slam = Deterministic_SLAM(sensor, mapconfig.SIZE_PIXELS, mapconfig.SIZE_METERS)
+        else:
+            slam = My_SLAM(sensor, mapconfig.SIZE_PIXELS, mapconfig.SIZE_METERS, random_seed = SEED)
+
+        #Initialize Robot
+        if(readlog):
+            robot = FileDrone(odomFile)
+        else:
+            robot = NetworkVehicle()
             robot.initialize()
-    if(stream):
-        server = Server(slam, MAP_SIZE_PIXELS, robot)
+
+        #Open Controll and Map Server
+        server = Server(slam, mapconfig.SIZE_PIXELS, robot)
         server.start()
 
-    
-    # Start with an empty trajectory of positions
-    trajectory = []
+        #Initialize Navigation
+        navigation = Navigation(slam, mapconfig, robot.getSize(), RELEVANT_LIDARS, SECURITY_DIST_MM, Commands)
+        navigation.start()
 
-    # Start timing
-    start_sec = time()
-    
-    # Loop
-    atexit.register(set_normal_term)
-    set_curses_term()
-    
-    scanno = 0
+        #Monitors
+        scanno = 0
+        dist = 0
+        timePast = 0
+        trajectory = []
+        start_sec = time()
 
-    dist = 0
-    zeit = 0
+        #Make initial scan
+        scan = sensor.scan()
 
-    ##make initial scan
-    scan = sensor.scan()
-    
-    while(True):
-        scanno+=1
-        if use_odometry:
-            ##navigaiton
-            
+        initialized = True
+
+        #Main loop
+        while(True):
+            scanno += 1
+
+            #get command
             command = navigation.update(scan)
-            #print command
 
-            ##odometry
+            #send command and get odometry
             velocities = robot.move(command)
-            dist += velocities[0]
-            zeit += velocities[2]
-	    print velocities
-            ##lidar
-            scan = sensor.scan()
-            
-            if(len(scan)<=0):
-                print 'Reader error or end of file.'
+
+            #check if velocities are valid
+            if(velocities == None):
+                print "Robot terminated."
                 break
-            
-            # Update SLAM with lidar and velocities
+
+            #update monitors
+            dist += velocities[0]
+            timePast += velocities[2]
+
+            #get scan
+            scan = sensor.scan()
+
+            #check if scan is valid
+            if(len(scan)<=0):
+                print "Sensor terminated."
+                break
+
+            #Update SLAM
             slam.update(scan, velocities)
 
-
-        else:
-            scan = sensor.scan()
-            if(len(scan)<=0):
-                print 'Reader error or end of file.'
-                break
+            # Get new position
+            x_mm, y_mm, theta_degrees = slam.getpos()    
         
-            # Update SLAM with lidar alone
-            slam.update(scan)
-                    
-        # Get new position
-        x_mm, y_mm, theta_degrees = slam.getpos()    
-        
-        # Add new position to trajectory
-        trajectory.append((x_mm, y_mm))
+            # Add new position to trajectory
+            trajectory.append((x_mm, y_mm))
 
+    except KeyboardInterrupt:
+        print "Program stoped!"
+    finally:
+        print "Shutting down."
+        if(sensor != None): sensor.shutdown()
+        if(navigation != None): navigation.stop()
+        if(robot != None): robot.shutdown()
+        if(server != None): server.close()
 
-        if kbhit():
-            break
+    if(initialized):
+        #Print results
+        elapsed_sec = time() - start_sec
+        print('\n%d scans in %f sec = %f scans / sec' % (scanno, elapsed_sec, scanno/elapsed_sec))
+        print ('Distance traveled:%f mm in %fs' % (dist, timePast))
 
-    
-    if(use_odometry):
-        robot.shutdown()
-        navigation.stop()
-        
-    # Report elapsed time   
-    elapsed_sec = time() - start_sec
-    print('\n%d scans in %f sec = %f scans / sec' % (scanno, elapsed_sec, scanno/elapsed_sec))
+        #generate map
+        mapbytes = createMap(slam, trajectory, mapconfig)
+        # Save map and trajectory as PGM file
+        pgm_save(resultname, mapbytes, (mapconfig.SIZE_PIXELS, mapconfig.SIZE_PIXELS))
 
-    print ('dist traveled:%f mm in %fs' % (dist, zeit))         
-                                
-    mapbytes = createMap(slam, trajectory)
-
-           
-    # Save map and trajectory as PGM file
-    pgm_save(filename, mapbytes, (MAP_SIZE_PIXELS, MAP_SIZE_PIXELS))
-
-    
-    image = cv2.imread(filename, 0)
-    print"Accessing the image.. again. So dirty."
-    print"Saving as .png: ..."
-    cv2.imwrite("test.png", image)
-
-    
-    
-    if(stream):
-        server.close()
-    print "done"
 
 # Helpers ---------------------------------------------------------        
 
-def createMap(slam, trajectory):
+def createMap(slam, trajectory, mapconfig):
     # Create a byte array to receive the computed maps
-    mapbytes = bytearray(MAP_SIZE_PIXELS * MAP_SIZE_PIXELS)
+    mapbytes = bytearray(mapconfig.SIZE_PIXELS * mapconfig.SIZE_PIXELS)
     
     # Get final map    
     slam.getmap(mapbytes)
@@ -238,54 +146,113 @@ def createMap(slam, trajectory):
                 
         x_mm, y_mm = coords
                                
-        x_pix = mm2pix(x_mm)
-        y_pix = mm2pix(y_mm)
+        x_pix = int(mapconfig.mmToPixels(x_mm))
+        y_pix = int(mapconfig.mmToPixels(y_mm))
                                                                                               
-        mapbytes[y_pix * MAP_SIZE_PIXELS + x_pix] = 0;
+        mapbytes[y_pix * mapconfig.SIZE_PIXELS + x_pix] = 0;
         
     return mapbytes
 
-# switch to normal terminal
-def set_normal_term():
-    termios.tcsetattr(fd, termios.TCSAFLUSH, old_term)
 
-# switch to unbuffered terminal
-def set_curses_term():
-    termios.tcsetattr(fd, termios.TCSAFLUSH, new_term)
+#________________________________READ_ARGUMENTS______________________________________#
 
-def putch(ch):
-    sys.stdout.write(ch)
-
-def getch():
-    return sys.stdin.read(1)
-
-def getche():
-    ch = getch()
-    putch(ch)
-    return ch
-
-def kbhit():
-    dr,dw,de = select([sys.stdin], [], [], 0)
-    return dr <> []
-
-def mm2pix(mm):
-        
-    return int(mm / (MAP_SIZE_METERS * 1000. / MAP_SIZE_PIXELS))  
-
-
-##get arguments
-g = 0.1
-h = 0.1
-
+log = False
+readlog = False
+only_odometry = False
+sensorFile = "log"
+odomFile = "odometry"
+resultname = "result"
+size_pixels = 1000
+size_meters = 40
+helptext = ("Specify parameters (e.g log=true to perform logging). \n" +
+            "log: true if data should be stored. Default false. \n" +
+            "readlog: true if data should be read from logfile. Default false. \n" +
+            "deterministic: true if just odometry, no rmhc should be used. Default false. \n" +
+            "sensor: file from which the sensor data should be read. Default log. \n" +
+            "odometry: file from which the odometry data should be read. Default odometry. \n" +
+            "result: filename for the created map. Default result. \n" +
+            "pixels: size of the map in pixels. Default 1000. \n" +
+            "meters: size of the map in meters. Default 40. \n")
 
 if(len(sys.argv)>1):
-    if(sys.argv[1] == "help"):
-        print "Run with default g = 0.1 and h = 0.1 or specify with first two arguments."
+    if(sys.argv[1] == "help" or sys.argv[1] == "--help" or sys.argv[1] == "-help"):
+        #print help
+        print helptext
+        sys.exit()
     else:
-        if(len(sys.argv) != 3):
-            print "Invalid amount of arguments. Zero or two."
-        else:
-            main(float(sys.argv[1]), float(sys.argv[2]))
-else:
-    main(g, h)
+        for arg in sys.argv:
+            values = arg.split('=')
+            if(len(values)==2):
+                if(values[0] == "log"):
+                    if(values[1] == "true"): log = True
+                    elif(values[1] == "false"): log = False
+                    else:
+                        print "Unknown argument value for log. true or false"
+                        print helptext
+                        sys.exit()
+                        
+                elif(values[0] == "readlog"):
+                    if(values[1] == "true"): readlog = True
+                    elif(values[1] == "false"): readlog = False
+                    else:
+                        print "Unknown argument value for readlog. true or false"
+                        print helptext
+                        sys.exit()
+                        
+                elif(values[0] == "deterministic"):
+                    if(values[1] == "true"): only_odometry = True
+                    elif(values[1] == "false"): only_odometry = False
+                    else:
+                        print "Unknown argument value for deterministic. true or false"
+                        print helptext
+                        sys.exit()
 
+                elif(values[0] == "sensor"):
+                    if(len(values[1]) > 0): sensorFile = values[1]
+                    else:
+                        print "Bad filename for sensor."
+                        print helptext
+                        sys.exit()
+                
+                elif(values[0] == "odometry"):
+                    if(len(values[1]) > 0): odomFile = values[1]
+                    else:
+                        print "Bad filename for odometry."
+                        print helptext
+                        sys.exit()
+
+                elif(values[0] == "result"):
+                    if(len(values[1]) > 0): resultname = values[1]
+                    else:
+                        print "Bad filename for result."
+                        print helptext
+                        sys.exit()
+                        
+                elif(values[0] == "pixels"):
+                    try:
+                        size_pixels = int(values[1])
+                    except ValueError:
+                        print "Bad value for pixels."
+                        print helptext
+                        sys.exit()
+
+                elif(values[0] == "meters"):
+                    try:
+                        size_meters = int(values[1])
+                    except ValueError:
+                        print "Bad value for meters."
+                        print helptext
+                        sys.exit()
+
+                else:
+                    print "Unknown parameter: " + value[0]
+                    print helptext
+                    sys.exit()
+            
+mapconfig = MapConfig(size_pixels, size_meters)
+
+main(log, readlog, only_odometry, sensorFile, odomFile, resultname, mapconfig)
+
+
+
+        

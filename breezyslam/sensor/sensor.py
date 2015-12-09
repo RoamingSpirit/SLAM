@@ -14,7 +14,11 @@ class Sensor(Laser):
                        offsetMillimeters)
 
     abc.abstractmethod
-
     def scan(self):
         """return a scan array"""
+        return
+
+    abc.abstractmethod
+    def shutdown(self):
+        """shutdown everything"""
         return

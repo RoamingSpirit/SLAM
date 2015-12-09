@@ -18,9 +18,10 @@ class ControlServer(threading.Thread):
 
     def __init__(self, vehicle):
         threading.Thread.__init__(self)
+        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.socket.settimeout(2)
         self.connection = socket.socket()
         self.vehicle = vehicle
-        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
     def run(self):
         """
@@ -42,7 +43,7 @@ class ControlServer(threading.Thread):
                         y = self.connection.recv(1)
                         z = self.connection.recv(1)
                         rz = self.connection.recv(1)
-                        print "Commands: ", ord(x), ord(y), ord(z), ord(rz)
+                        print "ControlServer: Commands: ", ord(x), ord(y), ord(z), ord(rz)
                         self.vehicle.move_manually(int(cmd), (x, y, z, rz))
                     else:
                         self.vehicle.move_manually(int(cmd))
@@ -59,7 +60,7 @@ class ControlServer(threading.Thread):
         # Bind socket to local host and port
         try:
             self.socket.bind((HOST, PORT))
-        except socket.error as msg:
+        except socket.error:
             return False
 
         if self.running:
@@ -73,7 +74,6 @@ class ControlServer(threading.Thread):
                 print "ControlServer: Socket connected with " + address[0] + ":" + str(address[1])
                 return True
             except socket.error:
-                print "ControlServer: Socket closed."
                 return False
 
     def close(self):
@@ -83,4 +83,3 @@ class ControlServer(threading.Thread):
         self.running = False
         self.socket.shutdown(socket.SHUT_RDWR)
         self.socket.close()
-        print "Socket closed."
