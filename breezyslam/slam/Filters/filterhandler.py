@@ -1,5 +1,4 @@
 from filterinterface import FilterInterface
-from sensorfilter import SensorFilter
 
 class FilterHandler(FilterInterface):
 
@@ -7,11 +6,9 @@ class FilterHandler(FilterInterface):
         self.xFilter = xFilter
         self.yFilter = yFilter
         self.thetaFilter = thetaFilter
-        self.dataFilter = SensorFilter()
 
     def __call__(self, slam_position, start_position, error, time, command):
-        z_position = slam_position#self.dataFilter(slam_position, start_position, error, time, command)
-        est_position = z_position.copy()
+        est_position = slam_position.copy()
         """
         if(time == 0): return est_position
         
