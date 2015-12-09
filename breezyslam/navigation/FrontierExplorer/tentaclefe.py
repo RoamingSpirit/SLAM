@@ -13,7 +13,6 @@ import math
 
 
 class TentacleFE(FEI):
-
     
     def __init__(self, mapconf, tentacles, min_dist, max_search):
         self.mapconf = mapconf
@@ -21,7 +20,6 @@ class TentacleFE(FEI):
         self.max_search = max_search
         self.min_dist = min_dist
         print "Tentacle Fe initialized with %d tentacles and dist between %d and %d" % (tentacles, min_dist, max_search) 
-
 
     def findFrontiers(self, position, mapbytes, width):
         """
@@ -75,8 +73,6 @@ class TentacleFE(FEI):
             x += pos[0]
             y += pos[1]
         return (x/len(positions), y/len(positions))
-            
-                          
 
     def getTentacleValue(self, xc, yc, mapbytes, mapsize, dx, dy, max_dist, min_dist):
         """

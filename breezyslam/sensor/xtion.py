@@ -156,7 +156,7 @@ class FileXTION(XTION):
             if len(s) == 0:
                 break
 
-            toks = s.split()[0:-1]  # ignore ''
+            toks = s.split()[0:-1]  # ignore '' CHECK!!!!
 
             lidar = [int(tok) for tok in toks[:]]
 
