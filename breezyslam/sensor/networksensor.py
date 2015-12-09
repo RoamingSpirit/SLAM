@@ -53,7 +53,7 @@ class NetworkSensor(Sensor):
         scan = ""
         while "\n" not in scan:
             scan += self.connection.recv(1)
-        values = scan.split(",",5)
+        values = scan.split(",", 5)
         print len(values)
         for value in values:
             print value
