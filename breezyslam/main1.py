@@ -19,6 +19,7 @@ from breezyslam.algorithms import Deterministic_SLAM
 
 from time import time
 import math
+import sys
 
 
 #seed for RMHC
@@ -28,7 +29,7 @@ RELEVANT_LIDARS = 50
 #Distance the robot should keep from any obstacle in mm
 SECURITY_DIST_MM = 800
 
-def main(log = False, readlog = False, only_odometry = False, sensorFile = "log", odomFile = "odometry", resultname = "result", mapconfig = MapConfig()):
+def main(log, readlog, only_odometry, sensorFile, odomFile, resultname, mapconfig):
     initialized = False
     sensor = None
     navigation = None
@@ -150,9 +151,106 @@ def createMap(slam, trajectory, mapconfig):
         
     return mapbytes
 
-main(readlog = True)
+
+#________________________________READ_ARGUMENTS______________________________________#
+
+log = False
+readlog = False
+only_odometry = False
+sensorFile = "log"
+odomFile = "odometry"
+resultname = "result"
+size_pixels = 1000
+size_meters = 40
+helptext = ("Specify parameters (e.g log=true to perform logging). \n" +
+            "log: true if data should be stored. Default false. \n" +
+            "readlog: true if data should be read from logfile. Default false. \n" +
+            "deterministic: true if just odometry, no rmhc should be used. Default false. \n" +
+            "sensor: file from which the sensor data should be read. Default log. \n" +
+            "odometry: file from which the odometry data should be read. Default odometry. \n" +
+            "result: filename for the created map. Default result. \n" +
+            "pixels: size of the map in pixels. Default 1000. \n" +
+            "meters: size of the map in meters. Default 40. \n")
+
+if(len(sys.argv)>1):
+    if(sys.argv[1] == "help" or sys.argv[1] == "--help" or sys.argv[1] == "-help"):
+        #print help
+        print helptext
+        sys.exit()
+    else:
+        for arg in sys.argv:
+            values = arg.split('=')
+            if(len(values)==2):
+                if(values[0] == "log"):
+                    if(values[1] == "true"): log = True
+                    elif(values[1] == "false"): log = False
+                    else:
+                        print "Unknown argument value for log. true or false"
+                        print helptext
+                        sys.exit()
+                        
+                elif(values[0] == "readlog"):
+                    if(values[1] == "true"): readlog = True
+                    elif(values[1] == "false"): readlog = False
+                    else:
+                        print "Unknown argument value for readlog. true or false"
+                        print helptext
+                        sys.exit()
+                        
+                elif(values[0] == "deterministic"):
+                    if(values[1] == "true"): only_odometry = True
+                    elif(values[1] == "false"): only_odometry = False
+                    else:
+                        print "Unknown argument value for deterministic. true or false"
+                        print helptext
+                        sys.exit()
+
+                elif(values[0] == "sensor"):
+                    if(len(values[1]) > 0): sensorFile = values[1]
+                    else:
+                        print "Bad filename for sensor."
+                        print helptext
+                        sys.exit()
+                
+                elif(values[0] == "odometry"):
+                    if(len(values[1]) > 0): odomFile = values[1]
+                    else:
+                        print "Bad filename for odometry."
+                        print helptext
+                        sys.exit()
+
+                elif(values[0] == "result"):
+                    if(len(values[1]) > 0): resultname = values[1]
+                    else:
+                        print "Bad filename for result."
+                        print helptext
+                        sys.exit()
+                        
+                elif(values[0] == "pixels"):
+                    try:
+                        size_pixels = int(values[1])
+                    except ValueError:
+                        print "Bad value for pixels."
+                        print helptext
+                        sys.exit()
+
+                elif(values[0] == "meters"):
+                    try:
+                        size_meters = int(values[1])
+                    except ValueError:
+                        print "Bad value for meters."
+                        print helptext
+                        sys.exit()
+
+                else:
+                    print "Unknown parameter: " + value[0]
+                    print helptext
+                    sys.exit()
 
 
+mapconfig = MapConfig(size_pixels, size_meters)
+
+main(log, readlog, only_odometry, sensorFile, odomFile, resultname, mapconfig)
 
 
 
