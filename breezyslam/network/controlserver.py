@@ -27,7 +27,6 @@ class ControlServer(threading.Thread):
         """
         Setup the connection and receive commands from socket.
         """
-        print "ControlServer: Try to bind socket..."
         while not self.setup() and self.running:
             pass
 
@@ -75,7 +74,6 @@ class ControlServer(threading.Thread):
                 print "ControlServer: Socket connected with " + address[0] + ":" + str(address[1])
                 return True
             except socket.error:
-                print "ControlServer: Socket closed."
                 return False
 
     def close(self):
@@ -85,4 +83,3 @@ class ControlServer(threading.Thread):
         self.running = False
         self.socket.shutdown(socket.SHUT_RDWR)
         self.socket.close()
-        print "ControlServer: Socket closed."

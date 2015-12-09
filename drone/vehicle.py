@@ -10,7 +10,7 @@ import abc
 class Vehicle(object):
 
     @abc.abstractmethod
-    def getOdometry(self):
+    def get_odometry(self):
         """Return a tuple of odometry (dxy in mm,dthata in degree, dt in s)"""
         return
 
