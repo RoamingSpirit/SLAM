@@ -6,6 +6,7 @@ import math
 
 
 class Turtlebot(Vehicle, ros_turtlebot.ROSTurtlebot):
+
     SPEED = 0.15
 
     def __init__(self):
@@ -27,6 +28,9 @@ class Turtlebot(Vehicle, ros_turtlebot.ROSTurtlebot):
         self._diffy = None
         self._difftheta = None
         self._time = time.time()
+
+        self.size = 0.5
+
         self.initialize()
 
         # self._com = SCommunicator.SCommunicator(COMPort)
@@ -87,3 +91,6 @@ class Turtlebot(Vehicle, ros_turtlebot.ROSTurtlebot):
         elif command == 5:
             # Wait.
             self._stopRobot()
+
+    def getSize(self):
+        return self.size

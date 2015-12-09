@@ -6,24 +6,34 @@ author: Nils Bernhardt
 
 import abc
 
+
 class Vehicle(object):
 
-    abc.abstractmethod
-    def getOdometry(self):
-        """return a tuple of odometry (dxy in mm,dthata in degree, dt in s)"""
+    @abc.abstractmethod
+    def get_odometry(self):
+        """Return a tuple of odometry (dxy in mm,dthata in degree, dt in s)"""
         return
 
     @abc.abstractmethod
     def initialize(self):
-        """prepare"""
+        """Prepare"""
         return
 
     @abc.abstractmethod
     def shutdown(self):
-        """stop every running thread"""
+        """Stop every running thread"""
         return
 
     @abc.abstractmethod
     def move(self, cmd):
-        """move by dxy milimeters"""
+        """
+        Move by dxy millimeters
+        :param cmd: Command.
+        """
         return
+
+    @abc.abstractmethod
+    def getSize(self):
+        """Return size in meter"""
+        return
+

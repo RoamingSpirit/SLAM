@@ -28,7 +28,7 @@ class NetworkVehicle(Vehicle):
         self.connection = socket.socket()
         self.manually_operated = False
         self.is_emergency = False
-        self.size = 0
+        self.size = 0.0
         self.odometry = [0.0, 0.0, 0.0]
 
     def move(self, cmd):
@@ -120,7 +120,11 @@ class NetworkVehicle(Vehicle):
         try:
             self.connection.settimeout(2)
             self.connection.send(chr(0))
-            self.size = int(self.connection.recv(1))
+            msg = self.connection.recv(1)
+            while "\n" not in msg:
+                msg += self.connection.recv(1)
+            msg = msg.split("\n")
+            self.size = float(msg[0])
 
             print "NetworkVehicle: Connected."
         except socket.timeout:
