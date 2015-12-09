@@ -64,6 +64,7 @@ class MapServer(threading.Thread):
             try:
                 self.connection, address = self.socket.accept()
                 print "MapServer: Socket connected with " + address[0] + ":" + str(address[1])
+                self.connection.sendall(str(self.MAP_SIZE_PIXELS)+"\n")
                 return True
             except socket.error:
                 return False
