@@ -3,12 +3,13 @@ import math
 
 class MapConfig():
 
-    SIZE_PIXELS = 1000
-    SIZE_METERS = 40
-
     UNKNOWN = 127
     FREE = 255
     WALL = 0
+
+    def __init__(self, SIZE_PIXELS = 1000, SIZE_METERS = 40):
+        self.SIZE_PIXELS = SIZE_PIXELS
+        self.SIZE_METERS = SIZE_METERS
     
     def getValue(self,x, y, mapbytes):
         """

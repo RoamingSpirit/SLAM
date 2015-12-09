@@ -22,8 +22,8 @@ class NetworkVehicle(Vehicle):
 
     def __init__(self, log=True):
         self.log = log
-        if log:
-            self.out = open('odomerty', 'w')
+        if(log): self.out = open('odomerty2','w')
+
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.connection = socket.socket()
         self.manually_operated = False
