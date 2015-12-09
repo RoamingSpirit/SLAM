@@ -15,9 +15,8 @@ class MapServer(threading.Thread):
 
     def __init__(self, slam, MAP_SIZE_PIXELS):
         threading.Thread.__init__(self)
-        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.socket.settimeout(2)
-        self.connection = socket.socket()
+        self.socket = None
+        self.connection = None
         self.slam = slam
         self.MAP_SIZE_PIXELS = MAP_SIZE_PIXELS
 
@@ -31,7 +30,6 @@ class MapServer(threading.Thread):
         while not self.setup() and self.running:
             pass
 
-        self.connection.settimeout(2)
         while self.running:
             # Create a byte array to receive the computed maps
             mapb = bytearray(self.MAP_SIZE_PIXELS * self.MAP_SIZE_PIXELS)
@@ -50,6 +48,8 @@ class MapServer(threading.Thread):
         Setup a connection to a client on port 8000.
         """
         # Bind socket to local host and port
+        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        
         try:
             self.socket.bind((HOST, PORT))
         except socket.error:
@@ -74,5 +74,10 @@ class MapServer(threading.Thread):
         Close the server.
         """
         self.running = False
-        self.socket.shutdown(socket.SHUT_RDWR)
+        try:
+            self.socket.shutdown(socket.SHUT_RDWR)
+            
+        except socket.error:
+            pass
         self.socket.close()
+            
