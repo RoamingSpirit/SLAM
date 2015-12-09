@@ -58,3 +58,7 @@ class FileDrone(Vehicle):
         Set the moving command.
         '''
         return self.getOdometry()
+
+    def getSize(self):
+        #TODO return size in meter
+        return 0.4

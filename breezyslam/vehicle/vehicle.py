@@ -27,3 +27,9 @@ class Vehicle(object):
     def move(self, cmd):
         """move by dxy milimeters"""
         return
+
+    @abc.abstractmethod
+    def getSize(self):
+        """Return size in meter"""
+        return
+
