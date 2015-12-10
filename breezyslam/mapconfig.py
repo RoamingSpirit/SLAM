@@ -15,6 +15,11 @@ class MapConfig():
         im = Image.new('L', (self.SIZE_PIXELS,self.SIZE_PIXELS))
         im.putdata(mapbytes)
         im.save(filename+'.png')
+
+    def loadpng(self, filename):
+        img = Image.open(filename+'.png').convert('LA')
+        data = list(img.getdata())
+        return [int(i[0]) for i in data]
     
     def getValue(self,x, y, mapbytes):
         """
