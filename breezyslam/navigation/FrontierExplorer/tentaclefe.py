@@ -38,15 +38,19 @@ class TentacleFE(FEI):
             angle = a * angleDif
             dx = math.cos(angle)
             dy = math.sin(angle)
-            #print "Tentacle #%d with angle %f on vector %f|%f" %(a, angle,dx,dy)
+            print "Tentacle #%d with angle %f on vector %f|%f" %(a, angle,dx,dy)
             value = self.getTentacleValue(x, y, mapbytes, map_size, dx, dy, max_search, min_dist)
-            #print "Tentacle value at %f|%f is %d" % value
+            print "Tentacle value at %f|%f is %d" % value
             values.append(value)
 
         frontiers = PriorityQueue()
         current = None
         maxPos = tentacles/4
         for i in range(0, len(values)):
+
+            ##debug only remove later
+            self.mapconf.drawRect(values[i][0], values[i][1], 5, 0, mapbytes)
+
             if(values[i][2] == self.mapconf.UNKNOWN):
                 if(current == None):
                     #print "New forntier"
@@ -56,14 +60,15 @@ class TentacleFE(FEI):
                     current.append(values[i])
                 else:
                     #print "max size reached. Storing"
-                    frontiers.put((len(current), self.getCenter(current)))
+                    frontiers.put((-len(current), self.getCenter(current)))
                     current = [values[i]]
             else:
                 if(current != None):
                     #print "End reached. Storing."
-                    frontiers.put((len(current), self.getCenter(current)))
+                    frontiers.put((-len(current), self.getCenter(current)))
                     current = None
-        
+
+
         return frontiers
 
     def getCenter(self, positions):
@@ -80,17 +85,13 @@ class TentacleFE(FEI):
         """
         #make value iteratable
         if(math.fabs(dx)>math.fabs(dy)):
-            if(dy == 0):
-                dx = 1
-            else:
-                dy = float(dy)/dx
-                dx =1
+            dy = float(dy)/math.fabs(dx)
+            if(dx>0): dx = 1
+            else: dx = -1
         else:
-            if(dx==0):
-                dy=1
-            else:
-                dx = float(dx)/dy
-                dy = 1
+            dx = float(dx)/math.fabs(dy)
+            if(dy>0): dy = 1
+            else: dy = -1
         #print "corrected vector %f|%f" %(dx,dy)
         step_dist = math.sqrt(dx*dx+dy*dy)
         steps = int(max_dist/step_dist)
@@ -105,5 +106,5 @@ class TentacleFE(FEI):
             #if(value != self.mapconf.FREE): return (x, y, self.mapconf.WALL)
             if(value < self.mapconf.UNKNOWN): return (x, y, self.mapconf.WALL)
            
-        return (xc, yc, self.mapconf.FREE)
+        return (x, y, self.mapconf.FREE)
 

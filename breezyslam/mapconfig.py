@@ -1,5 +1,5 @@
 import math
-
+from PIL import Image
 
 class MapConfig():
 
@@ -10,6 +10,11 @@ class MapConfig():
     def __init__(self, SIZE_PIXELS = 1000, SIZE_METERS = 40):
         self.SIZE_PIXELS = SIZE_PIXELS
         self.SIZE_METERS = SIZE_METERS
+
+    def safeaspng(self, mapbytes, filename):
+        im = Image.new('L', (1000,1000))
+        im.putdata(mapbytes)
+        im.save(filename)
     
     def getValue(self,x, y, mapbytes):
         """
@@ -173,6 +178,52 @@ class MapConfig():
 
         return ret_list
 
+    def drawCross(self, xc, yc, size, value, mapbytes):
+        xc = int(xc)
+        yc = int(yc)
+        for i in range(-size/2, size/2):
+            x = i + xc
+            y = i + yc
+            if not self.outofBounds(x, y):
+                self.setValue(x, y, value, mapbytes)
+
+        for i in range(-size/2, size/2):
+            x = i + xc
+            y = yc - i
+            if not self.outofBounds(x, y):
+                self.setValue(x, y, value, mapbytes)
+
+    def drawPlus(self, xc, yc, size, value, mapbytes):
+        xc = int(xc)
+        yc = int(yc)
+        y = yc
+        for x in range(xc-size/2, xc+size/2):
+            if not self.outofBounds(x, y):
+                self.setValue(x, y, value, mapbytes)
+
+        x = xc
+        for y in range(yc-size/2, yc+size/2):
+            if not self.outofBounds(x, y):
+                self.setValue(x, y, value, mapbytes)
+
+    def drawRect(self, xc, yc, size, value, mapbytes):
+        xc = int(xc)
+        yc = int(yc)
+        for x in range(xc-size/2, xc+size/2):
+            y = yc+size/2
+            if not self.outofBounds(x, y):
+                self.setValue(x, y, value, mapbytes)
+            y = yc-size/2
+            if not self.outofBounds(x, y):
+                    self.setValue(x, y, value, mapbytes)
+
+        for y in range(yc-size/2, yc+size/2):
+            x = xc+size/2
+            if not self.outofBounds(x, y):
+                self.setValue(x, y, value, mapbytes)
+            x = xc-size/2
+            if not self.outofBounds(x, y):
+                self.setValue(x, y, value, mapbytes)
 
 
 

@@ -42,12 +42,17 @@ class TentacleRouter(Router):
         '''
         frontiers = self.fe.findFrontiers((x_pixels, y_pixels), mapbytes, self.mapconfig.SIZE_PIXELS)
 
-        
+        best = frontiers.get()
+
+        while(not frontiers.empty()):
+            pos = frontiers.get()
+            self.mapconfig.drawCross(pos[1][0], pos[1][1], 20, 255, mapbytes)
+        return best[1]
         if(frontiers.empty()):
             if(len(self.prev_positions) == 0):
                 ##do deep search
                 print "No frontiers found. No previous possition."
-                return None
+                return
             else:
                 print "No frontiers foud. Going to previous position"
                 return self.prev_positions.pop()
