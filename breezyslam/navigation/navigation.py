@@ -58,10 +58,11 @@ class Navigation(threading.Thread):
                 route = self.router.getRoute(self.position, self.mapbytes)
                 if(route == None): self.terminated = True
                 else: print "Target found in %fs: %f,%f" % (time.time()-start,route[0][0], route[0][1])
-                self.recalculate = False
+
                 
                 self.route_lock.acquire()
                 self.route = route
+                self.recalculate = False
                 self.route_lock.release()
             else:
                 self.route_lock.acquire()
@@ -82,9 +83,10 @@ class Navigation(threading.Thread):
             #check scan for obstacles in front
             if(self.checkTrajectory(scan, self.offset_in_scan, self.min_distance)== False):
                 #recalcualte route
-                self.recalculate = True
+
                 
                 self.route_lock.acquire()
+                self.recalculate = True
                 self.route_lock.notify()
                 self.route_lock.release()
                 
