@@ -86,7 +86,9 @@ class Navigation(threading.Thread):
 
                 
                 self.route_lock.acquire()
+
                 self.recalculate = True
+                self.target = None
                 self.route_lock.notify()
                 self.route_lock.release()
                 
