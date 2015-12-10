@@ -22,7 +22,7 @@ class NetworkVehicle(Vehicle):
 
     def __init__(self, log=True):
         self.log = log
-        if(log): self.out = open('odomerty2','w')
+        if(log): self.out = open('odomerty','w')
 
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.connection = socket.socket()
@@ -160,6 +160,7 @@ class NetworkVehicle(Vehicle):
         """
         Close connection
         """
+        if(self.log): self.out.close()
         try:
             self.connection.send(chr(1))
             self.connection.close()

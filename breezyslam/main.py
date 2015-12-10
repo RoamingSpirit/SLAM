@@ -81,6 +81,9 @@ def main(log, readlog, only_odometry, sensorFile, odomFile, resultname, mapconfi
 
             #get command
             command = navigation.update(scan)
+            if(command == None):
+                print "Navigation terminated."
+                break
 
             #send command and get odometry
             velocities = robot.move(command)
@@ -129,7 +132,7 @@ def main(log, readlog, only_odometry, sensorFile, odomFile, resultname, mapconfi
         #generate map
         mapbytes = createMap(slam, trajectory, mapconfig)
         # Save map and trajectory as PGM file
-        pgm_save(resultname, mapbytes, (mapconfig.SIZE_PIXELS, mapconfig.SIZE_PIXELS))
+        mapconfig.safeaspng(mapbytes, resultname)
 
 
 # Helpers ---------------------------------------------------------        

@@ -19,6 +19,7 @@ class Navigation(threading.Thread):
     route_lock = threading.Condition()
     route = None
     target = None
+    terminated = False
     
     def __init__(self, slam, mapconfig, ROBOT_SIZE_METERS, offset_in_scan, min_distance, commands):
         """
@@ -52,9 +53,11 @@ class Navigation(threading.Thread):
             if(self.recalculate):                
                 self.mapbytes = self.createMap()
                 self.position = self.slam.getpos()
-                print self.position
+                start = time.time()
+                print "Searching at: ", self.position
                 route = self.router.getRoute(self.position, self.mapbytes)
-                print "Target: %f,%f" % (route[0])
+                if(route == None): self.terminated = True
+                else: print "Target found in %fs: %f,%f" % (time.time()-start,route[0][0], route[0][1])
                 self.recalculate = False
                 
                 self.route_lock.acquire()
@@ -64,14 +67,16 @@ class Navigation(threading.Thread):
                 self.route_lock.acquire()
                 self.route_lock.wait()
                 self.route_lock.release()
-        print "Navigation terminated"            
+        print "Navigation stoped"            
             
         
 
     def update(self, scan):
         """
         return a move command based on the navigation and the scan
+        or None if the navigationis not able to find a new target
         """
+        if(self.terminated): return None
         command = self.getCommand()
         if(command == self.commands.MOVE_FORWARD):
             #check scan for obstacles in front

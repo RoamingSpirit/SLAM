@@ -28,12 +28,12 @@ class TentacleRouter(Router):
         y_pixels = self.mapconfig.mmToPixels(position[1])
 
         target = self.getNext(x_pixels, y_pixels, mapbytes)
+        if(target == None): return None
         x_mm = self.mapconfig.pixelsTomm(target[0])
         y_mm = self.mapconfig.pixelsTomm(target[1])
         return deque([(x_mm, y_mm)])
 
     def calcTentacles(self, robot_size, dist):
-        print dist, robot_size
         return int(2 * math.pi * dist / robot_size * 2)
     
     def getNext(self, x_pixels, y_pixels, mapbytes):
@@ -42,17 +42,22 @@ class TentacleRouter(Router):
         '''
         frontiers = self.fe.findFrontiers((x_pixels, y_pixels), mapbytes, self.mapconfig.SIZE_PIXELS)
 
+
+        """
+        add for displaying frontiers in the map
         best = frontiers.get()
 
         while(not frontiers.empty()):
             pos = frontiers.get()
             self.mapconfig.drawCross(pos[1][0], pos[1][1], 20, 255, mapbytes)
         return best[1]
+        """
+        
         if(frontiers.empty()):
             if(len(self.prev_positions) == 0):
                 ##do deep search
                 print "No frontiers found. No previous possition."
-                return
+                return None
             else:
                 print "No frontiers foud. Going to previous position"
                 return self.prev_positions.pop()

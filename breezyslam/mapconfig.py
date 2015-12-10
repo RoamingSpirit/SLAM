@@ -12,9 +12,9 @@ class MapConfig():
         self.SIZE_METERS = SIZE_METERS
 
     def safeaspng(self, mapbytes, filename):
-        im = Image.new('L', (1000,1000))
+        im = Image.new('L', (self.SIZE_PIXELS,self.SIZE_PIXELS))
         im.putdata(mapbytes)
-        im.save(filename)
+        im.save(filename+'.png')
     
     def getValue(self,x, y, mapbytes):
         """

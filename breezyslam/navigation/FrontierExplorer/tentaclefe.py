@@ -19,13 +19,13 @@ class TentacleFE(FEI):
         self.tentacles = tentacles
         self.max_search = max_search
         self.min_dist = min_dist
-        print "Tentacle Fe initialized with %d tentacles and dist between %d and %d" % (tentacles, min_dist, max_search) 
+        #print "Tentacle Fe initialized with %d tentacles and dist between %d and %d" % (tentacles, min_dist, max_search) 
 
     def findFrontiers(self, position, mapbytes, width):
         """
         return a priority queue with coordinates (x_pixels, y_pixels)
         """
-        print "Finding frontiers at %f|%f" %(position)
+        #print "Finding frontiers at %f|%f" %(position)
         return self.getTargets(position[0], position[1], mapbytes, self.mapconf.SIZE_PIXELS, self.tentacles, self.max_search, self.min_dist)
 
     def getTargets(self, x, y, mapbytes, map_size, tentacles, max_search, min_dist):
@@ -38,9 +38,9 @@ class TentacleFE(FEI):
             angle = a * angleDif
             dx = math.cos(angle)
             dy = math.sin(angle)
-            print "Tentacle #%d with angle %f on vector %f|%f" %(a, angle,dx,dy)
+            #print "Tentacle #%d with angle %f on vector %f|%f" %(a, angle,dx,dy)
             value = self.getTentacleValue(x, y, mapbytes, map_size, dx, dy, max_search, min_dist)
-            print "Tentacle value at %f|%f is %d" % value
+            #print "Tentacle value at %f|%f is %d" % value
             values.append(value)
 
         frontiers = PriorityQueue()
@@ -49,7 +49,7 @@ class TentacleFE(FEI):
         for i in range(0, len(values)):
 
             ##debug only remove later
-            self.mapconf.drawRect(values[i][0], values[i][1], 5, 0, mapbytes)
+            #self.mapconf.drawRect(values[i][0], values[i][1], 5, 0, mapbytes)
 
             if(values[i][2] == self.mapconf.UNKNOWN):
                 if(current == None):
