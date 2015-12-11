@@ -25,7 +25,7 @@ import sys
 #seed for RMHC
 SEED = 9999
 #LIDAR offset from the center which must be checked for obstacles
-RELEVANT_LIDARS = 80
+RELEVANT_LIDARS = 150
 #Distance the robot should keep from any obstacle in mm
 SECURITY_DIST_MM = 800
 

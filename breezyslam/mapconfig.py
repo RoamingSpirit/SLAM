@@ -30,6 +30,7 @@ class MapConfig():
         :param width: width of the 2d map
         :return: value at the x,y location
         """
+	if(self.outofBounds(x,y)): return self.WALL
         return mapbytes[y*self.SIZE_PIXELS+x]
 
     def setValue(self,x, y, value, mapbytes):
