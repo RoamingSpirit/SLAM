@@ -1,7 +1,5 @@
 """
 networksensor.py: Representing a TCP connection to a sensor.
-
-author: Lukas Brauckmann
 """
 import socket
 from sensor import Sensor
@@ -9,9 +7,10 @@ from sensor import Sensor
 HOST = ""
 PORT = 9001
 
+__author__ = "Lukas"
+
 
 class NetworkSensor(Sensor):
-
     def __init__(self):
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.connection = socket.socket()
@@ -26,7 +25,7 @@ class NetworkSensor(Sensor):
         self.initialize()
 
         Sensor.__init__(self, self.width, self.scan_rate_hz, self.viewangle,
-                       self.distance_no_detection_mm, self.detection_margin, self.offset_millimeters)
+                        self.distance_no_detection_mm, self.detection_margin, self.offset_millimeters)
 
     def scan(self):
         """

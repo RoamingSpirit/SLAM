@@ -1,8 +1,14 @@
+"""
+xtionclient.py: Class representing a connection to a 'NetworkVehicle.'
+
+author: Lukas Brauckmann
+"""
+
 import socket
 from xtion import XTION
 
 
-class XtionClient():
+class XtionClient:
 
     def __init__(self, host="", port=9001):
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

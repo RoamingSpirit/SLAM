@@ -15,10 +15,10 @@ class Sensor(Laser):
 
     abc.abstractmethod
     def scan(self):
-        """return a scan array"""
+        """Return a scan array"""
         return
 
     abc.abstractmethod
     def shutdown(self):
-        """shutdown everything"""
+        """Shutdown everything"""
         return

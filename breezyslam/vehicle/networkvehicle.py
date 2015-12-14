@@ -1,9 +1,10 @@
 """
 NetworkVehicle class.
 """
-
 import socket
 from vehicle import Vehicle
+
+__author__ = "Lukas"
 
 
 class NetworkVehicle(Vehicle):
@@ -22,7 +23,8 @@ class NetworkVehicle(Vehicle):
 
     def __init__(self, log=True):
         self.log = log
-        if(log): self.out = open('odomerty','w')
+        if log:
+            self.out = open('odomerty', 'w')
 
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.connection = socket.socket()
@@ -62,7 +64,6 @@ class NetworkVehicle(Vehicle):
         Send steering commands to the robot client.
         :param command: Moving command.
         :param values: Parameters for manual moving.
-        :return: None.
         """
         if not self.is_emergency:
 
@@ -79,7 +80,6 @@ class NetworkVehicle(Vehicle):
     def emergency(self):
         """
         Emergency stop.
-        :rtype: object
         """
         if self.is_emergency:
             self.is_emergency = False
@@ -108,6 +108,10 @@ class NetworkVehicle(Vehicle):
             self.manually_operated = True
 
     def getSize(self):
+        """
+        Return the size of the vehicle.
+        :return: Size.
+        """
         return self.size
 
     def initialize(self):
@@ -148,8 +152,8 @@ class NetworkVehicle(Vehicle):
 
         # Connect to the client
         try:
-            self.connection, addr = self.socket.accept()
-            print "NetworkVehicle: Connected with " + addr[0] + ":" + str(addr[1])
+            self.connection, address = self.socket.accept()
+            print "NetworkVehicle: Connected with " + address[0] + ":" + str(address[1])
             return True
         except socket.error:
             self.shutdown()
@@ -158,9 +162,10 @@ class NetworkVehicle(Vehicle):
 
     def shutdown(self):
         """
-        Close connection
+        Close connection.
         """
-        if(self.log): self.out.close()
+        if self.log:
+            self.out.close()
         try:
             self.connection.send(chr(1))
             self.connection.close()

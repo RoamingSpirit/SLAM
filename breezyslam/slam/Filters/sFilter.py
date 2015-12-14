@@ -1,5 +1,5 @@
-
 import abc
+
 
 class sFilter(object):
     """
@@ -12,7 +12,6 @@ class sFilter(object):
     g = None
     h = None
 
-
     @abc.abstractmethod
     def __init__(self, g, h, val, dval):
         pass
@@ -20,7 +19,6 @@ class sFilter(object):
     def _checkInit(self):
         if self.g is None or self.h is None:
             raise NotImplementedError("g and h not initialized properly")
-
 
     @abc.abstractmethod
     def __call__(self, z, dt, g, h):
@@ -35,4 +33,3 @@ class sFilter(object):
             self._update()
             return ... 
         """
-        

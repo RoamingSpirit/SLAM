@@ -1,9 +1,6 @@
-'''
+"""
 Drone class.
-'''
-
-__author__ = "lukas"
-__date__ = "$10.11.2015 10:12:49$"
+"""
 
 # ~ import sys
 # ~ sys.path.insert(0, '/home/pi/libardrone/python-ardrone')
@@ -15,6 +12,9 @@ import libardrone
 import cv2
 import time
 import math
+
+__author__ = "lukas"
+__date__ = "$10.11.2015 10:12:49$"
 
 DRONE_SPEED = 0.1
 TESTING = True
