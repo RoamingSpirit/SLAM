@@ -5,11 +5,11 @@ Drone class.
 __author__ = "lukas"
 __date__ = "$10.11.2015 10:12:49$"
 
-# ~ import sys
-# ~ sys.path.insert(0, '/home/pi/libardrone/python-ardrone')
 import sys
+sys.path.insert(0, '/home/pi/libardrone/python-ardrone')
 
-sys.path.insert(0, '/home/lukas/Dokumente/Libs/libardrone/python-ardrone')
+
+#sys.path.insert(0, '/home/lukas/Dokumente/Libs/libardrone/python-ardrone')
 from vehicle import Vehicle
 import libardrone
 import cv2
