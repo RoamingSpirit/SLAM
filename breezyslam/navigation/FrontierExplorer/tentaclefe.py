@@ -11,7 +11,7 @@ from Queue import PriorityQueue
 import math
 
 #minimum amount of valid tentacles to form a frontier
-MINIMUM_TENTACLES = 3 
+MINIMUM_TENTACLES = 4 
 
 
 
@@ -19,7 +19,7 @@ class TentacleFE(FEI):
     
     def __init__(self, mapconf, tentacles, min_dist, max_search):
         self.mapconf = mapconf
-        self.tentacles = tentacles
+        self.tentacles = tentacles * 2
         self.max_search = max_search
         self.min_dist = min_dist
         #print "Tentacle Fe initialized with %d tentacles and dist between %d and %d" % (tentacles, min_dist, max_search) 
