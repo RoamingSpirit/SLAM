@@ -1,4 +1,7 @@
-
+"""
+author: Nils Bernhardt
+Class for reading the odometry log from a file.
+"""
 from vehicle import Vehicle
 
 

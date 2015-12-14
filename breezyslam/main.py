@@ -1,3 +1,9 @@
+"""
+main program.
+author: Nils Bernhardt
+
+"""
+
 from sensor.xtion import XTION
 from sensor.xtion import FileXTION
 
@@ -12,8 +18,6 @@ from mapconfig import MapConfig
 from navigation.navigation import Navigation
 
 from slam.rmhcslam import My_SLAM
-
-from pgmutils.pgm_utils import pgm_save
 
 from breezyslam.algorithms import Deterministic_SLAM
 
@@ -52,7 +56,7 @@ def main(log, readlog, only_odometry, sensorFile, odomFile, resultname, mapconfi
         if(readlog):
             robot = FileDrone(odomFile)
         else:
-            robot = NetworkVehicle()
+            robot = NetworkVehicle(log)
             robot.initialize()
 
         #Open Controll and Map Server
@@ -157,7 +161,7 @@ def createMap(slam, trajectory, mapconfig):
     return mapbytes
 
 
-#________________________________READ_ARGUMENTS______________________________________#
+#________________________________READ_ARGUMENTS_______________________________#
 
 log = False
 readlog = False

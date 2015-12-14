@@ -1,5 +1,7 @@
 """
 server.py:
+author: Nils Bernhardt
+edited: Lukas Brauckmann
 """
 
 import socket
