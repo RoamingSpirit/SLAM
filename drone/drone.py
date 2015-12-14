@@ -2,11 +2,11 @@
 Drone class.
 """
 
-# ~ import sys
-# ~ sys.path.insert(0, '/home/pi/libardrone/python-ardrone')
 import sys
+sys.path.insert(0, '/home/pi/libardrone/python-ardrone')
 
-sys.path.insert(0, '/home/lukas/Dokumente/Libs/libardrone/python-ardrone')
+
+#sys.path.insert(0, '/home/lukas/Dokumente/Libs/libardrone/python-ardrone')
 from vehicle import Vehicle
 import libardrone
 import cv2

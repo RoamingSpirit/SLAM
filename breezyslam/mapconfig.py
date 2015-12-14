@@ -12,6 +12,7 @@ class MapConfig():
         self.SIZE_METERS = SIZE_METERS
 
     def safeaspng(self, mapbytes, filename):
+        print "Storing map as %s.png." %filename
         im = Image.new('L', (self.SIZE_PIXELS,self.SIZE_PIXELS))
         im.putdata(mapbytes)
         im.save(filename+'.png')
