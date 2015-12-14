@@ -14,7 +14,6 @@ class TentacleRouter(Router):
 
     
     def __init__(self, mapconfig, ROBOT_SIZE_METERS, min_distance):
-        self.prev_positions = []
         self.mapconfig = mapconfig
         self.SCAN_DIST_PIXELS = mapconfig.mmToPixels(3500) #todo
         tentacles = self.calcTentacles(mapconfig.mToPixels(ROBOT_SIZE_METERS), self.SCAN_DIST_PIXELS)
@@ -54,15 +53,7 @@ class TentacleRouter(Router):
         """
         
         if(frontiers.empty()):
-            if(len(self.prev_positions) == 0):
-                ##do deep search
-                print "No frontiers found. No previous possition."
-                return None
-            else:
-                print "No frontiers foud. Going to previous position"
-                return self.prev_positions.pop()
+            return None
         else:
-            print "Returning first frontier"
-            self.prev_positions.append((x_pixels, y_pixels))
             return frontiers.get()[1]
        

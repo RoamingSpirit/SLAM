@@ -10,6 +10,9 @@ from Queue import PriorityQueue
 
 import math
 
+#minimum amount of valid tentacles to form a frontier
+MINIMUM_TENTACLES = 3 
+
 
 
 class TentacleFE(FEI):
@@ -65,11 +68,22 @@ class TentacleFE(FEI):
             else:
                 if(current != None):
                     #print "End reached. Storing."
-                    frontiers.put((-len(current), self.getCenter(current)))
+                    if(len(current) > MINIMUM_TENTACLES and self.getFrontierLength(current) > self.min_dist * 2):
+                        frontiers.put((-len(current), self.getCenter(current)))
                     current = None
 
 
         return frontiers
+
+    def getFrontierLength(self, frontier):
+        x1 = frontier[0][0]
+        y1 = frontier[0][1]
+        x2 = frontier[len(frontier)-1][0]
+        y2 = frontier[len(frontier)-1][1]
+        dx = x1-x2
+        dy = y1-y2
+        return math.sqrt(dx*dx+dy*dy)
+            
 
     def getCenter(self, positions):
         x = 0
