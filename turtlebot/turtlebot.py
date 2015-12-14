@@ -39,6 +39,9 @@ class Turtlebot(Vehicle, ros_turtlebot.ROSTurtlebot):
     def initialize(self):
         ros_turtlebot.ROSTurtlebot.__init__(self)
 
+        self._accumXY = 0.0
+        self._accumT = 0.0
+
         if self._past_x is not None and self._past_y is not None and self._past_theta is not None:
             print "Turtlebot properly instantiated subclass"
         else:
@@ -59,7 +62,7 @@ class Turtlebot(Vehicle, ros_turtlebot.ROSTurtlebot):
         print "Accumulated value is: ", self._accumT
         self._accumXY = 0.0
         self._accumT = 0.0
-        response = (self._accumXY*1000, math.degrees(self._accumT), time.time() - self._time)
+        response = (dxy*1000, math.degrees(dtheta), time.time() - self._time)
         self._time = time.time()
         msg = "%f,%f,%f" % response
         print msg
