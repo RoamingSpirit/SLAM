@@ -54,9 +54,12 @@ class NetworkVehicle(Vehicle):
                     self.out.write("%f %f %f\n" % (self.odometry[0], self.odometry[1], self.odometry[2]))
                 return self.odometry
         except socket.timeout:
-            print "Timeout: Return [0.0, 0.0, 0.0]."
+            print "NetworkVehicle: Timeout: Return [0.0, 0.0, 0.0]."
+        except ValueError:
+            print "NetworkVehicle: ValueError: Return [0.0, 0.0, 0.0]."
         except socket.error, error:
-            print error, "Return [0.0, 0.0, 0.0]."
+            print "NetworkVehicle: ", error, "Return None."
+            return None
         return [0.0, 0.0, 0.0]
 
     def move_manually(self, command, values=("", "", "", "")):
