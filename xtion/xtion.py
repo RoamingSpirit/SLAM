@@ -1,5 +1,5 @@
 """
-sensor.py : Asus xtion which emulates a laser scaner
+sensor.py : Asus xtion which emulates a laser scaner.
 
 author: Nils Bernhardt
 """
@@ -10,16 +10,15 @@ import math
 
 
 class XTION(Sensor):
+    """
+    A class for the Asus XTION.
+    """
     viewangle = 58  # asus xtion view in degrees
     linecount = 5  # lines above and below to generate average (0=online desired line)
     distance_no_detection_mm = 3500  # max detection range
     scan_rate_hz = 23  # todo find value
     detectionMargin = 4  # pixels on the sites of the scans which should be ignored
     offsetMillimeters = 50  # offset of the sensor to the center of the robot
-
-    '''
-    A class for the Asus XTION
-    '''
 
     def __init__(self, log=True):
         self.log = log
@@ -35,7 +34,7 @@ class XTION(Sensor):
                         self.detectionMargin, self.offsetMillimeters)
 
     def get_parameters(self):
-        parameters = [None]*6
+        parameters = [None] * 6
         parameters[0] = str(self.width)
         parameters[1] = str(self.scan_rate_hz)
         parameters[2] = str(self.viewangle)
@@ -96,42 +95,52 @@ class XTION(Sensor):
     '''
 
     def getAverageDepth(self, frame_data, width, height, x, y, distance):
-        sum = 0;
+        """
+        Get the average value of a specific pixel with a certain amount of pixel above and under.
+        :param frame_data: Depth frame.
+        :param width: Width of the frame.
+        :param height: Height of th frame.
+        :param x: X coordinate of the pixel.
+        :param y: Y coordinate of the pixel.
+        :param distance: Pixels under and above the desired row.
+        :return: Average value.
+        """
+        sum = 0
         count = 0
         for yTemp in range(-distance + y, distance + 1 + y):
             value = frame_data[yTemp * width + x]
-            if (value > 0):
+            if value > 0:
                 sum += value
                 count += 1
-        if (count > 0):
+        if count > 0:
             return sum / count
         else:
             return 0
 
 
 class FileXTION(XTION):
+    """
+    A class for reading the log file of an Asus XTION.
+    """
     # current frame read
     index = 0
 
-    '''
-    A class for reading the log file of an Asus XTION
-    
-    dataset: filename
-    datadir: directionary of the file default '.'
-    '''
-
     def __init__(self, dataset, datadir='.'):
+        """
+        Initialization.
+        :param dataset: Filename.
+        :param datadir: Directory of the file default '.'.
+        """
         self.scans, width = self.load_data(datadir, dataset)
         Sensor.__init__(self, width, self.scan_rate_hz, self.viewangle, self.distance_no_detection_mm,
                         self.detectionMargin, self.offsetMillimeters)
 
-    '''
-    reads a scan 
-    return: array with the values
-    '''
-
     def scan(self):
-        if (self.index < len(self.scans)):
+        """
+        Read a scan.
+        :return: Array with the values.
+        """
+        if self.index < len(self.scans):
             self.index += 1
             return self.scans[self.index - 1]
         else:
@@ -163,7 +172,7 @@ class FileXTION(XTION):
             lidar = [int(tok) for tok in toks[:]]
 
             for x in range(0, len(lidar)):
-                if (lidar[x] > self.distance_no_detection_mm):
+                if lidar[x] > self.distance_no_detection_mm:
                     lidar[x] = 0
 
             scans.append(lidar)

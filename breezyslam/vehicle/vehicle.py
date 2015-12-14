@@ -1,8 +1,8 @@
-'''
+"""
 vehilce.py: base class for any vehicle like turtlebot
-             
-author: Nils Bernhardt 
-'''
+
+author: Nils Bernhardt
+"""
 
 import abc
 

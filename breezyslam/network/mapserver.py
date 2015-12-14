@@ -1,5 +1,5 @@
 """
-server.py:
+mapserver.py:
 author: Nils Bernhardt
 edited: Lukas Brauckmann
 """
@@ -82,4 +82,3 @@ class MapServer(threading.Thread):
         except socket.error:
             pass
         self.socket.close()
-            
