@@ -46,7 +46,7 @@ class Navigation(threading.Thread):
         Recalcualtes a new route if necessary
         '''
         self.running = True
-        time.sleep(20)
+        time.sleep(15)
         self.recalculate = True
         while(self.running):
             

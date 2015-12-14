@@ -14,6 +14,7 @@ class TentacleRouter(Router):
 
     
     def __init__(self, mapconfig, ROBOT_SIZE_METERS, min_distance):
+        self.observed_positions = []
         self.mapconfig = mapconfig
         self.SCAN_DIST_PIXELS = mapconfig.mmToPixels(3500) #todo
         tentacles = self.calcTentacles(mapconfig.mToPixels(ROBOT_SIZE_METERS), self.SCAN_DIST_PIXELS)
@@ -25,9 +26,15 @@ class TentacleRouter(Router):
         '''
         x_pixels = self.mapconfig.mmToPixels(position[0])
         y_pixels = self.mapconfig.mmToPixels(position[1])
-
+        
         target = self.getNext(x_pixels, y_pixels, mapbytes)
-        if(target == None): return None
+        if(target == None):
+            if len(self.observed_positions) > 0:
+                return deque([self.observed_positions.pop()])
+            else:
+                return None
+            
+        self.observed_positions.append(position)
         x_mm = self.mapconfig.pixelsTomm(target[0])
         y_mm = self.mapconfig.pixelsTomm(target[1])
         return deque([(x_mm, y_mm)])
@@ -40,8 +47,6 @@ class TentacleRouter(Router):
         Return a targetpoint (x_pixels, y_pixels)
         '''
         frontiers = self.fe.findFrontiers((x_pixels, y_pixels), mapbytes, self.mapconfig.SIZE_PIXELS)
-
-
         """
         add for displaying frontiers in the map
         best = frontiers.get()

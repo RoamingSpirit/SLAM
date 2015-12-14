@@ -135,7 +135,7 @@ def main(log, readlog, only_odometry, sensorFile, odomFile, resultname, mapconfi
 
         #generate map
         mapbytes = createMap(slam, trajectory, mapconfig)
-        # Save map and trajectory as PGM file
+        # Save map and trajectory as png file        
         mapconfig.safeaspng(mapbytes, resultname)
 
 
