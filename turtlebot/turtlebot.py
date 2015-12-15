@@ -7,7 +7,7 @@ import math
 
 class Turtlebot(Vehicle, ros_turtlebot.ROSTurtlebot):
 
-    SPEED = 0.15
+    SPEED = 0.3
 
     def __init__(self):
         """
