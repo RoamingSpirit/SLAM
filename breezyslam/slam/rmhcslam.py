@@ -13,14 +13,17 @@ _DEFAULT_MAP_QUALITY = 100  # out of 255
 _DEFAULT_HOLE_WIDTH_MM = 300
 
 # Random mutation hill-climbing (RMHC) params
-_DEFAULT_SIGMA_XY_MM = 20  # w/out odometry 45
-_DEFAULT_SIGMA_THETA_DEGREES = 0.5  # w/out odometry 2.5
+_DEFAULT_SIGMA_XY_MM = 100  # w/out odometry 45
+_DEFAULT_SIGMA_THETA_DEGREES = 20  # w/out odometry 2.5
 _DEFAULT_MAX_SEARCH_ITER = 1000  # w/out odometry 1000
 
 # Filter
 filtering = False
 g = 0.1
 h = 0.1
+
+#maximal turning speed
+MAX_DEGREE_PER_S = 360.0
 
 
 class My_SLAM(RMHC_SLAM):
@@ -50,7 +53,7 @@ class My_SLAM(RMHC_SLAM):
         self.values = len(scan_mm)
         for x in range(0, len(scan_mm)):
             if scan_mm[x] == 0:
-                errors += 1
+                errors += 1 
         self.error = float(errors) / len(scan_mm)
         if velocities == None:
             self.time = None
@@ -66,6 +69,14 @@ class My_SLAM(RMHC_SLAM):
         """
         # RMHC search is implemented as a C extension for efficiency
         slam_position = RMHC_SLAM._getNewPosition(self, start_position)
+        
+        #check slam values for reliable turn.
+        vtheta = (slam_position.theta_degrees - start_position.theta_degrees)/self.time
+        if(math.fabs(vtheta) > MAX_DEGREE_PER_S):
+            vtheta = vtheta/math.fabs(vtheta) * MAX_DEGREE_PER_S
+            slam_position.theta_degrees = start_position.theta_degrees + vtheta * self.time
+        
+        
         if not filtering: return slam_position
         if self.time == None:
             return slam_position

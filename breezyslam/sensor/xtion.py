@@ -16,9 +16,9 @@ class XTION(Sensor):
     viewangle = 58  # asus xtion view in degrees
     linecount = 5  # lines above and below to generate average (0=online desired line)
     distance_no_detection_mm = 3500  # max detection range
-    scan_rate_hz = 23  # todo find value
+    scan_rate_hz = 50  # todo find value
     detectionMargin = 4  # pixels on the sites of the scans which should be ignored
-    offsetMillimeters = 50  # offset of the sensor to the center of the robot
+    offsetMillimeters = 0  # offset of the sensor to the center of the robot
 
     def __init__(self, log=True):
         self.log = log

@@ -64,8 +64,9 @@ def main(log, readlog, only_odometry, sensorFile, odomFile, resultname, mapconfi
         server.start()
 
         #Initialize Navigation
-        navigation = Navigation(slam, mapconfig, robot.getSize(), RELEVANT_LIDARS, SECURITY_DIST_MM, Commands)
-        navigation.start()
+        if(not readlog):
+            navigation = Navigation(slam, mapconfig, robot.getSize(), RELEVANT_LIDARS, SECURITY_DIST_MM, Commands)
+            navigation.start()
 
         #Monitors
         scanno = 0
@@ -84,10 +85,14 @@ def main(log, readlog, only_odometry, sensorFile, odomFile, resultname, mapconfi
             scanno += 1
 
             #get command
-            command = navigation.update(scan)
-            if(command == None):
-                print "Navigation terminated."
-                break
+            if(readlog):
+                command = None
+            else:
+                command = navigation.update(scan)
+                
+                if(command == None):
+                    print "Navigation terminated."
+                    break
 
             #send command and get odometry
             velocities = robot.move(command)
