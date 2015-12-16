@@ -51,6 +51,7 @@ class MapServer(threading.Thread):
         """
         # Bind socket to local host and port
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.socket.settimeout(2)
         
         try:
             self.socket.bind((HOST, PORT))

@@ -136,17 +136,6 @@ class Drone(Vehicle):
         """
         self.cmd = cmd
 
-    def manually_move(self, x, y, z, rz):
-        """
-        Set the moving command.
-        """
-        self.cmd = 6
-        self.commands[0] = x
-        self.commands[1] = y
-        self.commands[2] = -z
-        self.commands[3] = rz
-        print "Commands: ", self.commands
-
     def land(self):
         """
         Land.

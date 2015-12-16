@@ -18,8 +18,8 @@ class ControlServer(threading.Thread):
 
     def __init__(self, vehicle):
         threading.Thread.__init__(self)
-        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.socket.settimeout(2)
+        self.socket = None
+        self.connection = None
         self.connection = socket.socket()
         self.vehicle = vehicle
 
@@ -38,13 +38,6 @@ class ControlServer(threading.Thread):
                     if cmd == "@":
                         print "ControlServer: Emergency!"
                         self.vehicle.emergency()
-                    elif cmd == "6":
-                        x = self.connection.recv(1)
-                        y = self.connection.recv(1)
-                        z = self.connection.recv(1)
-                        rz = self.connection.recv(1)
-                        print "ControlServer: Commands: ", ord(x), ord(y), ord(z), ord(rz)
-                        self.vehicle.move_manually(int(cmd), (x, y, z, rz))
                     else:
                         self.vehicle.move_manually(int(cmd))
             except socket.timeout:
@@ -58,6 +51,9 @@ class ControlServer(threading.Thread):
         Setup a connection to a client on port 8000.
         """
         # Bind socket to local host and port
+        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.socket.settimeout(2)
+
         try:
             self.socket.bind((HOST, PORT))
         except socket.error:
@@ -81,5 +77,9 @@ class ControlServer(threading.Thread):
         Close the connection and stop the running thread.
         """
         self.running = False
-        self.socket.shutdown(socket.SHUT_RDWR)
+        try:
+            self.socket.shutdown(socket.SHUT_RDWR)
+
+        except socket.error:
+            pass
         self.socket.close()
