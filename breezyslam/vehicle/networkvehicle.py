@@ -26,8 +26,8 @@ class NetworkVehicle(Vehicle):
         if log:
             self.out = open('odometry', 'w')
 
-        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.connection = socket.socket()
+        self.socket = None
+        self.connection = None
         self.manually_operated = False
         self.is_emergency = False
         self.size = 0.0
@@ -149,6 +149,9 @@ class NetworkVehicle(Vehicle):
         Setup a connection to a client on PORT.
         """
         # Bind socket to local host and port
+        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.socket.settimeout(2)
+
         try:
             self.socket.bind((NetworkVehicle.HOST, NetworkVehicle.PORT))
         except socket.error:
@@ -176,6 +179,7 @@ class NetworkVehicle(Vehicle):
             self.out.close()
         try:
             self.connection.send(chr(1))
+            self.connection.shutdown(socket.SHUT_RDWR)
             self.connection.close()
             self.socket.shutdown(socket.SHUT_RDWR)
             self.socket.close()
