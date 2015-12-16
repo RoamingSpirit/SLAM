@@ -9,12 +9,12 @@ from Filters.standardGH import standardGH
 import math
 
 # Basic params
-_DEFAULT_MAP_QUALITY = 100  # out of 255
-_DEFAULT_HOLE_WIDTH_MM = 300
+_DEFAULT_MAP_QUALITY = 200  # out of 255
+_DEFAULT_HOLE_WIDTH_MM = 500
 
 # Random mutation hill-climbing (RMHC) params
-_DEFAULT_SIGMA_XY_MM = 100  # w/out odometry 45
-_DEFAULT_SIGMA_THETA_DEGREES = 20  # w/out odometry 2.5
+_DEFAULT_SIGMA_XY_MM = 20  # w/out odometry 45
+_DEFAULT_SIGMA_THETA_DEGREES = 1  # w/out odometry 2.5
 _DEFAULT_MAX_SEARCH_ITER = 1000  # w/out odometry 1000
 
 # Filter
@@ -71,10 +71,10 @@ class My_SLAM(RMHC_SLAM):
         slam_position = RMHC_SLAM._getNewPosition(self, start_position)
         
         #check slam values for reliable turn.
-        vtheta = (slam_position.theta_degrees - start_position.theta_degrees)/self.time
-        if(math.fabs(vtheta) > MAX_DEGREE_PER_S):
-            vtheta = vtheta/math.fabs(vtheta) * MAX_DEGREE_PER_S
-            slam_position.theta_degrees = start_position.theta_degrees + vtheta * self.time
+        #vtheta = (slam_position.theta_degrees - start_position.theta_degrees)/self.time
+        #if(math.fabs(vtheta) > MAX_DEGREE_PER_S):
+        #    vtheta = vtheta/math.fabs(vtheta) * MAX_DEGREE_PER_S
+        #    slam_position.theta_degrees = start_position.theta_degrees + vtheta * self.time
         
         
         if not filtering: return slam_position
