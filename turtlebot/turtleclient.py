@@ -15,8 +15,7 @@ class TurtleClient(threading.Thread):
 
     def __init__(self, host="", port=9000):
         threading.Thread.__init__(self)
-        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.socket.settimeout(2)
+        self.socket = None
         self.host = host
         self.port = port
         self.turtle = Turtlebot()
@@ -28,7 +27,15 @@ class TurtleClient(threading.Thread):
         Main loop.
         """
         print "TurtleClient: Connecting.."
-        self.socket.connect((self.host, self.port))
+        connected = False
+        while not connected:
+            try:
+                self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                self.socket.connect((self.host, self.port))
+                self.socket.settimeout(2)
+                connected = True
+            except socket.error:
+                continue
         print "TurtleClient: Connected to host."
 
         while self.running:
