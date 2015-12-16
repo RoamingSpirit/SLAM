@@ -11,7 +11,7 @@ import threading
 import time
 import math
 
-ANGLE_TOLERANCE_DEGREE = 5 #tolerance for moving forward
+ANGLE_TOLERANCE_DEGREE = 10 #tolerance for moving forward
 TARGET_TOLERANCE_MM = 500 #min dist to target
 
 class Navigation(threading.Thread):
@@ -38,7 +38,7 @@ class Navigation(threading.Thread):
         self.mapbytes = self.createMap()
         self.recalculate = False
         self.offset_in_scan = offset_in_scan
-        self.min_distance = min_distance
+        self.min_distance = 1000# min_distance
         self.router = TentacleRouter(mapconfig, ROBOT_SIZE_METERS, min_distance)
     
     def run(self):

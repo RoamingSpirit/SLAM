@@ -9,8 +9,8 @@ from Filters.standardGH import standardGH
 import math
 
 # Basic params
-_DEFAULT_MAP_QUALITY = 200  # out of 255
-_DEFAULT_HOLE_WIDTH_MM = 500
+_DEFAULT_MAP_QUALITY = 100  # out of 255
+_DEFAULT_HOLE_WIDTH_MM = 400
 
 # Random mutation hill-climbing (RMHC) params
 _DEFAULT_SIGMA_XY_MM = 20  # w/out odometry 45

@@ -11,7 +11,7 @@ from Queue import PriorityQueue
 import math
 
 #minimum amount of valid tentacles to form a frontier
-MINIMUM_TENTACLES = 1 
+MINIMUM_TENTACLES = 5 
 
 
 
