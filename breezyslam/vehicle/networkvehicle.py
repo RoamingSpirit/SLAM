@@ -16,7 +16,7 @@ class NetworkVehicle(Vehicle):
     PORT = 9000
 
     MOVE = 6
-    ODOMETRY = 7
+    ODOMETRY = 13
     LAND = 8
     TAKEOFF = 9
     EMERGENCY = 10
@@ -26,8 +26,8 @@ class NetworkVehicle(Vehicle):
         if log:
             self.out = open('odometry', 'w')
 
-        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.connection = socket.socket()
+        self.socket = None
+        self.connection = None
         self.manually_operated = False
         self.is_emergency = False
         self.size = 0.0
@@ -39,30 +39,35 @@ class NetworkVehicle(Vehicle):
         :param cmd: Move command.
         :return: Odometry data.
         """
-        try:
-            if not self.is_emergency:
-                if not self.manually_operated:
-                    self.connection.send(chr(cmd))
-                else:
-                    self.connection.send(chr(NetworkVehicle.ODOMETRY))
+        while 1:
+            try:
+                if not self.is_emergency:
+                    if not self.manually_operated:
+                        self.connection.send(chr(cmd))
+                    else:
+                        self.connection.send(chr(NetworkVehicle.ODOMETRY))
 
-                # Receive and parse odometry.
-                data = self.connection.recv(1024)
-                values = data.split(",", 3)
-                self.odometry = [float(tok) for tok in values[:]]
-                if self.log:
-                    self.out.write("%f %f %f\n" % (self.odometry[0], self.odometry[1], self.odometry[2]))
-                return self.odometry
-        except socket.timeout:
-            print "NetworkVehicle: Timeout: Return [0.0, 0.0, 0.0]."
-        except ValueError:
-            print "NetworkVehicle: ValueError: Return [0.0, 0.0, 0.0]."
-        except socket.error, error:
-            print "NetworkVehicle: ", error, "Return None."
-            return None
-        return [0.0, 0.0, 0.0]
+                    # Receive and parse odometry.
+                    msg = self.connection.recv(1)
+                    while "\n" not in msg:
+                        msg += self.connection.recv(1)
+                    values = msg.split(",", 3)
+                    if len(values) == 3:
+                        self.odometry = [float(tok) for tok in values[:]]
+                        if self.log:
+                            self.out.write("%f %f %f\n" % (self.odometry[0], self.odometry[1], self.odometry[2]))
+                        return self.odometry
+            except socket.timeout:
+                print "NetworkVehicle: Timeout."
+                continue
+            except ValueError:
+                print "NetworkVehicle: ValueError."
+                continue
+            except socket.error, error:
+                print "NetworkVehicle: ", error, "Return None."
+                return None
 
-    def move_manually(self, command, values=("", "", "", "")):
+    def move_manually(self, command):
         """
         Send steering commands to the robot client.
         :param command: Moving command.
@@ -144,6 +149,9 @@ class NetworkVehicle(Vehicle):
         Setup a connection to a client on PORT.
         """
         # Bind socket to local host and port
+        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.socket.settimeout(2)
+
         try:
             self.socket.bind((NetworkVehicle.HOST, NetworkVehicle.PORT))
         except socket.error:
@@ -171,6 +179,7 @@ class NetworkVehicle(Vehicle):
             self.out.close()
         try:
             self.connection.send(chr(1))
+            self.connection.shutdown(socket.SHUT_RDWR)
             self.connection.close()
             self.socket.shutdown(socket.SHUT_RDWR)
             self.socket.close()
@@ -180,10 +189,10 @@ class NetworkVehicle(Vehicle):
         except socket.error, error:
             print error
 
-            # ~ if __name__ == '__main__':
-            # ~ CLIENT = NetworkVehicle()
-            # ~ CLIENT.initialize()
-            # ~ time.sleep(10)
-            # ~ CLIENT.move(MOVE_FORWARD)
-            # ~ CLIENT.move(TURN_LEFT)
-            # ~ CLIENT.shutdown()
+if __name__ == '__main__':
+    CLIENT = NetworkVehicle()
+    CLIENT.initialize()
+    time.sleep(10)
+    CLIENT.move(MOVE_FORWARD)
+    CLIENT.move(TURN_LEFT)
+    CLIENT.shutdown()

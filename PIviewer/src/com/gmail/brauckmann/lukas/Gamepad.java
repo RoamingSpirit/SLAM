@@ -8,7 +8,7 @@ import net.java.games.input.ControllerEnvironment;
  * Class representing a connection to a Gamepad/Controller.
  * 
  * @author Lukas
- *
+ * 
  */
 public class Gamepad extends Thread {
 	/**
@@ -41,7 +41,8 @@ public class Gamepad extends Thread {
 	 */
 	private void setup() {
 		// Get all available controllers.
-		Controller[] ca = ControllerEnvironment.getDefaultEnvironment().getControllers();
+		Controller[] ca = ControllerEnvironment.getDefaultEnvironment()
+				.getControllers();
 
 		// Search for correct controller.
 		for (int i = 0; i < ca.length && controller == null; i++) {
@@ -89,13 +90,13 @@ public class Gamepad extends Thread {
 					} else if (components[i].getName().equals("Thumb 2")) {
 						// Land.
 						if (components[i].getPollData() == 1.0f) {
-							client.sendCommand('8');
+							client.sendCommand('11');
 							continue;
 						}
 					} else if (components[i].getName().equals("Trigger")) {
 						// Takeoff.
 						if (components[i].getPollData() == 1.0f) {
-							client.sendCommand('9');
+							client.sendCommand('12');
 							continue;
 						}
 					} else if (components[i].getName().equals("Base 4")) {
@@ -103,47 +104,29 @@ public class Gamepad extends Thread {
 						if (components[i].getPollData() == 1.0f) {
 							System.out.println("User mod");
 							client.sendCommand('0');
-							client.sendCommand('6');
-							client.sendValues(0, 0, 0, 0);
+							client.sendCommand('5');
 							Thread.sleep(500);
 							continue;
 						}
 					} else {
 						if (components[i].getName().equals("x")) {
 							if (Math.abs(components[i].getPollData()) > 0.1) {
-								y = components[i].getPollData();
+								client.sendCommand('3');
+								moving = true;
+							}else if (Math.abs(components[i].getPollData()) < -0.1) {
+								client.sendCommand('4');
 								moving = true;
 							}
 						}
 						if (components[i].getName().equals("y")) {
-							if (Math.abs(components[i].getPollData()) > 0.1) {
-								x = components[i].getPollData();
-								moving = true;
-							}
-						}
-						if (components[i].getName().equals("z")) {
-							if (Math.abs(components[i].getPollData()) > 0.1) {
-								rz = components[i].getPollData();
-								moving = true;
-							}
-						}
-						if (components[i].getName().equals("rz")) {
-							if (Math.abs(components[i].getPollData()) > 0.1) {
-								z = components[i].getPollData();
+							if (Math.abs(components[i].getPollData()) < -0.1) {
+								client.sendCommand('2');
 								moving = true;
 							}
 						}
 
-						if (moving) {
-							client.sendCommand('6');
-							client.sendValues(x, y, z, rz);
-							hover = false;
-						} else if (!hover) {
-							System.out.println("Moving: " + moving);
-							client.sendCommand('6');
-							client.sendValues(0, 0, 0, 0);
-							hover = true;
-						}
+						if (!moving) 
+							client.sendCommand('5');
 					}
 				}
 			} catch (InterruptedException e) {

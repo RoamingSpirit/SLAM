@@ -19,8 +19,7 @@ class DroneClient(threading.Thread):
         self.host = host
         self.port = port
         self.drone = Drone()
-        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.socket.settimeout(2)
+        self.socket = None
         self.start()
 
     def run(self):
@@ -28,7 +27,15 @@ class DroneClient(threading.Thread):
         Main loop.
         """
         print "DroneClient: Connecting.."
-        self.socket.connect((self.host, self.port))
+        connected = False
+        while not connected:
+            try:
+                self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                self.socket.connect((self.host, self.port))
+                self.socket.settimeout(2)
+                connected = True
+            except socket.error:
+                continue
         print "DroneClient: Connected to host."
 
         while self.running:
@@ -52,28 +59,35 @@ class DroneClient(threading.Thread):
                 elif msg == chr(2):
                     self.drone.move(ord(msg))
                     self.socket.send(self.drone.get_odometry())
+                    self.drone.send("\n")
                 elif msg == chr(3):
                     self.drone.move(ord(msg))
                     self.socket.send(self.drone.get_odometry())
+                    self.drone.send("\n")
                 elif msg == chr(4):
                     self.drone.move(ord(msg))
                     self.socket.send(self.drone.get_odometry())
+                    self.drone.send("\n")
                 elif msg == chr(5):
                     self.drone.move(ord(msg))
                     self.socket.send(self.drone.get_odometry())
+                    self.drone.send("\n")
                 # Testing commands.
                 elif msg == chr(6):
-                    x = float(ord(self.socket.recv(1))) / 10 - 1
-                    y = float(ord(self.socket.recv(1))) / 10 - 1
-                    z = float(ord(self.socket.recv(1))) / 10 - 1
-                    rz = float(ord(self.socket.recv(1))) / 10 - 1
-                    self.drone.manually_move(x, y, z, rz)
+                    self.drone.move(2)
                 elif msg == chr(7):
-                    self.socket.send(self.drone.get_odometry())
+                    self.drone.move(3)
                 elif msg == chr(8):
-                    self.drone.land()
+                    self.drone.move(4)
                 elif msg == chr(9):
+                    self.drone.move(5)
+                elif msg == chr(11):
+                    self.drone.land()
+                elif msg == chr(12):
                     self.drone.initialize()
+                elif msg == chr(13):
+                    self.socket.send(self.drone.get_odometry())
+                    self.drone.send("\n")
 
             except socket.timeout:
                 pass
