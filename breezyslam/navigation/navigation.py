@@ -38,7 +38,7 @@ class Navigation(threading.Thread):
         self.mapbytes = self.createMap()
         self.recalculate = False
         self.offset_in_scan = offset_in_scan
-        self.min_distance = 1000# min_distance
+        self.min_distance = min_distance
         self.router = TentacleRouter(mapconfig, ROBOT_SIZE_METERS, min_distance)
     
     def run(self):
